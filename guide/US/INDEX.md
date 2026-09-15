@@ -4,6 +4,7 @@
 Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andrés Ocina
 **Stack:** Vue 3 + Vite + JavaScript + CSS puro + Vitest
 40 historias · 168 puntos · Actualizado: 15/09/2026
+**Reparto entre el equipo:** ver [REPARTO.md](REPARTO.md)
 
 ---
 
