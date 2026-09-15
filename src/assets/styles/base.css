@@ -1,0 +1,124 @@
+/* ==========================================================================
+   HARE-S — Sistema de Diseño: Forest Academic Analytics (Stitch)
+   base.css: Reset, tipografía, cifras tabulares, accesibilidad e impresión.
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background-color: var(--background);
+  color: var(--on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tipografía de encabezados con Plus Jakarta Sans */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headline);
+  color: var(--primary-container);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+h1 {
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 1.125rem;
+}
+
+p {
+  color: var(--on-surface-variant);
+}
+
+/* Enlaces limpios */
+a {
+  color: var(--secondary);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+a:hover {
+  color: var(--primary-container);
+}
+
+/* Cifras tabulares obligatorias en datos numéricos (FE-02 Escenario 5) */
+table,
+.metric-kpi,
+.tabular-data,
+.badge,
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Accesibilidad y foco */
+:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+/* Form inputs reset */
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Reglas de impresión limpias (FE-02 Escenario 6) */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Ocultar elementos de navegación e interacción durante la impresión */
+  .app-sidebar,
+  .app-header,
+  .nav-tabs,
+  .filters-bar,
+  .header-actions,
+  .actions-group,
+  .pagination-bar,
+  .btn,
+  .modal-backdrop {
+    display: none !important;
+  }
+
+  .app-layout {
+    display: block !important;
+  }
+
+  .app-main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .flat-card {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1.5rem !important;
+  }
+}

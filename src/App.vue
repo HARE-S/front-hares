@@ -2,230 +2,690 @@
 import { ref } from 'vue';
 import TestForm from './components/TestForm.vue';
 import TestList from './components/TestList.vue';
-import { BookOpen, ListFilter, PlusCircle, CheckCircle2 } from 'lucide-vue-next';
+import {
+  BookOpen,
+  Layers,
+  Edit3,
+  PlusCircle,
+  Library,
+  BarChart3,
+  CheckCircle2,
+  UserCheck,
+  School,
+  Calendar,
+  Settings,
+  HelpCircle,
+  Cloud,
+  ChevronDown,
+  LayoutDashboard
+} from 'lucide-vue-next';
 
-const currentTab = ref('catalog'); // 'catalog' | 'new-test'
+const currentTab = ref('catalog'); // 'catalog' | 'form'
 const testListRef = ref(null);
-const lastCreatedNotification = ref(null);
+const testToEdit = ref(null);
+const userRole = ref('coordinator'); // 'coordinator' | 'tutor'
+const toastNotification = ref(null);
+
+function showToast(message) {
+  toastNotification.value = message;
+  setTimeout(() => {
+    toastNotification.value = null;
+  }, 5000);
+}
+
+function handleOpenCreate() {
+  testToEdit.value = null;
+  currentTab.value = 'form';
+}
+
+function handleEditTest(test) {
+  testToEdit.value = test;
+  currentTab.value = 'form';
+}
 
 function handleTestCreated(newTest) {
-  lastCreatedNotification.value = newTest;
-  // Refrescar el listado y conmutar a la vista de catálogo
+  showToast(`Prueba "${newTest.name}" (${newTest.code}) registrada correctamente.`);
+  testToEdit.value = null;
+  currentTab.value = 'catalog';
   if (testListRef.value) {
     testListRef.value.refresh();
   }
-  currentTab.value = 'catalog';
+}
 
-  setTimeout(() => {
-    lastCreatedNotification.value = null;
-  }, 6000);
+function handleTestUpdated(updatedTest) {
+  showToast(`Prueba "${updatedTest.name}" (${updatedTest.code}) actualizada correctamente.`);
+  testToEdit.value = null;
+  currentTab.value = 'catalog';
+  if (testListRef.value) {
+    testListRef.value.refresh();
+  }
+}
+
+function handleCancelEdit() {
+  testToEdit.value = null;
+  currentTab.value = 'catalog';
 }
 </script>
 
 <template>
-  <div class="app-layout">
-    <!-- Barra Superior de Navegación (Plano Verde y Blanco) -->
-    <header class="app-header">
-      <div class="header-container">
-        <div class="brand-group">
-          <div class="brand-badge">
-            <BookOpen :size="20" class="brand-icon" />
+  <div class="stitch-app">
+    <!-- BARRA LATERAL PERSISTENTE (Stitch Dark Slate Theme: #192134) -->
+    <aside class="stitch-sidebar">
+      <div class="sidebar-top">
+        <!-- Logo & Branding -->
+        <div class="brand-header">
+          <div class="brand-icon-box">
+            <BookOpen :size="22" class="brand-icon" />
           </div>
-          <div>
-            <h1 class="brand-title">HARE-S</h1>
-            <span class="brand-tag">Batería de Lectura Eficaz · Peñascal</span>
+          <div class="brand-text">
+            <div class="brand-title-row">
+              <span class="brand-name">HARE-S</span>
+              <span class="brand-edu-chip">Edu</span>
+            </div>
+            <span class="brand-org">Fundación Peñascal</span>
           </div>
         </div>
 
-        <!-- Pestañas de Navegación Planas -->
-        <nav class="nav-tabs">
+        <!-- Quick Action CTA -->
+        <div v-if="userRole !== 'tutor'" class="sidebar-cta-wrap">
           <button
-            class="tab-btn"
-            :class="{ active: currentTab === 'catalog' }"
+            class="sidebar-cta-btn"
+            @click="handleOpenCreate"
+          >
+            <PlusCircle :size="16" />
+            <span>{{ testToEdit ? 'Editar Prueba' : 'Nueva Prueba' }}</span>
+          </button>
+        </div>
+
+        <!-- Navegación Principal -->
+        <nav class="sidebar-nav">
+          <button
+            class="nav-item"
+            :class="{ active: currentTab === 'dashboard' }"
             @click="currentTab = 'catalog'"
           >
-            <ListFilter :size="17" />
-            <span>Catálogo de Pruebas</span>
+            <LayoutDashboard :size="18" />
+            <span>Dashboard</span>
           </button>
+
           <button
-            class="tab-btn"
-            :class="{ active: currentTab === 'new-test' }"
-            @click="currentTab = 'new-test'"
+            class="nav-item"
+            :class="{ active: currentTab === 'catalog' && !testToEdit }"
+            @click="currentTab = 'catalog'; testToEdit = null;"
           >
-            <PlusCircle :size="17" />
-            <span>Dar de Alta Prueba</span>
+            <Layers :size="18" />
+            <span class="flex-1">Catálogo de Pruebas</span>
+            <span v-if="currentTab === 'catalog'" class="nav-active-dot"></span>
+          </button>
+
+          <button class="nav-item disabled" title="Próximamente">
+            <Edit3 :size="18" />
+            <span>Registro en Aula</span>
+          </button>
+
+          <button class="nav-item disabled" title="Próximamente">
+            <Library :size="18" />
+            <span>Biblioteca de Libros</span>
+          </button>
+
+          <button class="nav-item disabled" title="Próximamente">
+            <BarChart3 :size="18" />
+            <span>Informes y Exportación</span>
           </button>
         </nav>
       </div>
-    </header>
 
-    <!-- Contenido Principal -->
-    <main class="app-main">
-      <div class="main-container">
-        <!-- Notificación tras crear prueba y conmutar de vista -->
-        <div v-if="lastCreatedNotification && currentTab === 'catalog'" class="alert alert-success toast-banner">
-          <CheckCircle2 :size="18" />
-          <span>
-            Prueba <strong>{{ lastCreatedNotification.name }}</strong> (<code>{{ lastCreatedNotification.code }}</code>) registrada correctamente en el backend.
-          </span>
+      <!-- Pie de la barra lateral con estado académico -->
+      <div class="sidebar-bottom">
+        <div class="academic-session-card">
+          <div class="session-info">
+            <div class="pulse-indicator">
+              <span class="pulse-dot"></span>
+            </div>
+            <div class="session-labels">
+              <span class="session-year">Curso 2024-25</span>
+              <span class="session-status">Sincronizado</span>
+            </div>
+          </div>
+          <Cloud :size="16" class="session-icon" />
         </div>
 
-        <!-- Vistas -->
-        <transition name="fade" mode="out-in">
-          <TestList
-            v-if="currentTab === 'catalog'"
-            ref="testListRef"
-            key="catalog"
-          />
-          <TestForm
-            v-else-if="currentTab === 'new-test'"
-            key="new-test"
-            @test-created="handleTestCreated"
-          />
-        </transition>
+        <div class="sidebar-secondary-links">
+          <button class="nav-item-sm disabled"><HelpCircle :size="15" /><span>Soporte</span></button>
+          <button class="nav-item-sm disabled"><Settings :size="15" /><span>Configuración</span></button>
+        </div>
       </div>
-    </main>
+    </aside>
 
-    <!-- Pie de página plano -->
-    <footer class="app-footer">
-      <p>HARE-S Frontend · Vue 3 + Vite · Conectado al backend Flask (Puerto 5000)</p>
-    </footer>
+    <!-- ÁREA PRINCIPAL: TOPBAR + CONTENIDO -->
+    <div class="stitch-main-layout">
+      <!-- CABECERA SUPERIOR (TopNavBar de Stitch) -->
+      <header class="stitch-header">
+        <div class="header-left">
+          <!-- Selector de Aula / Cohorte -->
+          <div class="context-chip">
+            <School :size="16" class="chip-icon" />
+            <div class="chip-content">
+              <span class="chip-label">Aula Actual</span>
+              <div class="chip-value-row">
+                <span class="chip-val">3º Primaria - Aula 3A</span>
+                <span class="chip-tag">26 alum.</span>
+              </div>
+            </div>
+            <ChevronDown :size="14" class="chip-arrow" />
+          </div>
+
+          <!-- Selector de Evaluación / Periodo -->
+          <div class="context-chip hidden-sm">
+            <Calendar :size="16" class="chip-icon" />
+            <div class="chip-content">
+              <span class="chip-label">Periodo</span>
+              <div class="chip-value-row">
+                <span class="chip-val">Evaluación A - Enero</span>
+                <span class="chip-tag-active">Activo</span>
+              </div>
+            </div>
+            <ChevronDown :size="14" class="chip-arrow" />
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- Selector de Rol (Coordinador vs Tutor) -->
+          <div class="role-pill-selector">
+            <UserCheck :size="15" class="role-icon" />
+            <label for="app-role-select" class="role-pill-label">Rol:</label>
+            <select id="app-role-select" v-model="userRole" class="role-dropdown">
+              <option value="coordinator">Coordinador (Edición)</option>
+              <option value="tutor">Tutor (Lectura)</option>
+            </select>
+          </div>
+
+          <!-- Perfil Docente -->
+          <div class="teacher-profile">
+            <div class="teacher-avatar">YP</div>
+            <div class="teacher-details">
+              <span class="teacher-name">Yeremi Peralta</span>
+              <span class="teacher-role">{{ userRole === 'coordinator' ? 'Coordinador Pedagógico' : 'Tutor 3º A' }}</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- LIENZO DE CONTENIDO -->
+      <main class="stitch-content-canvas">
+        <div class="content-container">
+          <!-- Toast Notification -->
+          <div v-if="toastNotification && currentTab === 'catalog'" class="alert alert-success toast-banner" role="alert">
+            <CheckCircle2 :size="18" />
+            <span>{{ toastNotification }}</span>
+          </div>
+
+          <!-- Vistas Activas -->
+          <transition name="fade" mode="out-in">
+            <TestList
+              v-if="currentTab === 'catalog'"
+              ref="testListRef"
+              key="catalog"
+              :user-role="userRole"
+              @edit-test="handleEditTest"
+            />
+            <TestForm
+              v-else-if="currentTab === 'form'"
+              key="form"
+              :test-to-edit="testToEdit"
+              :user-role="userRole"
+              @test-created="handleTestCreated"
+              @test-updated="handleTestUpdated"
+              @cancel-edit="handleCancelEdit"
+            />
+          </transition>
+        </div>
+      </main>
+
+      <!-- Pie de página -->
+      <footer class="stitch-footer">
+        <p>HARE-S · Sistema de Evaluación de Fluidez y Comprensión Lectora · Fundación Peñascal</p>
+      </footer>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.app-layout {
+.stitch-app {
+  display: flex;
   min-height: 100vh;
+  background-color: var(--background);
+}
+
+/* --- BARRA LATERAL STITCH (#192134) --- */
+.stitch-sidebar {
+  width: 260px;
+  background-color: var(--tertiary);
+  color: var(--on-tertiary-container);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem 1rem;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 40;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.5rem 1.25rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background-color: var(--primary-container);
+  border: 1px solid rgba(111, 251, 190, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary-fixed);
+}
+
+.brand-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.brand-name {
+  font-family: var(--font-headline);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--surface-container-lowest);
+  letter-spacing: -0.02em;
+}
+
+.brand-edu-chip {
+  background-color: rgba(0, 108, 73, 0.4);
+  color: var(--secondary-fixed);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(111, 251, 190, 0.3);
+  text-transform: uppercase;
+}
+
+.brand-org {
+  font-size: 0.75rem;
+  color: var(--on-tertiary-container);
+}
+
+.sidebar-cta-wrap {
+  margin: 1rem 0;
+}
+
+.sidebar-cta-btn {
+  width: 100%;
+  background-color: var(--primary-container);
+  color: var(--secondary-fixed);
+  border: 1px solid rgba(111, 251, 190, 0.35);
+  font-family: var(--font-headline);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.sidebar-cta-btn:hover {
+  background-color: var(--tertiary-container);
+  border-color: var(--secondary-fixed);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--on-tertiary-container);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: left;
+  width: 100%;
+}
+
+.nav-item:hover:not(.disabled) {
+  background-color: var(--tertiary-container);
+  color: var(--surface-container-lowest);
+}
+
+.nav-item.active {
+  background-color: var(--primary-container);
+  color: var(--secondary-fixed);
+  border-color: rgba(111, 251, 190, 0.25);
+  font-weight: 600;
+}
+
+.nav-item.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nav-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--secondary-fixed);
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* Barra inferior del sidebar */
+.academic-session-card {
+  background-color: rgba(46, 54, 75, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.session-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pulse-indicator {
+  display: flex;
+  position: relative;
+  width: 8px;
+  height: 8px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--secondary-fixed);
+}
+
+.session-labels {
   display: flex;
   flex-direction: column;
 }
 
-.app-header {
-  background-color: var(--white);
-  border-bottom: 2px solid var(--green-600);
-  position: sticky;
-  top: 0;
-  z-index: 50;
+.session-year {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--surface-container-lowest);
 }
 
-.header-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0.85rem 1.5rem;
+.session-status {
+  font-size: 0.7rem;
+  color: var(--on-tertiary-container);
+}
+
+.session-icon {
+  color: var(--on-tertiary-container);
+}
+
+.sidebar-secondary-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.nav-item-sm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--on-tertiary-container);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  width: 100%;
+}
+
+.nav-item-sm.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* --- ÁREA PRINCIPAL --- */
+.stitch-main-layout {
+  flex: 1;
+  margin-left: 260px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header superior */
+.stitch-header {
+  height: 64px;
+  background-color: var(--surface-container-lowest);
+  border-bottom: 1px solid var(--outline-variant);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 30;
 }
 
-.brand-group {
+.header-left,
+.header-right {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
-.brand-badge {
-  background-color: var(--green-700);
-  color: var(--white);
-  width: 40px;
-  height: 40px;
+.context-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
   border-radius: var(--radius-md);
+  padding: 0.35rem 0.75rem;
+}
+
+.chip-icon {
+  color: var(--secondary);
+}
+
+.chip-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.chip-label {
+  font-size: 0.6875rem;
+  color: var(--on-surface-variant);
+  line-height: 1;
+}
+
+.chip-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+}
+
+.chip-val {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+.chip-tag {
+  font-size: 0.7rem;
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface-variant);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-xs);
+  font-weight: 500;
+}
+
+.chip-tag-active {
+  font-size: 0.7rem;
+  background-color: var(--primary-container);
+  color: var(--secondary-fixed);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-xs);
+  font-weight: 600;
+}
+
+.chip-arrow {
+  color: var(--on-surface-variant);
+}
+
+.role-pill-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-md);
+}
+
+.role-icon {
+  color: var(--primary-container);
+}
+
+.role-pill-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+  margin-bottom: 0;
+}
+
+.role-dropdown {
+  background-color: var(--surface-container-lowest);
+  border: 1px solid #cbd5e1;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-container);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+}
+
+.teacher-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+}
+
+.teacher-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary-container);
+  color: var(--secondary-fixed);
+  font-size: 0.75rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.brand-title {
-  font-size: 1.25rem;
-  letter-spacing: -0.02em;
-  color: var(--green-950);
-}
-
-.brand-tag {
-  font-size: 0.75rem;
-  color: var(--gray-500);
-  display: block;
-}
-
-.nav-tabs {
+.teacher-details {
   display: flex;
-  gap: 0.5rem;
-  background-color: var(--gray-100);
-  padding: 0.25rem;
-  border-radius: var(--radius-md);
+  flex-direction: column;
 }
 
-.tab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: transparent;
-  color: var(--gray-600);
-  font-family: inherit;
-  font-size: 0.875rem;
+.teacher-name {
+  font-size: 0.825rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
+  color: var(--on-surface);
+  line-height: 1.1;
 }
 
-.tab-btn:hover {
-  color: var(--green-900);
+.teacher-role {
+  font-size: 0.7rem;
+  color: var(--on-surface-variant);
 }
 
-.tab-btn.active {
-  background-color: var(--white);
-  color: var(--green-850);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.app-main {
+/* Canvas de contenido */
+.stitch-content-canvas {
   flex: 1;
-  padding: 2rem 1.5rem;
+  padding: 2rem 1.75rem;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
 }
 
-.main-container {
-  max-width: 1200px;
-  margin: 0 auto;
+.content-container {
+  width: 100%;
 }
 
 .toast-banner {
   margin-bottom: 1.5rem;
 }
 
-.app-footer {
+.stitch-footer {
+  border-top: 1px solid var(--outline-variant);
+  background-color: var(--surface-container-lowest);
+  padding: 1rem 1.5rem;
   text-align: center;
-  padding: 1.5rem;
-  font-size: 0.8rem;
-  color: var(--gray-500);
-  border-top: 1px solid var(--gray-200);
-  background-color: var(--white);
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
 }
 
-/* Transición suave entre pestañas */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.15s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-@media (max-width: 640px) {
-  .header-container {
-    flex-direction: column;
-    align-items: flex-start;
+@media (max-width: 1024px) {
+  .stitch-sidebar {
+    width: 72px;
+    padding: 1rem 0.5rem;
   }
-  .nav-tabs {
-    width: 100%;
+  .brand-text,
+  .sidebar-cta-btn span,
+  .nav-item span,
+  .academic-session-card,
+  .sidebar-secondary-links {
+    display: none;
   }
-  .tab-btn {
-    flex: 1;
-    justify-content: center;
+  .sidebar-cta-btn {
+    padding: 0.5rem;
+    border-radius: 50%;
+  }
+  .stitch-main-layout {
+    margin-left: 72px;
+  }
+  .hidden-sm {
+    display: none;
   }
 }
 </style>
