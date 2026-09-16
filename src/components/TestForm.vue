@@ -1,9 +1,20 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue';
-import { createTest, deduceLevelAndTypeFromCode } from '../services/testsService';
-import { PlusCircle, CheckCircle2, AlertCircle, Sparkles, BookOpen, RotateCcw } from 'lucide-vue-next';
+import { createTest, updateTest, deduceLevelAndTypeFromCode } from '../services/testsService';
+import { PlusCircle, CheckCircle2, AlertCircle, Sparkles, BookOpen, RotateCcw, Save, X } from 'lucide-vue-next';
 
-const emit = defineEmits(['test-created']);
+const props = defineProps({
+  testToEdit: {
+    type: Object,
+    default: null
+  },
+  userRole: {
+    type: String,
+    default: 'coordinator' // 'coordinator' | 'tutor' | 'admin'
+  }
+});
+
+const emit = defineEmits(['test-created', 'test-updated', 'cancel-edit']);
 
 const form = reactive({
   code: '',
@@ -19,14 +30,35 @@ const successMessage = ref('');
 const errorMessage = ref('');
 const autoDeductionApplied = ref(false);
 
-// Deducción reactiva a medida que el usuario escribe el código
+const isEditMode = computed(() => Boolean(props.testToEdit && props.testToEdit.id));
+const isCodeLocked = computed(() => isEditMode.value && Boolean(props.testToEdit?.has_results));
+const canManage = computed(() => props.userRole !== 'tutor');
+
+// Deducción reactiva a medida que el usuario escribe el código (solo si no está bloqueado)
 const deduced = computed(() => {
   return deduceLevelAndTypeFromCode(form.code);
 });
 
-// Autocompletar sugerencias del código si los campos están vacíos
+// Precargar datos si se pasa testToEdit
+watch(() => props.testToEdit, (newTest) => {
+  if (newTest) {
+    form.code = newTest.code || '';
+    form.name = newTest.name || '';
+    form.words = newTest.words !== undefined && newTest.words !== null ? newTest.words : '';
+    form.course = newTest.course !== undefined && newTest.course !== null ? newTest.course : '';
+    form.test_letter = newTest.test_letter || '';
+    form.type = newTest.type || '';
+    autoDeductionApplied.value = false;
+    errorMessage.value = '';
+    successMessage.value = '';
+  } else {
+    resetForm();
+  }
+}, { immediate: true });
+
+// Autocompletar sugerencias del código si los campos están vacíos (en modo alta o código libre)
 watch(() => form.code, (newCode) => {
-  if (!newCode) {
+  if (!newCode || isEditMode.value) {
     autoDeductionApplied.value = false;
     return;
   }
@@ -66,11 +98,21 @@ function resetForm() {
   errorMessage.value = '';
 }
 
+function handleCancel() {
+  resetForm();
+  emit('cancel-edit');
+}
+
 async function handleSubmit() {
   errorMessage.value = '';
   successMessage.value = '';
 
-  // Validaciones del frontend coherentes con el backend
+  if (!canManage.value) {
+    errorMessage.value = 'Los tutores no tienen permiso para modificar o crear pruebas en el catálogo.';
+    return;
+  }
+
+  // Validaciones del frontend coherentes con FE-14 y BE-11
   if (!form.code.trim()) {
     errorMessage.value = "El campo 'code' (código) es obligatorio.";
     return;
@@ -87,12 +129,23 @@ async function handleSubmit() {
 
   isSubmitting.value = true;
   try {
-    const created = await createTest(form);
-    successMessage.value = `¡Prueba "${created.name}" (${created.code}) dada de alta con éxito!`;
-    emit('test-created', created);
-    resetForm();
+    if (isEditMode.value) {
+      const updated = await updateTest(props.testToEdit.id, form);
+      const resultObj = updated || { ...form, id: props.testToEdit.id, words: wordsNum };
+      successMessage.value = `¡Prueba "${resultObj.name}" (${resultObj.code}) actualizada con éxito!`;
+      emit('test-updated', resultObj);
+    } else {
+      const created = await createTest(form);
+      successMessage.value = `¡Prueba "${created.name}" (${created.code}) dada de alta con éxito!`;
+      emit('test-created', created);
+      resetForm();
+    }
   } catch (err) {
-    errorMessage.value = err.message || 'Error al guardar la prueba en el servidor.';
+    if (err.status === 409) {
+      errorMessage.value = 'Ese código ya existe en el catálogo.';
+    } else {
+      errorMessage.value = err.message || 'Error al guardar la prueba en el servidor.';
+    }
   } finally {
     isSubmitting.value = false;
   }
@@ -104,15 +157,28 @@ async function handleSubmit() {
     <div class="flat-card-header">
       <div class="header-title-group">
         <div class="icon-box">
-          <BookOpen :size="20" class="text-green-700" />
+          <BookOpen :size="24" class="text-green-700" />
         </div>
         <div>
-          <h2>Alta de Prueba en el Catálogo</h2>
-          <p class="subtitle">Registra un nuevo texto de lectura para las evaluaciones de fluidez</p>
+          <h2>{{ isEditMode ? 'Edición de Prueba de Lectura' : 'Alta de Prueba en el Catálogo' }}</h2>
+          <p class="subtitle">
+            {{ isEditMode
+              ? 'Modifica los parámetros de la prueba seleccionada'
+              : 'Registra un nuevo texto de lectura para las evaluaciones de fluidez'
+            }}
+          </p>
         </div>
       </div>
-      <span class="badge badge-green">BE-11 · Catálogo</span>
+      <span class="badge badge-green">{{ isEditMode ? 'FE-15 · Edición' : 'FE-14 · Alta' }}</span>
     </div>
+
+    <!-- Contenedor del formulario con padding generoso -->
+    <div class="card-body">
+      <!-- Aviso de rol tutor si aplica -->
+      <div v-if="!canManage" class="alert alert-warning" role="alert">
+        <AlertCircle :size="18" />
+        <span>Acceso de solo lectura: el rol tutor no puede añadir ni modificar pruebas.</span>
+      </div>
 
     <!-- Alertas de estado -->
     <div v-if="successMessage" class="alert alert-success" role="alert">
@@ -137,11 +203,18 @@ async function handleSubmit() {
             v-model="form.code"
             type="text"
             class="form-input"
+            :disabled="isCodeLocked || !canManage"
+            :class="{ 'input-locked': isCodeLocked }"
             placeholder="Ej: 0IF, 1AF, 2BL..."
             required
             maxlength="50"
           />
-          <span class="form-hint">Debe ser único. Determina automáticamente curso, letra y tipo.</span>
+          <span v-if="isCodeLocked" class="form-hint text-amber-700 font-medium">
+            El código no puede modificarse porque hay resultados asociados.
+          </span>
+          <span v-else class="form-hint">
+            Debe ser único. Determina automáticamente curso, letra y tipo.
+          </span>
         </div>
 
         <!-- Nombre de la prueba -->
@@ -154,6 +227,7 @@ async function handleSubmit() {
             v-model="form.name"
             type="text"
             class="form-input"
+            :disabled="!canManage"
             placeholder="Ej: La vaca, Normativa piscinas..."
             required
             maxlength="255"
@@ -171,6 +245,7 @@ async function handleSubmit() {
             v-model="form.words"
             type="number"
             class="form-input"
+            :disabled="!canManage"
             placeholder="Ej: 269"
             min="1"
             required
@@ -181,7 +256,12 @@ async function handleSubmit() {
         <!-- Curso -->
         <div class="form-group col-span-1">
           <label for="test-course">Curso escolar</label>
-          <select id="test-course" v-model="form.course" class="form-select">
+          <select
+            id="test-course"
+            v-model="form.course"
+            class="form-select"
+            :disabled="!canManage"
+          >
             <option value="">(Sin asignar)</option>
             <option :value="0">0 (Diagnóstica / Inicial)</option>
             <option :value="1">1º Primaria</option>
@@ -194,10 +274,15 @@ async function handleSubmit() {
           <span class="form-hint">Primer dígito del código.</span>
         </div>
 
-        <!-- Letra pedagógica -->
+        <!-- Letra pedagógica (Vocabulario cerrado: I, A, B, C, D, E) -->
         <div class="form-group col-span-1">
           <label for="test-letter">Letra pedagógica</label>
-          <select id="test-letter" v-model="form.test_letter" class="form-select">
+          <select
+            id="test-letter"
+            v-model="form.test_letter"
+            class="form-select"
+            :disabled="!canManage"
+          >
             <option value="">(Ninguna)</option>
             <option value="I">I — Inicial (Diagnóstica)</option>
             <option value="A">A — Primer corte</option>
@@ -209,10 +294,15 @@ async function handleSubmit() {
           <span class="form-hint">Carácter central del código.</span>
         </div>
 
-        <!-- Tipo de texto -->
+        <!-- Tipo de texto (Vocabulario cerrado: F, L) -->
         <div class="form-group col-span-1">
           <label for="test-type">Tipo de texto</label>
-          <select id="test-type" v-model="form.type" class="form-select">
+          <select
+            id="test-type"
+            v-model="form.type"
+            class="form-select"
+            :disabled="!canManage"
+          >
             <option value="">(Sin tipo)</option>
             <option value="F">F — Funcional</option>
             <option value="L">L — Literario</option>
@@ -221,8 +311,11 @@ async function handleSubmit() {
         </div>
       </div>
 
-      <!-- Sugerencia de autocompletado pedagógico -->
-      <div v-if="deduced.course !== null || deduced.testLetter !== null || deduced.testType !== null" class="deduction-box">
+      <!-- Sugerencia de autocompletado pedagógico (en modo alta) -->
+      <div
+        v-if="!isEditMode && (deduced.course !== null || deduced.testLetter !== null || deduced.testType !== null)"
+        class="deduction-box"
+      >
         <div class="deduction-content">
           <Sparkles :size="16" class="text-green-600" />
           <span>
@@ -244,6 +337,18 @@ async function handleSubmit() {
       <!-- Barra de acciones -->
       <div class="form-actions">
         <button
+          v-if="isEditMode"
+          type="button"
+          class="btn btn-secondary"
+          :disabled="isSubmitting"
+          @click="handleCancel"
+        >
+          <X :size="16" />
+          <span>Cancelar edición</span>
+        </button>
+
+        <button
+          v-else
           type="button"
           class="btn btn-secondary"
           :disabled="isSubmitting"
@@ -254,46 +359,71 @@ async function handleSubmit() {
         </button>
 
         <button
+          v-if="canManage"
           type="submit"
           class="btn btn-primary"
           :disabled="isSubmitting"
         >
-          <PlusCircle :size="16" />
-          <span>{{ isSubmitting ? 'Guardando...' : 'Dar de Alta Prueba' }}</span>
+          <component :is="isEditMode ? Save : PlusCircle" :size="16" />
+          <span>
+            {{ isSubmitting ? 'Guardando...' : (isEditMode ? 'Guardar Cambios' : 'Dar de Alta Prueba') }}
+          </span>
         </button>
       </div>
     </form>
+  </div>
   </div>
 </template>
 
 <style scoped>
 .test-form-card {
-  max-width: 820px;
+  max-width: 880px;
   margin: 0 auto;
-  border-top: 4px solid var(--green-600);
+  border-top: 4px solid var(--primary-container);
+}
+
+.flat-card-header {
+  padding: 1.5rem 1.75rem;
+  border-bottom: 1px solid var(--outline-variant);
+  background-color: var(--surface-container-lowest);
 }
 
 .header-title-group {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 1.35rem;
 }
 
 .icon-box {
   background-color: var(--green-100);
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
+  border: 1px solid var(--green-300);
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--green-850);
+  color: var(--primary-container);
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.header-title-group h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--primary-container);
+  letter-spacing: -0.015em;
+  margin-bottom: 0.3rem;
 }
 
 .subtitle {
-  font-size: 0.85rem;
-  color: var(--gray-500);
-  margin-top: 0.15rem;
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  line-height: 1.4;
+}
+
+.card-body {
+  padding: 1.75rem 2rem;
 }
 
 .required {
@@ -312,6 +442,21 @@ async function handleSubmit() {
 
 .col-span-2 {
   grid-column: span 2;
+}
+
+.input-locked {
+  background-color: var(--gray-100);
+  color: var(--gray-600);
+  cursor: not-allowed;
+  border-color: var(--gray-300);
+}
+
+.text-amber-700 {
+  color: #b45309;
+}
+
+.font-medium {
+  font-weight: 500;
 }
 
 .deduction-box {

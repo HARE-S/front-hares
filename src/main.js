@@ -3,10 +3,16 @@ import App from './App.vue';
 import router from './router';
 import './assets/main.css';
 
-if (import.meta.env.DEV) {
-  import('./tests/mswSetup');
+async function startApp() {
+  // Esperar a que MSW esté listo en desarrollo
+  if (import.meta.env.DEV) {
+    const { mswReady } = await import('./tests/mswSetup');
+    await mswReady;
+  }
+
+  const app = createApp(App);
+  app.use(router);
+  app.mount('#app');
 }
 
-const app = createApp(App);
-app.use(router);
-app.mount('#app');
+startApp();

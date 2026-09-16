@@ -4,54 +4,58 @@
 [FE-31]
 
 ## Título
-Evolución individual del alumno
+Panel de Rendimiento Lector y Evolución individual del alumno
 
 ## Descripción
 **Como** tutor
-**Quiero** ver la progresión de un alumno a lo largo del curso
+**Quiero** ver un panel de rendimiento de mi sección y la evolución individual de cada alumno
 
-**Para** saber si el programa está funcionando con él.
+**Para** diagnosticar qué estrategias están funcionando y dónde intervenir.
 
 ## Criterios de Aceptación
 
-### Escenario 1: Serie por prueba
+### Escenario 1: Panel de rendimiento por sección
+```gherkin
+Dado un tutor en una sección con alumnos evaluados
+Cuando accede al dashboard
+Entonces ve el "Panel de Rendimiento Lector" de esa sección
+Y muestra el aula actual y período de evaluación seleccionable
+```
+
+### Escenario 2: Tarjetas de métrica
+```gherkin
+Dado una sección con resultados registrados
+Cuando se muestra el dashboard
+Entonces se visualizan cuatro métricas principales en tarjetas:
+  - Velocidad media del aula con % de objetivo
+  - Alumnos evaluados vs. total
+  - Libros leídos en trimestre
+  - Alerta pedagógica (alumnos que requieren apoyo)
+```
+
+### Escenario 3: Gráfico de progreso
+```gherkin
+Dado una sección con histórico de pruebas
+Cuando se muestra el gráfico de progreso
+Entonces se representa la evolución de PPM a lo largo del período
+Y se compara contra el baremo estándar del centro
+```
+
+### Escenario 4: Distribución de niveles
+```gherkin
+Dado una sección evaluada
+Cuando se consulta la distribución
+Entonces se muestra cuántos alumnos hay en cada banda (alto/normal/bajo)
+Y qué porcentaje representan del total
+```
+
+### Escenario 5: Ficha de alumno individual
 ```gherkin
 Dado un alumno con resultados en varias pruebas
-Cuando se abre su evolucion
-Entonces se muestra una serie con la media del par funcional y literario por prueba
-Y las pruebas se ordenan I, A, B, C, D, E
-```
-
-### Escenario 2: Diferencia entre tipos de texto
-```gherkin
-Dado un alumno con resultados funcionales y literarios
-Cuando se consulta una prueba concreta
-Entonces se muestra la diferencia entre el texto literario y el funcional
-Y se indica cual le resulta mas dificil
-```
-
-### Escenario 3: Progreso entre pruebas
-```gherkin
-Dado un alumno con al menos dos pruebas
-Cuando se consulta su evolucion
-Entonces se muestra la variacion entre pruebas consecutivas
-Y una variacion positiva se distingue visualmente de una negativa
-```
-
-### Escenario 4: Par incompleto
-```gherkin
-Dado un alumno que solo hizo el texto literario de una prueba
-Cuando se muestra la media de ese par
-Entonces se indica que el par esta incompleto
-Y la media NO se calcula tratando la prueba ausente como un cero
-```
-
-### Escenario 5: Datos insuficientes
-```gherkin
-Dado un alumno con una sola prueba registrada
-Cuando se abre su evolucion
-Entonces se muestra un mensaje explicando que hacen falta al menos dos
-Y no se dibuja un grafico
+Cuando se abre su ficha desde el listado de sección
+Entonces se muestra su evolución personal (FE-26)
+Y se incluye gráfico de serie con diferencias funcional/literario
+Y variación entre pruebas consecutivas
 ```
 
 ### Escenario 6: Acotación por fechas
@@ -62,13 +66,15 @@ Entonces solo se representan los resultados de ese periodo
 ```
 
 ## Notas
-* **El escenario 4 corrige un comportamiento del sistema anterior.** En la hoja de cálculo del centro, una prueba no realizada devuelve cero y la media del par sale a la mitad. Aquí una prueba ausente es ausencia de dato, no un cero, y debe verse como tal.
-* **El escenario 2 tiene valor pedagógico directo:** los alumnos suelen tener más dificultad con los textos funcionales, y cuánta es esa diferencia orienta la intervención.
-* **Diseño:** `.delta--up`, `--down`, `--flat` y `--nodata` para las variaciones.
-* **Backend:** BE-31, más las métricas de par.
+* **Dashboard de sección:** Vista agregada con cuatro métricas: velocidad media, alumnos evaluados, libros leídos y alerta pedagógica. Es el primer punto de entrada tras seleccionar una sección.
+* **Escenario 1 (Panel):** Cabecera seleccionable con aula y período. Botones de acciones rápidas (asignar libro, nueva evaluación).
+* **Escenario 5 (Ficha individual):** Composición de bloques: datos del alumno, histórico, gráfico de evolución, diferencias funcional/literario y variaciones.
+* **Regla de dominio:** Una prueba ausente es ausencia de dato, no un cero. La ficha del alumno no promedia pares incompletos.
+* **Diseño:** Tarjetas simples sin sombras, badges para variaciones (delta) y alertas. Gráficos en FE-30.
+* **Backend:** BE-31 (evolución individual), BE-30 (bandas), BE-10 (navegación con dashboard).
 
 ## Estimación
-5 Puntos de Historia (Serie, diferencias y estados de datos escasos)
+8 Puntos de Historia (Panel de Rendimiento, métricas, gráfico de progreso, distribución de niveles, serie individual)
 
 ## Prioridad
 Alta
@@ -77,12 +83,14 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE31-01 | **Servicio de evolución** Serie de pares y progreso. | - | Pendiente |
-| T-FE31-02 | **Gráfico de evolución** Ordenado por letra de prueba. | - | Pendiente |
-| T-FE31-03 | **Diferencia funcional frente a literario** | - | Pendiente |
-| T-FE31-04 | **Píldoras de variación** Entre pruebas consecutivas. | - | Pendiente |
-| T-FE31-05 | **Estados de par incompleto y datos insuficientes** | - | Pendiente |
-| T-FE31-06 | **Pruebas** Escenarios 4 y 5. | - | Pendiente |
+| T-FE31-01 | **Estructura del dashboard** Panel de Rendimiento Lector (cabecera, selectores, layout). | Santiago | **Completado** |
+| T-FE31-02 | **Componente MetricCard** Reutilizable para las cuatro métricas principales. | Santiago | **Completado** |
+| T-FE31-03 | **Servicio de sección** Obtener métricas agregadas de sección (velocidad media, alumnos, libros). | Santiago | **Completado** |
+| T-FE31-04 | **Gráfico de progreso** Línea de evolución PPM con baremo de referencia (FE-30). | - | Bloqueado |
+| T-FE31-05 | **Distribución de niveles** Gráfico y recuento por banda (FE-34). | - | Bloqueado |
+| T-FE31-06 | **Ficha individual del alumno** Evolución, diferencias funcional/literario, variaciones. | Santiago | **Completado** |
+| T-FE31-07 | **Acción pedagógica sugerida** Alerta y recomendaciones para intervención. | Santiago | **Completado** |
+| T-FE31-08 | **Pruebas** Dashboard, tablas de evolución, estados de datos incompletos. | Santiago | **En curso** |
 
 ---
 

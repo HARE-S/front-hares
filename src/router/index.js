@@ -88,31 +88,17 @@ export const routes = [
 async function guard(to) {
   if (to.meta.public) return true;
 
-  const { isAuthenticated, loading, load, isPending } = useAuth();
+  const auth = useAuth();
 
-  // Cargar sesión si no se ha cargado
-  if (!loading.value) {
-    await load();
-  }
+  // Cargar sesión si aún no se ha intentado
+  await auth.load();
 
-  // Esperar a que termine de cargar
-  if (loading.value) {
-    await new Promise(resolve => {
-      const interval = setInterval(() => {
-        if (!loading.value) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 50);
-    });
-  }
-
-  if (!isAuthenticated.value) {
+  if (!auth.isAuthenticated.value) {
     return { name: 'login', query: { next: to.fullPath } };
   }
 
   // Si el usuario está pendiente y no intenta acceder a pending, redirigir
-  if (isPending.value && to.name !== 'pending') {
+  if (auth.isPending.value && to.name !== 'pending') {
     return { name: 'pending' };
   }
 

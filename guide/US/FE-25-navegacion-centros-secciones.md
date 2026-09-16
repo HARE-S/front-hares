@@ -30,12 +30,12 @@ Entonces se muestran sus secciones
 Y el numero de alumnos de cada una
 ```
 
-### Escenario 3: Alumnado de una sección
+### Escenario 3: Panel de Rendimiento Lector
 ```gherkin
 Dado una seccion seleccionada
 Cuando se abre su detalle
-Entonces se muestra el alumnado matriculado
-Y cada nombre enlaza a su ficha
+Entonces se muestra primero el Panel de Rendimiento Lector (FE-31)
+Y luego el alumnado matriculado con sus fichas individuales
 ```
 
 ### Escenario 4: Ámbito del tutor

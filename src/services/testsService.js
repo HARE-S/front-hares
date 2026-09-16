@@ -46,6 +46,7 @@ export async function getTests(params = {}) {
     query.set('course', params.course);
   }
   if (params.type) query.set('type', params.type);
+  if (params.test_letter) query.set('test_letter', params.test_letter);
   if (params.page) query.set('page', params.page);
   if (params.limit) query.set('limit', params.limit);
   if (params.include_disabled) query.set('include_disabled', 'true');
@@ -69,10 +70,49 @@ export async function createTest(testData) {
     type: testData.type || null
   };
 
-  return request('/tests', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  });
+  try {
+    return await request('/tests', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    if (err.status === 409) {
+      const conflictErr = new Error('Ese código ya existe en el catálogo.');
+      conflictErr.status = 409;
+      throw conflictErr;
+    }
+    throw err;
+  }
+}
+
+/**
+ * Actualiza los datos de una prueba existente (PUT /api/v1/tests/<id>)
+ */
+export async function updateTest(testId, testData) {
+  const payload = {
+    code: testData.code?.trim(),
+    name: testData.name?.trim(),
+    words: parseInt(testData.words, 10),
+    course: testData.course !== '' && testData.course !== null && testData.course !== undefined
+      ? parseInt(testData.course, 10)
+      : null,
+    test_letter: testData.test_letter || null,
+    type: testData.type || null
+  };
+
+  try {
+    return await request(`/tests/${testId}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    if (err.status === 409) {
+      const conflictErr = new Error('Ese código ya existe en el catálogo.');
+      conflictErr.status = 409;
+      throw conflictErr;
+    }
+    throw err;
+  }
 }
 
 /**
@@ -83,3 +123,4 @@ export async function deleteTest(testId) {
     method: 'DELETE'
   });
 }
+

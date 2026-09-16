@@ -1,0 +1,301 @@
+/* ==========================================================================
+   HARE-S — Sistema de Diseño: Forest Academic Analytics (Stitch)
+   components.css: Clases reutilizables para botones, tarjetas, tablas,
+   distintivos de nivel, formularios y estados de pantalla.
+   ========================================================================== */
+
+/* --- BOTONES --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-headline);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Botón Primario (Deep Forest Green con hover a Dark Forest) */
+.btn-primary {
+  background-color: var(--primary-container);
+  color: var(--on-primary);
+  border-color: rgba(111, 251, 190, 0.35);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary);
+  border-color: var(--secondary-fixed);
+}
+
+/* Botón Secundario (Borde slate neutro) */
+.btn-secondary {
+  background-color: var(--surface-container-lowest);
+  color: var(--on-surface);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--surface-container-low);
+  border-color: #94a3b8;
+  color: var(--primary-container);
+}
+
+/* Botón Acento (Rich Emerald) */
+.btn-accent {
+  background-color: var(--secondary);
+  color: var(--on-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-accent:hover:not(:disabled) {
+  background-color: var(--on-secondary-container);
+}
+
+/* Botón Peligro / Borrado */
+.btn-danger {
+  background-color: var(--error);
+  color: var(--on-error);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--on-error-container);
+}
+
+.btn-danger-outline {
+  background-color: transparent;
+  color: var(--error);
+  border: 1px solid var(--error-container);
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+  background-color: var(--error-container);
+  color: var(--on-error-container);
+}
+
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.btn-icon {
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+}
+
+/* --- TARJETAS Y PANELES --- */
+.flat-card {
+  background-color: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.flat-card-header {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--surface-container);
+  background-color: var(--surface-container-lowest);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* --- DISTINTIVOS Y CHIPS (BADGES) --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  line-height: 1.2;
+}
+
+/* Bandas oficiales de nivel lector (FE-02 Escenario 3) */
+.badge--high,
+.badge-green {
+  background-color: var(--level-high-bg);
+  border-color: var(--level-high-border);
+  color: var(--level-high-text);
+}
+
+.badge--normal,
+.badge-emerald {
+  background-color: var(--level-normal-bg);
+  border-color: var(--level-normal-border);
+  color: var(--level-normal-text);
+}
+
+.badge--low,
+.badge-danger {
+  background-color: var(--level-low-bg);
+  border-color: var(--level-low-border);
+  color: var(--level-low-text);
+}
+
+/* Ausencia de dato con distintivo propio (FE-02 Escenario 4) */
+.badge--nodata,
+.badge-gray {
+  background-color: var(--level-nodata-bg);
+  border-color: var(--level-nodata-border);
+  color: var(--level-nodata-text);
+}
+
+.badge--progress {
+  background-color: var(--level-progress-bg);
+  border-color: var(--level-progress-border);
+  color: var(--level-progress-text);
+}
+
+/* Tipos pedagógicos de texto */
+.badge--functional {
+  background-color: var(--level-high-bg);
+  border-color: var(--level-high-border);
+  color: var(--level-high-text);
+}
+
+.badge--literary {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+/* --- TABLAS PLANAS Y ANALÍTICAS --- */
+.flat-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--outline-variant);
+  background-color: var(--surface-container-lowest);
+}
+
+.flat-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.flat-table th {
+  background-color: var(--surface-container-low);
+  color: var(--on-surface-variant);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--outline-variant);
+  white-space: nowrap;
+}
+
+.flat-table td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--surface-container);
+  color: var(--on-surface);
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+
+.flat-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.flat-table tbody tr:hover td {
+  background-color: var(--surface);
+}
+
+/* --- FORMULARIOS --- */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+label {
+  display: block;
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--primary-container);
+  margin-bottom: 0.35rem;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-container-lowest);
+  color: var(--on-surface);
+  font-size: 0.875rem;
+  transition: var(--transition-fast);
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(0, 108, 73, 0.15);
+}
+
+.form-input:disabled,
+.form-select:disabled {
+  background-color: var(--surface-container-low);
+  color: var(--on-surface-variant);
+  cursor: not-allowed;
+  border-color: var(--surface-container-high);
+}
+
+.form-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+  margin-top: 0.3rem;
+}
+
+/* --- ALERTAS --- */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin-bottom: 1.25rem;
+}
+
+.alert-success {
+  background-color: var(--level-high-bg);
+  border: 1px solid var(--level-high-border);
+  color: var(--level-high-text);
+}
+
+.alert-danger {
+  background-color: var(--level-low-bg);
+  border: 1px solid var(--level-low-border);
+  color: var(--level-low-text);
+}
+
+.alert-warning {
+  background-color: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  color: var(--warning);
+}

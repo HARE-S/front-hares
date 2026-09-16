@@ -27,6 +27,13 @@ export class ForbiddenError extends ApiError {
   }
 }
 
+export class UnauthorizedError extends ApiError {
+  constructor(message, data) {
+    super(message, 401, data);
+    this.name = 'UnauthorizedError';
+  }
+}
+
 export async function request(endpoint, options = {}) {
   const url = `${BASE_URL}${endpoint}`;
 
@@ -55,9 +62,7 @@ export async function request(endpoint, options = {}) {
       const errorMsg = data?.error || data?.message || `Error ${res.status}: ${res.statusText}`;
 
       if (res.status === 401) {
-        // 401: redirigir a login (el router lo captura)
-        window.location.href = '/login';
-        return null;
+        throw new UnauthorizedError(errorMsg, data);
       }
 
       if (res.status === 403) {

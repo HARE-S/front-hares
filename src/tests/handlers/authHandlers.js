@@ -26,6 +26,18 @@ const mockUsers = [
 
 let currentSession = null;
 
+// Restaurar sesión desde sessionStorage al iniciar (en desarrollo)
+if (typeof sessionStorage !== 'undefined') {
+  try {
+    const stored = sessionStorage.getItem('__hares_session_dev__');
+    if (stored) {
+      currentSession = JSON.parse(stored);
+    }
+  } catch (err) {
+    // Ignorar errores de sessionStorage
+  }
+}
+
 export const authHandlers = [
   http.post('/api/v1/auth/register', async ({ request }) => {
     const body = await request.json();
@@ -180,6 +192,34 @@ export const authHandlers = [
     return HttpResponse.json(
       {
         message: 'Se envió un enlace de recuperación a tu correo. Revisa tu bandeja de entrada.'
+      },
+      { status: 200 }
+    );
+  }),
+
+  http.post('/api/v1/auth/resend-verification', async ({ request }) => {
+    const body = await request.json();
+    const { email } = body;
+
+    if (!email) {
+      return HttpResponse.json(
+        { error: 'El correo es requerido' },
+        { status: 400 }
+      );
+    }
+
+    const user = mockUsers.find(u => u.email === email);
+
+    if (!user) {
+      return HttpResponse.json(
+        { error: 'Correo no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json(
+      {
+        message: 'Se reenviaron las instrucciones de verificación. Revisa tu correo.'
       },
       { status: 200 }
     );

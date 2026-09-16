@@ -2,9 +2,11 @@
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { login } from '@/services/authService';
+import { useAuth } from '@/composables/useAuth';
 
 const router = useRouter();
 const route = useRoute();
+const { setUser } = useAuth();
 
 const mode = ref('login'); // 'login', 'register', 'forgot'
 const email = ref('');
@@ -15,6 +17,9 @@ const error = ref('');
 const success = ref('');
 const loading = ref(false);
 const forgotEmail = ref('');
+const showPassword = ref(false);
+const showPasswordConfirm = ref(false);
+const sessionExpired = ref(route?.query?.expired === 'true');
 
 async function handleLogin() {
   error.value = '';
@@ -35,6 +40,8 @@ async function handleLogin() {
     const response = await login(email.value, password.value || '');
 
     if (response) {
+      // Establecer usuario inmediatamente para que el router guard lo detecte
+      setUser(response);
       const next = route.query.next || '/';
       router.push(next);
     }
@@ -172,8 +179,16 @@ function handleKeydown(e) {
 <template>
   <div class="login-page">
     <div class="login-box">
-      <h1>HARES</h1>
+      <div class="logo-header">
+        <img src="/logo-hares.png" alt="HARE-S" class="logo-img" />
+        <h1>HARES</h1>
+      </div>
       <p class="subtitle">Plataforma de Gestión de Comprensión Lectora</p>
+
+      <!-- Mensaje de sesión expirada -->
+      <div v-if="sessionExpired" class="alert alert-info">
+        Tu sesión ha expirado. Por favor, vuelve a acceder.
+      </div>
 
       <!-- Tabs -->
       <div class="auth-tabs" v-if="mode !== 'forgot'">
@@ -209,15 +224,31 @@ function handleKeydown(e) {
 
         <div class="form-group">
           <label for="password-login">Contraseña</label>
-          <input
-            id="password-login"
-            v-model="password"
-            type="password"
-            class="form-input"
-            placeholder="Contraseña"
-            @keydown="handleKeydown"
-            :disabled="loading"
-          />
+          <div class="password-wrapper">
+            <input
+              id="password-login"
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              class="form-input"
+              placeholder="Contraseña"
+              @keydown="handleKeydown"
+              :disabled="loading"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              @click="showPassword = !showPassword"
+              :disabled="loading"
+              :title="showPassword ? 'Ocultar' : 'Mostrar'"
+            >
+              <svg v-if="!showPassword" viewBox="0 0 24 24" class="icon-eye">
+                <path d="M12 5C7 5 2.73 8.11 1 12.46c1.73 4.35 6 7.54 11 7.54s9.27-3.19 11-7.54C21.27 8.11 17 5 12 5m0 9c-1.38 0-2.5-1.12-2.5-2.5S10.62 8.5 12 8.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              <svg v-else viewBox="0 0 24 24" class="icon-eye">
+                <path d="M11.83 9L15.64 12.81c.04-.25.08-.5.08-.81 0-1.66-1.34-3-3-3-.29 0-.54.04-.81.08M7.4 6.9L6.1 5.6C3.12 7.97 1 11.3 1 12.46c1.73 4.35 6 7.54 11 7.54 1.25 0 2.45-.2 3.6-.57l-2.64-2.64c-.9.36-1.95.58-3.1.58-1.66 0-3-1.34-3-3 0-1.13.22-2.2.57-3.1zM21 4.45L19.55 3 3 19.55 4.45 21 21 4.45M12 4c5 0 9.27 3.19 11 7.54-1.73 4.35-6 7.54-11 7.54S2.73 16.35 1 12c1.73-4.35 6-7.54 11-7.54z"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div v-if="error" class="alert alert-danger">
@@ -260,30 +291,62 @@ function handleKeydown(e) {
 
         <div class="form-group">
           <label for="password-register">Contraseña</label>
-          <input
-            id="password-register"
-            v-model="password"
-            type="password"
-            class="form-input"
-            placeholder="Contraseña"
-            @keydown="handleKeydown"
-            :disabled="loading"
-            required
-          />
+          <div class="password-wrapper">
+            <input
+              id="password-register"
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              class="form-input"
+              placeholder="Contraseña"
+              @keydown="handleKeydown"
+              :disabled="loading"
+              required
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              @click="showPassword = !showPassword"
+              :disabled="loading"
+              :title="showPassword ? 'Ocultar' : 'Mostrar'"
+            >
+              <svg v-if="!showPassword" viewBox="0 0 24 24" class="icon-eye">
+                <path d="M12 5C7 5 2.73 8.11 1 12.46c1.73 4.35 6 7.54 11 7.54s9.27-3.19 11-7.54C21.27 8.11 17 5 12 5m0 9c-1.38 0-2.5-1.12-2.5-2.5S10.62 8.5 12 8.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              <svg v-else viewBox="0 0 24 24" class="icon-eye">
+                <path d="M11.83 9L15.64 12.81c.04-.25.08-.5.08-.81 0-1.66-1.34-3-3-3-.29 0-.54.04-.81.08M7.4 6.9L6.1 5.6C3.12 7.97 1 11.3 1 12.46c1.73 4.35 6 7.54 11 7.54 1.25 0 2.45-.2 3.6-.57l-2.64-2.64c-.9.36-1.95.58-3.1.58-1.66 0-3-1.34-3-3 0-1.13.22-2.2.57-3.1zM21 4.45L19.55 3 3 19.55 4.45 21 21 4.45M12 4c5 0 9.27 3.19 11 7.54-1.73 4.35-6 7.54-11 7.54S2.73 16.35 1 12c1.73-4.35 6-7.54 11-7.54z"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="form-group">
           <label for="password-confirm">Confirmar contraseña</label>
-          <input
-            id="password-confirm"
-            v-model="passwordConfirm"
-            type="password"
-            class="form-input"
-            placeholder="Confirmar contraseña"
-            @keydown="handleKeydown"
-            :disabled="loading"
-            required
-          />
+          <div class="password-wrapper">
+            <input
+              id="password-confirm"
+              v-model="passwordConfirm"
+              :type="showPasswordConfirm ? 'text' : 'password'"
+              class="form-input"
+              placeholder="Confirmar contraseña"
+              @keydown="handleKeydown"
+              :disabled="loading"
+              required
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              @click="showPasswordConfirm = !showPasswordConfirm"
+              :disabled="loading"
+              :title="showPasswordConfirm ? 'Ocultar' : 'Mostrar'"
+            >
+              <svg v-if="!showPasswordConfirm" viewBox="0 0 24 24" class="icon-eye">
+                <path d="M12 5C7 5 2.73 8.11 1 12.46c1.73 4.35 6 7.54 11 7.54s9.27-3.19 11-7.54C21.27 8.11 17 5 12 5m0 9c-1.38 0-2.5-1.12-2.5-2.5S10.62 8.5 12 8.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              <svg v-else viewBox="0 0 24 24" class="icon-eye">
+                <path d="M11.83 9L15.64 12.81c.04-.25.08-.5.08-.81 0-1.66-1.34-3-3-3-.29 0-.54.04-.81.08M7.4 6.9L6.1 5.6C3.12 7.97 1 11.3 1 12.46c1.73 4.35 6 7.54 11 7.54 1.25 0 2.45-.2 3.6-.57l-2.64-2.64c-.9.36-1.95.58-3.1.58-1.66 0-3-1.34-3-3 0-1.13.22-2.2.57-3.1zM21 4.45L19.55 3 3 19.55 4.45 21 21 4.45M12 4c5 0 9.27 3.19 11 7.54-1.73 4.35-6 7.54-11 7.54S2.73 16.35 1 12c1.73-4.35 6-7.54 11-7.54z"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div v-if="error" class="alert alert-danger">
@@ -364,12 +427,28 @@ function handleKeydown(e) {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
+.logo-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.logo-img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
 h1 {
   text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: var(--green-700);
+  font-size: 2rem;
+  margin: 0;
+  color: #0d9488;
   font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .subtitle {
@@ -414,6 +493,12 @@ h1 {
   margin-bottom: 1.25rem;
 }
 
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .form-input {
   width: 100%;
   padding: 0.75rem 0.85rem;
@@ -424,6 +509,10 @@ h1 {
   color: var(--gray-900);
   transition: var(--transition);
   font-family: inherit;
+}
+
+.password-wrapper .form-input {
+  padding-right: 3rem;
 }
 
 .form-input:focus {
@@ -442,6 +531,42 @@ h1 {
   cursor: not-allowed;
 }
 
+.password-toggle {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  color: var(--gray-400);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.icon-eye {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.password-toggle:hover:not(:disabled) {
+  color: var(--green-600);
+}
+
+.password-toggle:focus:not(:disabled) {
+  outline: none;
+  color: var(--green-600);
+}
+
+.password-toggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .alert {
   margin-bottom: 1.25rem;
 }
@@ -453,6 +578,16 @@ h1 {
   padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
   font-size: 0.875rem;
+}
+
+.alert-info {
+  background-color: var(--green-50);
+  border: 1px solid var(--green-200);
+  color: var(--green-900);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
 }
 
 .forgot-link {
