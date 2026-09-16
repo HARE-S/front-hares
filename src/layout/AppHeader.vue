@@ -19,8 +19,8 @@ const { user } = useAuth();
 
 <style scoped>
 .app-header {
-  background-color: white;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: var(--white);
+  border-bottom: 1px solid var(--gray-200);
   padding: 1rem 1.5rem;
 }
 
@@ -35,8 +35,8 @@ const { user } = useAuth();
 .page-title {
   margin: 0;
   font-size: 1.25rem;
-  color: #2c3e50;
-  font-weight: 600;
+  color: var(--green-950);
+  font-weight: 700;
 }
 
 .header-right {
@@ -47,9 +47,11 @@ const { user } = useAuth();
 
 .user-badge {
   padding: 0.5rem 1rem;
-  background-color: #f5f5f5;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  color: #666;
+  background-color: var(--green-50);
+  border: 1px solid var(--green-200);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  color: var(--green-900);
+  font-weight: 500;
 }
 </style>

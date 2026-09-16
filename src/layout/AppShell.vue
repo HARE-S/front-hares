@@ -28,6 +28,7 @@ const showShell = computed(() => !route.meta.public);
   display: grid;
   grid-template-columns: auto 1fr;
   min-height: 100vh;
+  background-color: var(--gray-50);
 }
 
 .shell-main {
@@ -39,5 +40,6 @@ const showShell = computed(() => !route.meta.public);
 .shell-content {
   flex: 1;
   padding: 1.5rem;
+  overflow-y: auto;
 }
 </style>

@@ -17,11 +17,13 @@
 
 h1 {
   margin-top: 0;
-  color: #333;
+  color: var(--green-950);
+  font-weight: 700;
 }
 
 .placeholder {
-  color: #999;
+  color: var(--gray-500);
   font-style: italic;
+  font-size: 0.95rem;
 }
 </style>

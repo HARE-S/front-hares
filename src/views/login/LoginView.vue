@@ -45,8 +45,8 @@ function handleKeydown(e) {
 </script>
 
 <template>
-  <div class="login-container">
-    <div class="login-box">
+  <div class="login-page">
+    <div class="login-box flat-card">
       <h1>HARES</h1>
       <p class="subtitle">Plataforma de Gestión de Comprensión Lectora</p>
 
@@ -57,17 +57,18 @@ function handleKeydown(e) {
             id="email"
             v-model="email"
             type="email"
+            class="form-input"
             placeholder="usuario@grupopenascal.com"
             @keydown="handleKeydown"
             :disabled="loading"
           />
         </div>
 
-        <div v-if="error" class="error-message">
+        <div v-if="error" class="alert alert-danger">
           {{ error }}
         </div>
 
-        <button type="submit" :disabled="loading">
+        <button type="submit" class="btn btn-primary" style="width: 100%;" :disabled="loading">
           {{ loading ? 'Autenticando...' : 'Acceder' }}
         </button>
       </form>
@@ -80,105 +81,38 @@ function handleKeydown(e) {
 </template>
 
 <style scoped>
-.login-container {
+.login-page {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: var(--gray-50);
+  padding: 1rem;
 }
 
 .login-box {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  padding: 2rem;
   width: 100%;
   max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
-  margin: 0 0 0.5rem;
   text-align: center;
-  color: #333;
   font-size: 2rem;
+  margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  margin: 0 0 2rem;
   text-align: center;
-  color: #666;
+  color: var(--gray-600);
   font-size: 0.9rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #333;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-family: inherit;
-}
-
-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-input:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-}
-
-button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #667eea;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-button:hover:not(:disabled) {
-  background-color: #5568d3;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.error-message {
-  color: #d32f2f;
-  background-color: #ffebee;
-  border: 1px solid #ffcdd2;
-  border-radius: 4px;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  margin-bottom: 2rem;
 }
 
 .hint {
-  margin: 1rem 0 0;
+  margin-top: 1rem;
   text-align: center;
-  color: #999;
+  color: var(--gray-500);
   font-size: 0.8rem;
 }
 </style>

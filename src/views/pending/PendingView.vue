@@ -36,13 +36,15 @@ async function handleLogout() {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: var(--gray-50);
+  padding: 1rem;
 }
 
 .pending-box {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  background-color: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   width: 100%;
   max-width: 500px;
@@ -56,36 +58,38 @@ async function handleLogout() {
 
 h1 {
   margin: 0 0 1rem;
-  color: #333;
+  color: var(--green-950);
   font-size: 1.5rem;
+  font-weight: 700;
 }
 
 p {
   margin: 0.5rem 0;
-  color: #666;
-  line-height: 1.5;
+  color: var(--gray-600);
+  line-height: 1.6;
 }
 
 .secondary {
-  color: #999;
+  color: var(--gray-500);
   font-size: 0.9rem;
   margin: 1.5rem 0 0;
 }
 
 .logout-btn {
   margin-top: 2rem;
-  padding: 0.75rem 1.5rem;
-  background-color: #667eea;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: 0.65rem 1.25rem;
+  background-color: var(--green-600);
+  color: var(--white);
+  border: 1.5px solid var(--green-600);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: var(--transition);
 }
 
 .logout-btn:hover {
-  background-color: #5568d3;
+  background-color: var(--green-700);
+  border-color: var(--green-700);
 }
 </style>

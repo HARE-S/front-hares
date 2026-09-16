@@ -66,23 +66,24 @@ async function handleLogout() {
 <style scoped>
 .app-sidebar {
   width: 280px;
-  background-color: #2c3e50;
-  color: white;
+  background-color: var(--green-950);
+  color: var(--white);
   display: flex;
   flex-direction: column;
   height: 100vh;
-  border-right: 1px solid #1a1a1a;
+  border-right: 1px solid var(--green-900);
 }
 
 .sidebar-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #34495e;
+  border-bottom: 1px solid var(--green-900);
 }
 
 .sidebar-header h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: #667eea;
+  color: var(--green-400);
+  font-weight: 700;
 }
 
 .sidebar-nav {
@@ -94,62 +95,66 @@ async function handleLogout() {
 .nav-link {
   display: block;
   padding: 0.75rem 1.5rem;
-  color: #ecf0f1;
+  color: var(--green-100);
   text-decoration: none;
-  transition: all 0.2s;
+  transition: var(--transition);
   border-left: 3px solid transparent;
 }
 
 .nav-link:hover {
-  background-color: #34495e;
+  background-color: var(--green-900);
   padding-left: 1.75rem;
 }
 
 .nav-link.active {
-  background-color: #34495e;
-  border-left-color: #667eea;
-  color: #667eea;
+  background-color: var(--green-900);
+  border-left-color: var(--green-400);
+  color: var(--green-300);
   font-weight: 600;
 }
 
 .sidebar-footer {
   padding: 1rem;
-  border-top: 1px solid #34495e;
+  border-top: 1px solid var(--green-900);
 }
 
 .user-info {
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background-color: #34495e;
-  border-radius: 4px;
+  background-color: var(--green-900);
+  border-radius: var(--radius-md);
   font-size: 0.85rem;
 }
 
 .user-email {
   margin: 0 0 0.25rem;
   font-weight: 600;
+  color: var(--green-200);
 }
 
 .user-role {
   margin: 0;
-  color: #bdc3c7;
+  color: var(--green-300);
   font-size: 0.8rem;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .logout-btn {
   width: 100%;
-  padding: 0.75rem;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  padding: 0.65rem;
+  background-color: var(--danger);
+  color: var(--white);
+  border: 1.5px solid var(--danger);
+  border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: var(--transition);
+  font-size: 0.9rem;
 }
 
 .logout-btn:hover {
-  background-color: #c0392b;
+  background-color: #991b1b;
+  border-color: #991b1b;
 }
 </style>
