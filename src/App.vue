@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import TestForm from './components/TestForm.vue';
 import TestList from './components/TestList.vue';
+import DashboardView from './views/dashboard/DashboardView.vue';
 import {
   BookOpen,
   Layers,
@@ -20,7 +21,7 @@ import {
   LayoutDashboard
 } from 'lucide-vue-next';
 
-const currentTab = ref('catalog'); // 'catalog' | 'form'
+const currentTab = ref('dashboard'); // 'dashboard' | 'catalog' | 'form'
 const testListRef = ref(null);
 const testToEdit = ref(null);
 const userRole = ref('coordinator'); // 'coordinator' | 'tutor'
@@ -102,10 +103,11 @@ function handleCancelEdit() {
           <button
             class="nav-item"
             :class="{ active: currentTab === 'dashboard' }"
-            @click="currentTab = 'catalog'"
+            @click="currentTab = 'dashboard'; testToEdit = null;"
           >
             <LayoutDashboard :size="18" />
-            <span>Dashboard</span>
+            <span class="flex-1">Dashboard</span>
+            <span v-if="currentTab === 'dashboard'" class="nav-active-dot"></span>
           </button>
 
           <button
@@ -222,8 +224,13 @@ function handleCancelEdit() {
 
           <!-- Vistas Activas -->
           <transition name="fade" mode="out-in">
+            <DashboardView
+              v-if="currentTab === 'dashboard'"
+              key="dashboard"
+              @new-assessment="handleOpenCreate"
+            />
             <TestList
-              v-if="currentTab === 'catalog'"
+              v-else-if="currentTab === 'catalog'"
               ref="testListRef"
               key="catalog"
               :user-role="userRole"
