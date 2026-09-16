@@ -49,32 +49,44 @@ export function useAuth() {
   };
 
   async function load() {
-    if (initialized.value) return;
+    if (initialized.value) {
+      console.log('[useAuth] load() ya fue inicializado, retornando');
+      return;
+    }
 
+    console.log('[useAuth] Iniciando load()');
     loading.value = true;
     try {
       // Primero intentar obtener del backend (cookies HttpOnly en producción)
+      console.log('[useAuth] Llamando getCurrentUser()...');
       const data = await getCurrentUser();
+      console.log('[useAuth] getCurrentUser() respondió:', data);
       if (data) {
         user.value = data;
         sessionExpired.value = false;
         // En desarrollo, guardar también en sessionStorage
         storeSession(data);
+        console.log('[useAuth] Usuario autenticado:', data.email);
       } else {
         user.value = null;
+        console.log('[useAuth] No hay usuario autenticado');
       }
     } catch (err) {
-      // Intenta recuperar desde sessionStorage (en ambos entornos para mayor resiliencia)
+      // Fallback: intentar recuperar sesión guardada si el backend falla
+      // Esto permite persistencia al recargar la página
+      console.log('[useAuth] Error en getCurrentUser():', err.message);
       const stored = getStoredSession();
       if (stored) {
         user.value = stored;
-        sessionExpired.value = false;
+        console.log('[useAuth] ✅ Sesión recuperada del almacenamiento');
       } else {
         user.value = null;
       }
+      sessionExpired.value = false;
     } finally {
       loading.value = false;
       initialized.value = true;
+      console.log('[useAuth] load() completado, isAuthenticated:', user.value !== null);
     }
   }
 
@@ -86,11 +98,8 @@ export function useAuth() {
     } finally {
       user.value = null;
       sessionExpired.value = false;
+      initialized.value = false;
       clearStoredSession();
-      // Solo redirigir si estamos en un contexto donde hay router
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
     }
   }
 

@@ -24,19 +24,23 @@ const mockUsers = [
   }
 ];
 
+// Estado de sesión: recuperar del sessionStorage si existe (para persistencia al recargar)
 let currentSession = null;
 
-// Restaurar sesión desde sessionStorage al iniciar (en desarrollo)
+// Intentar recuperar sesión guardada (permite persistencia al recargar página)
 if (typeof sessionStorage !== 'undefined') {
   try {
     const stored = sessionStorage.getItem('__hares_session_dev__');
     if (stored) {
       currentSession = JSON.parse(stored);
+      console.log('[MSW] ✅ Sesión recuperada del sessionStorage');
     }
   } catch (err) {
-    // Ignorar errores de sessionStorage
+    console.log('[MSW] Sesión anterior no válida');
   }
 }
+
+console.log('[MSW] Handlers de autenticación listos');
 
 export const authHandlers = [
   http.post('/api/v1/auth/register', async ({ request }) => {

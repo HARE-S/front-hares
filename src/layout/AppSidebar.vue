@@ -13,6 +13,18 @@ const userInitials = computed(() => {
   return parts.map(p => p.charAt(0).toUpperCase()).join('');
 });
 
+const roleNames = {
+  admin: 'Administrador',
+  coordinator: 'Coordinador Pedagógico',
+  teacher: 'Profesor',
+  tutor: 'Tutor'
+};
+
+const formattedRole = computed(() => {
+  if (!user.value) return '';
+  return roleNames[user.value.role] || user.value.role;
+});
+
 async function handleLogout() {
   showUserMenu.value = false;
   await logout();
@@ -123,8 +135,14 @@ async function handleLogout() {
 
       <!-- User Avatar -->
       <div v-if="user" class="user-section">
-        <button class="user-avatar" @click="showUserMenu = !showUserMenu">
-          {{ userInitials }}
+        <button class="user-button" @click="showUserMenu = !showUserMenu">
+          <div class="user-avatar">
+            {{ userInitials }}
+          </div>
+          <div class="user-info">
+            <p class="user-name-label">{{ user.name }}</p>
+            <p class="user-role-label">{{ formattedRole }}</p>
+          </div>
         </button>
 
         <div v-if="showUserMenu" class="user-menu">
@@ -373,16 +391,34 @@ async function handleLogout() {
   position: relative;
 }
 
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+
+.user-button:hover {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
 .user-avatar {
   width: 52px;
   height: 52px;
+  min-width: 52px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--green-500), var(--green-400));
   color: var(--green-950);
   border: 2px solid var(--green-300);
   font-weight: 800;
   font-size: 1.2rem;
-  cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -401,11 +437,48 @@ async function handleLogout() {
   pointer-events: none;
 }
 
-.user-avatar:hover {
+.user-button:hover .user-avatar {
   background: linear-gradient(135deg, var(--green-400), var(--green-300));
   transform: scale(1.08);
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
   border-color: var(--green-200);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.user-name-label {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--green-100);
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+.user-role-label {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--green-300);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+/* Responsive: ocultar texto en tablet/mobile */
+@media (max-width: 1024px) {
+  .user-info {
+    display: none;
+  }
+
+  .user-button {
+    padding: 0.5rem;
+    justify-content: center;
+  }
 }
 
 .user-menu {

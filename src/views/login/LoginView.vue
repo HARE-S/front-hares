@@ -42,7 +42,7 @@ async function handleLogin() {
     if (response) {
       // Establecer usuario inmediatamente para que el router guard lo detecte
       setUser(response);
-      const next = route.query.next || '/';
+      const next = route.query.next || '/dashboard';
       router.push(next);
     }
   } catch (err) {

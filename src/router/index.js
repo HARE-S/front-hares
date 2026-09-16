@@ -12,7 +12,7 @@ import { useAuth } from '@/composables/useAuth';
  */
 export const routes = [
   {
-    path: '/login',
+    path: '/',
     name: 'login',
     component: () => import('@/views/login/LoginView.vue'),
     meta: { public: true }
@@ -20,57 +20,14 @@ export const routes = [
   {
     path: '/pending',
     name: 'pending',
-    component: () => import('@/views/pending/PendingView.vue')
+    component: () => import('@/views/pending/PendingView.vue'),
+    meta: { requiresAuth: true }
   },
   {
-    path: '/',
+    path: '/dashboard',
     name: 'dashboard',
-    component: () => import('@/views/dashboard/DashboardView.vue')
-  },
-  {
-    path: '/centers',
-    name: 'centers',
-    component: () => import('@/views/centers/CentersView.vue')
-  },
-  {
-    path: '/centers/:centerId/sections/:sectionId',
-    name: 'section-detail',
-    component: () => import('@/views/section-detail/SectionDetailView.vue')
-  },
-  {
-    path: '/centers/:centerId/sections/:sectionId/students/:studentId',
-    name: 'student-detail',
-    component: () => import('@/views/student-detail/StudentDetailView.vue')
-  },
-  {
-    path: '/bulk-entry',
-    name: 'bulk-entry',
-    component: () => import('@/views/bulk-entry/BulkEntryView.vue')
-  },
-  {
-    path: '/tests',
-    name: 'tests',
-    component: () => import('@/views/tests-catalog/TestsCatalogView.vue')
-  },
-  {
-    path: '/books',
-    name: 'books',
-    component: () => import('@/views/books-catalog/BooksCatalogView.vue')
-  },
-  {
-    path: '/import',
-    name: 'import',
-    component: () => import('@/views/import/ImportView.vue')
-  },
-  {
-    path: '/reports',
-    name: 'reports',
-    component: () => import('@/views/reports/ReportsView.vue')
-  },
-  {
-    path: '/users-admin',
-    name: 'users-admin',
-    component: () => import('@/views/users-admin/UsersAdminView.vue')
+    component: () => import('@/layout/DashboardLayout.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/:pathMatch(.*)*',
@@ -86,22 +43,37 @@ export const routes = [
  * Las rutas `public` (login, 404) siempre pasan.
  */
 async function guard(to) {
-  if (to.meta.public) return true;
-
   const auth = useAuth();
 
-  // Cargar sesión si aún no se ha intentado
+  console.log(`🔐 Guard: ${to.path} (meta: ${JSON.stringify(to.meta)})`);
+
+  // Rutas públicas: login (/) y 404
+  if (to.meta.public) {
+    // Si usuario está autenticado e intenta ir a login (/), redirigir a dashboard
+    if (to.name === 'login' && auth.isAuthenticated.value) {
+      console.log(`✅ Autenticado intenta login, redirigiendo a /dashboard`);
+      return { name: 'dashboard' };
+    }
+    console.log(`✅ Ruta pública permitida`);
+    return true;
+  }
+
+  // Rutas protegidas: verificar autenticación
+  console.log(`🔑 Verificando autenticación para ruta protegida...`);
   await auth.load();
 
   if (!auth.isAuthenticated.value) {
+    console.log(`❌ No autenticado, redirigiendo a login (/)`);
     return { name: 'login', query: { next: to.fullPath } };
   }
 
-  // Si el usuario está pendiente y no intenta acceder a pending, redirigir
+  // Usuario autenticado está pendiente
   if (auth.isPending.value && to.name !== 'pending') {
+    console.log(`⏳ Usuario pendiente de aprobación`);
     return { name: 'pending' };
   }
 
+  console.log(`✅ Ruta protegida permitida`);
   return true;
 }
 
