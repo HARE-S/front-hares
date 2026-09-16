@@ -246,23 +246,6 @@ function handleKeydown(e) {
         Solo se permiten correos con dominio @grupopenascal.com
       </p>
     </div>
-
-    <!-- Credenciales de Demo -->
-    <div class="demo-box">
-      <h3>🧪 Demo</h3>
-      <div class="demo-item">
-        <code>admin@grupopenascal.com</code>
-        <code>admin123</code>
-      </div>
-      <div class="demo-item">
-        <code>coordinator@grupopenascal.com</code>
-        <code>coord123</code>
-      </div>
-      <div class="demo-item">
-        <code>teacher@grupopenascal.com</code>
-        <code>teacher123</code>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -271,11 +254,9 @@ function handleKeydown(e) {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
   min-height: 100vh;
   background: linear-gradient(135deg, var(--green-900) 0%, var(--green-850) 100%);
   padding: 1rem;
-  flex-wrap: wrap;
 }
 
 .login-box {
@@ -385,54 +366,5 @@ h1 {
   color: var(--gray-500);
   font-size: 0.8rem;
   line-height: 1.4;
-}
-
-.demo-box {
-  width: 100%;
-  max-width: 300px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  color: var(--white);
-  backdrop-filter: blur(10px);
-}
-
-.demo-box h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: var(--green-200);
-  font-size: 1rem;
-}
-
-.demo-item {
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.demo-item:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.demo-item code {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--green-100);
-  font-family: 'Courier New', monospace;
-  padding: 0.25rem 0;
-}
-
-@media (max-width: 768px) {
-  .login-page {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .demo-box {
-    max-width: 100%;
-  }
 }
 </style>

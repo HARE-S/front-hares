@@ -1,8 +1,8 @@
-import { setupServer } from 'msw/node';
+import { setupWorker } from 'msw/browser';
 import { authHandlers } from './handlers/authHandlers';
 
-export const server = setupServer(...authHandlers);
+export const worker = setupWorker(...authHandlers);
 
 if (import.meta.env.DEV) {
-  server.listen({ onUnhandledRequest: 'bypass' });
+  worker.start({ onUnhandledRequest: 'bypass' });
 }
