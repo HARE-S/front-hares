@@ -148,5 +148,40 @@ export const authHandlers = [
         }
       }
     );
+  }),
+
+  http.post('/api/v1/auth/forgot-password', async ({ request }) => {
+    const body = await request.json();
+    const { email } = body;
+
+    if (!email) {
+      return HttpResponse.json(
+        { error: 'El correo es requerido' },
+        { status: 400 }
+      );
+    }
+
+    if (!email.endsWith('@grupopenascal.com')) {
+      return HttpResponse.json(
+        { error: 'Solo se permiten correos @grupopenascal.com' },
+        { status: 400 }
+      );
+    }
+
+    const user = mockUsers.find(u => u.email === email);
+
+    if (!user) {
+      return HttpResponse.json(
+        { message: 'Si el correo existe, recibirás un enlace de recuperación.' },
+        { status: 200 }
+      );
+    }
+
+    return HttpResponse.json(
+      {
+        message: 'Se envió un enlace de recuperación a tu correo. Revisa tu bandeja de entrada.'
+      },
+      { status: 200 }
+    );
   })
 ];

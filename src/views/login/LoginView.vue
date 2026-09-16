@@ -6,7 +6,7 @@ import { login } from '@/services/authService';
 const router = useRouter();
 const route = useRoute();
 
-const mode = ref('login');
+const mode = ref('login'); // 'login', 'register', 'forgot'
 const email = ref('');
 const password = ref('');
 const passwordConfirm = ref('');
@@ -14,6 +14,7 @@ const name = ref('');
 const error = ref('');
 const success = ref('');
 const loading = ref(false);
+const forgotEmail = ref('');
 
 async function handleLogin() {
   error.value = '';
@@ -52,21 +53,31 @@ async function handleRegister() {
   try {
     if (!email.value) {
       error.value = 'El correo es requerido';
+      loading.value = false;
       return;
     }
 
     if (!email.value.endsWith('@grupopenascal.com')) {
       error.value = 'Solo se permiten correos @grupopenascal.com';
+      loading.value = false;
       return;
     }
 
     if (!password.value) {
       error.value = 'La contraseña es requerida';
+      loading.value = false;
+      return;
+    }
+
+    if (password.value.length < 8) {
+      error.value = 'La contraseña debe tener al menos 8 caracteres';
+      loading.value = false;
       return;
     }
 
     if (password.value !== passwordConfirm.value) {
       error.value = 'Las contraseñas no coinciden';
+      loading.value = false;
       return;
     }
 
@@ -104,10 +115,56 @@ async function handleRegister() {
   }
 }
 
+async function handleForgot() {
+  error.value = '';
+  success.value = '';
+  loading.value = true;
+
+  try {
+    if (!forgotEmail.value) {
+      error.value = 'Ingresa tu correo';
+      loading.value = false;
+      return;
+    }
+
+    if (!forgotEmail.value.endsWith('@grupopenascal.com')) {
+      error.value = 'Solo se permiten correos @grupopenascal.com';
+      loading.value = false;
+      return;
+    }
+
+    const res = await fetch('/api/v1/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: forgotEmail.value })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      error.value = data.error || 'Error al enviar enlace';
+      return;
+    }
+
+    success.value = data.message || 'Se envió un enlace de recuperación a tu correo.';
+    forgotEmail.value = '';
+
+    setTimeout(() => {
+      mode.value = 'login';
+      success.value = '';
+    }, 4000);
+  } catch (err) {
+    error.value = err.message || 'Error al procesar solicitud';
+  } finally {
+    loading.value = false;
+  }
+}
+
 function handleKeydown(e) {
   if (e.key === 'Enter' && !loading.value) {
     if (mode.value === 'login') handleLogin();
-    else handleRegister();
+    else if (mode.value === 'register') handleRegister();
+    else if (mode.value === 'forgot') handleForgot();
   }
 }
 </script>
@@ -119,7 +176,7 @@ function handleKeydown(e) {
       <p class="subtitle">Plataforma de Gestión de Comprensión Lectora</p>
 
       <!-- Tabs -->
-      <div class="auth-tabs">
+      <div class="auth-tabs" v-if="mode !== 'forgot'">
         <button
           :class="['tab', { active: mode === 'login' }]"
           @click="mode = 'login'; error = ''; success = ''"
@@ -242,6 +299,44 @@ function handleKeydown(e) {
         </button>
       </form>
 
+      <!-- Formulario Recuperar Contraseña -->
+      <form v-if="mode === 'forgot'" @submit.prevent="handleForgot">
+        <button type="button" class="back-link" @click="mode = 'login'; error = ''; success = ''">
+          ← Volver a acceder
+        </button>
+
+        <div class="form-group">
+          <label for="forgot-email">Correo corporativo</label>
+          <input
+            id="forgot-email"
+            v-model="forgotEmail"
+            type="email"
+            class="form-input"
+            placeholder="usuario@grupopenascal.com"
+            @keydown="handleKeydown"
+            :disabled="loading"
+            required
+          />
+        </div>
+
+        <div v-if="error" class="alert alert-danger">
+          {{ error }}
+        </div>
+
+        <div v-if="success" class="alert alert-success">
+          {{ success }}
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;" :disabled="loading">
+          {{ loading ? 'Enviando...' : 'Enviar enlace de recuperación' }}
+        </button>
+      </form>
+
+      <!-- Link de recuperación de contraseña (solo en login) -->
+      <button v-if="mode === 'login'" type="button" class="forgot-link" @click="mode = 'forgot'; error = ''; success = ''">
+        ¿Olvidaste tu contraseña?
+      </button>
+
       <p class="hint">
         Solo se permiten correos con dominio @grupopenascal.com
       </p>
@@ -360,11 +455,69 @@ h1 {
   font-size: 0.875rem;
 }
 
+.forgot-link {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background: none;
+  border: none;
+  color: var(--green-600);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: underline;
+}
+
+.forgot-link:hover {
+  color: var(--green-700);
+}
+
+.back-link {
+  display: block;
+  margin-bottom: 1.5rem;
+  background: none;
+  border: none;
+  color: var(--green-600);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  transition: var(--transition);
+}
+
+.back-link:hover {
+  color: var(--green-700);
+}
+
 .hint {
   margin-top: 1.5rem;
   text-align: center;
   color: var(--gray-500);
   font-size: 0.8rem;
   line-height: 1.4;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn:disabled {
+  position: relative;
+}
+
+.btn:disabled::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  border-top-color: currentColor;
+  animation: spin 0.8s linear infinite;
+  right: 1rem;
 }
 </style>
