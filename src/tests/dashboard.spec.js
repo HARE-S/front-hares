@@ -181,13 +181,18 @@ describe('Dashboard Docente de Fluidez Lectora (Stitch Design System)', () => {
       expect(wrapper.emitted('new-assessment')).toBeTruthy();
     });
 
-    it('muestra mensajes de feedback reactivos al interactuar con las acciones del dashboard', async () => {
+    it('emite "assign-book" al pulsar en "Asignar Libro" y muestra feedback al exportar informe', async () => {
       const wrapper = mount(DashboardView);
-      const assignBtn = wrapper.findAll('.btn-dashboard--secondary')[0];
+      const secondaryButtons = wrapper.findAll('.btn-dashboard--secondary');
+      const assignBtn = secondaryButtons[0];
+      const exportBtn = secondaryButtons[1];
 
       await assignBtn.trigger('click');
+      expect(wrapper.emitted('assign-book')).toBeTruthy();
+
+      await exportBtn.trigger('click');
       expect(wrapper.find('.feedback-banner').exists()).toBe(true);
-      expect(wrapper.text()).toContain('Módulo de asignación de libros');
+      expect(wrapper.text()).toContain('Generando informe consolidado');
     });
   });
 });

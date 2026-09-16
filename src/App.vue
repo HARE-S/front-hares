@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import TestForm from './components/TestForm.vue';
 import TestList from './components/TestList.vue';
 import DashboardView from './views/dashboard/DashboardView.vue';
+import BooksCatalogView from './views/books-catalog/BooksCatalogView.vue';
 import {
   BookOpen,
   Layers,
@@ -125,9 +126,14 @@ function handleCancelEdit() {
             <span>Registro en Aula</span>
           </button>
 
-          <button class="nav-item disabled" title="Próximamente">
+          <button
+            class="nav-item"
+            :class="{ active: currentTab === 'books' }"
+            @click="currentTab = 'books'; testToEdit = null;"
+          >
             <Library :size="18" />
-            <span>Biblioteca de Libros</span>
+            <span class="flex-1">Biblioteca de Libros</span>
+            <span v-if="currentTab === 'books'" class="nav-active-dot"></span>
           </button>
 
           <button class="nav-item disabled" title="Próximamente">
@@ -228,6 +234,7 @@ function handleCancelEdit() {
               v-if="currentTab === 'dashboard'"
               key="dashboard"
               @new-assessment="handleOpenCreate"
+              @assign-book="currentTab = 'books'"
             />
             <TestList
               v-else-if="currentTab === 'catalog'"
@@ -235,6 +242,11 @@ function handleCancelEdit() {
               key="catalog"
               :user-role="userRole"
               @edit-test="handleEditTest"
+            />
+            <BooksCatalogView
+              v-else-if="currentTab === 'books'"
+              key="books"
+              :user-role="userRole"
             />
             <TestForm
               v-else-if="currentTab === 'form'"

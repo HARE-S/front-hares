@@ -90,7 +90,7 @@ import FluencyChart from '../../components/dashboard/FluencyChart.vue';
 import LevelsDistribution from '../../components/dashboard/LevelsDistribution.vue';
 import RecentAssessmentsTable from '../../components/dashboard/RecentAssessmentsTable.vue';
 
-const emit = defineEmits(['new-assessment']);
+const emit = defineEmits(['new-assessment', 'assign-book']);
 
 const feedbackMessage = ref(null);
 
@@ -102,7 +102,7 @@ function showFeedback(msg) {
 }
 
 function handleAssignBook() {
-  showFeedback('Módulo de asignación de libros a 3º Primaria abierto.');
+  emit('assign-book');
 }
 
 function handleExportReport() {
