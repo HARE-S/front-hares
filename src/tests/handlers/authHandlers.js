@@ -66,14 +66,14 @@ export const authHandlers = [
       email,
       password,
       name: name || email.split('@')[0],
-      role: 'pending'
+      role: 'pending' // Esperando aprobación del Super Admin
     };
 
     mockUsers.push(newUser);
 
     return HttpResponse.json(
       {
-        message: 'Usuario registrado exitosamente. Espera a que un administrador active tu cuenta.'
+        message: 'Registro exitoso. Espera a que el Super Admin apruebe tu cuenta.'
       },
       { status: 201 }
     );

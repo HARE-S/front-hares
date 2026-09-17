@@ -6,7 +6,8 @@ import TestForm from '@/components/TestForm.vue';
 import TestList from '@/components/TestList.vue';
 
 const router = useRouter();
-const { logout } = useAuth();
+const { logout, user } = useAuth();
+
 import {
   BookOpen,
   Layers,
@@ -82,7 +83,7 @@ async function handleLogout() {
         <!-- Logo & Branding -->
         <div class="brand-header">
           <div class="brand-icon-box">
-            <BookOpen :size="22" class="brand-icon" />
+            <img src="/logo-hare.png" alt="HARE-S" class="brand-logo" />
           </div>
           <div class="brand-text">
             <div class="brand-title-row">
@@ -160,17 +161,17 @@ async function handleLogout() {
         <!-- User Section -->
         <div class="user-section">
           <button class="user-avatar-wrapper" @click="showUserMenu = !showUserMenu">
-            <div class="user-avatar">YP</div>
+            <div class="user-avatar">{{ user?.name?.substring(0, 2).toUpperCase() || 'U' }}</div>
             <div class="user-info">
-              <p class="user-name">Yeremi Peralta</p>
-              <p class="user-role">Coordinador Pedagógico</p>
+              <p class="user-name">{{ user?.name || 'Usuario' }}</p>
+              <p class="user-role">{{ userRole === 'coordinator' ? 'Coordinador' : 'Tutor' }}</p>
             </div>
           </button>
 
           <div v-if="showUserMenu" class="user-menu">
             <div class="menu-header">
-              <p class="user-name">Yeremi Peralta</p>
-              <p class="user-role">Coordinador</p>
+              <p class="user-name">{{ user?.name || 'Usuario' }}</p>
+              <p class="user-role">{{ user?.email || 'Sin email' }}</p>
             </div>
 
             <div class="menu-divider"></div>
@@ -258,15 +259,22 @@ async function handleLogout() {
 }
 
 .brand-icon-box {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-lg);
-  background-color: var(--primary-container);
+  background-color: white;
   border: 1px solid rgba(111, 251, 190, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--secondary-fixed);
+  padding: 4px;
+}
+
+.brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .brand-title-row {
@@ -670,7 +678,13 @@ async function handleLogout() {
 
   .user-avatar-wrapper {
     justify-content: center;
-    padding: 0.25rem;
+    padding: 0.35rem;
+  }
+
+  .user-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
   }
 
   .user-menu {

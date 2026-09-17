@@ -1,459 +1,288 @@
-<script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useAuth } from '@/composables/useAuth';
-
-const { user } = useAuth();
-
-// Datos de ejemplo (en producción vendrían del backend)
-const sectionData = ref({
-  name: 'Aula 3A',
-  averagePPM: 115,
-  targetPPM: 125,
-  progressPercent: 92,
-  evaluatedStudents: 24,
-  totalStudents: 26,
-  booksReadThisTerm: 68,
-  studentsNeedingSupport: 3
-});
-
-const pedagogicalAction = ref({
-  recommendation: 'Revisar las grabaciones de decodificación fonética para los 3 alumnos con PPM inferior a 85 en la prueba 3BL y 3CF.',
-  studentCount: 3,
-  alert: 'students_need_support'
-});
-
-const metrics = computed(() => [
-  {
-    title: 'Velocidad Media del Aula',
-    value: `${sectionData.value.averagePPM} PPM`,
-    subtext: `Objetivo: ${sectionData.value.targetPPM} PPM`,
-    badge: { label: `+8% vs. Corte Inicial`, type: 'success' }
-  },
-  {
-    title: 'Alumnos Evaluados',
-    value: `${sectionData.value.evaluatedStudents} / ${sectionData.value.totalStudents}`,
-    subtext: `${Math.round((sectionData.value.evaluatedStudents / sectionData.value.totalStudents) * 100)}% completitud`,
-    badge: { label: '82% completitud', type: 'success' }
-  },
-  {
-    title: 'Libros Leídos en Trimestre',
-    value: `${sectionData.value.booksReadThisTerm} títulos`,
-    subtext: 'en este período',
-    badge: { label: '+14 este mes', type: 'success' }
-  },
-  {
-    title: 'Alerta Pedagógica',
-    value: `${sectionData.value.studentsNeedingSupport}`,
-    subtext: 'Requieren Apoyo',
-    badge: { label: 'PPM < 85 o > 5% errores', type: 'danger' }
-  }
-]);
-</script>
-
 <template>
-  <div class="dashboard">
-    <!-- Cabecera -->
-    <div class="page-header">
-      <div class="header-left">
-        <h1>Panel de Rendimiento Lector</h1>
-        <p class="subtitle">Seguimiento sistemático de fluidez, velocidad (PPM) y comprensión lectora</p>
-      </div>
-      <div class="header-right">
-        <span class="badge-label">Baremo Oficial 2024</span>
-        <button class="btn btn-secondary">📋 Asignar Libro</button>
-        <button class="btn btn-primary">➕ Nueva Evaluación en Directo</button>
-      </div>
-    </div>
-
-    <!-- Tarjetas de Métricas -->
-    <div class="metrics-grid">
-      <div v-for="(metric, idx) in metrics" :key="idx" class="metric-card">
-        <div class="metric-header">
-          <h3>{{ metric.title }}</h3>
-          <span v-if="metric.badge" class="badge" :class="`badge-${metric.badge.type}`">
-            {{ metric.badge.label }}
-          </span>
+  <div class="dashboard-view">
+    <!-- SECTION 1: Page Header & Quick Actions Bar -->
+    <header class="dashboard-header">
+      <div class="header-titles">
+        <div class="title-badge-row">
+          <h1 class="page-title">Panel de Rendimiento Lector</h1>
+          <span class="badge-baremo">Baremo Oficial 2024</span>
         </div>
-        <div class="metric-value">{{ metric.value }}</div>
-        <div class="metric-subtext">{{ metric.subtext }}</div>
-      </div>
-    </div>
-
-    <!-- Sección de Gráficos -->
-    <div class="charts-grid">
-      <!-- Gráfico de Progreso -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <h2>Progreso de Fluidez Lectora (PPM)</h2>
-          <p>Comparativa longitudinal: Media Aula 3A frente a Baremo Estándar HARE-S</p>
-          <div class="chart-tabs">
-            <button class="tab-btn active">Trimestral</button>
-            <button class="tab-btn">Anual</button>
-          </div>
-        </div>
-        <div class="chart-placeholder">
-          [Gráfico de líneas — FE-30, FE-31]
-        </div>
+        <p class="page-subtitle">Seguimiento sistemático de fluidez, velocidad (PPM) y comprensión lectora</p>
       </div>
 
-      <!-- Distribución de Niveles -->
-      <div class="distribution-card">
-        <h2>Distribución de Niveles</h2>
-        <p>Clasificación según baremo de fluidez (26 alumnos)</p>
-        <div class="distribution-placeholder">
-          [Distribución de bandas por nivel — FE-34]
-        </div>
+      <!-- Action Button Group -->
+      <div class="action-buttons-group">
+        <!-- Secondary Action: Assign Book -->
+        <button 
+          type="button" 
+          class="btn-dashboard btn-dashboard--secondary"
+          @click="handleAssignBook"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="btn-icon-secondary">
+            <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+          </svg>
+          <span>Asignar Libro</span>
+        </button>
+
+        <!-- Secondary Action: Export -->
+        <button 
+          type="button" 
+          class="btn-dashboard btn-dashboard--secondary"
+          @click="handleExportReport"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="btn-icon-muted">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+          </svg>
+          <span>Exportar Informe (PDF/Excel)</span>
+        </button>
+
+        <!-- Primary Forest Action: New Assessment -->
+        <button 
+          type="button" 
+          class="btn-dashboard btn-dashboard--primary"
+          @click="$emit('new-assessment')"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="btn-icon-accent">
+            <path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+          </svg>
+          <span>+ Nueva Evaluación en Directo</span>
+        </button>
       </div>
+    </header>
+
+    <!-- Feedback Notice if user clicked action -->
+    <div v-if="feedbackMessage" class="feedback-banner" role="status">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      </svg>
+      <span>{{ feedbackMessage }}</span>
     </div>
 
-    <!-- Bloque de Acción Pedagógica -->
-    <div v-if="pedagogicalAction" class="pedagogical-action">
-      <div class="action-icon">⚠️</div>
-      <div class="action-content">
-        <h3>Acción Pedagógica Sugerida</h3>
-        <p>{{ pedagogicalAction.recommendation }}</p>
+    <!-- SECTION 2: Key Metric KPI Overview Cards -->
+    <KpiOverview @view-reinforcement="handleViewReinforcement" />
+
+    <!-- SECTION 3: Analytics Section (8/4 Split Grid) -->
+    <section aria-label="Análisis de Rendimiento" class="analytics-split-grid">
+      <!-- Main Analytical Chart: Fluidez Lectora PPM (8 cols) -->
+      <div class="grid-col-chart">
+        <FluencyChart />
       </div>
-      <button class="btn btn-secondary">Ver Refuerzo</button>
-    </div>
+
+      <!-- Right Side: Distribución de Niveles (4 cols) -->
+      <div class="grid-col-distribution">
+        <LevelsDistribution @open-intervention="handleOpenIntervention" />
+      </div>
+    </section>
+
+    <!-- SECTION 4: Data Table Section: Últimas Evaluaciones Registradas -->
+    <RecentAssessmentsTable 
+      @export="handleTableExport"
+      @play-audio="handlePlayAudio"
+      @view-detail="handleViewDetail"
+    />
   </div>
 </template>
 
+<script setup>
+import { ref } from 'vue';
+import KpiOverview from '../../components/dashboard/KpiOverview.vue';
+import FluencyChart from '../../components/dashboard/FluencyChart.vue';
+import LevelsDistribution from '../../components/dashboard/LevelsDistribution.vue';
+import RecentAssessmentsTable from '../../components/dashboard/RecentAssessmentsTable.vue';
+
+const emit = defineEmits(['new-assessment', 'assign-book']);
+
+const feedbackMessage = ref(null);
+
+function showFeedback(msg) {
+  feedbackMessage.value = msg;
+  setTimeout(() => {
+    feedbackMessage.value = null;
+  }, 4000);
+}
+
+function handleAssignBook() {
+  emit('assign-book');
+}
+
+function handleExportReport() {
+  showFeedback('Generando informe consolidado del Corte A (PDF/Excel)...');
+}
+
+function handleViewReinforcement() {
+  showFeedback('Filtrando alumnos prioritarios de intervención pedagógica (PPM < 85)...');
+}
+
+function handleOpenIntervention() {
+  showFeedback('Abriendo protocolo de lectura asistida para casos de intervención.');
+}
+
+function handleTableExport(data) {
+  showFeedback(`Descarga iniciada: ${data.length} registros exportados a formato CSV/Excel.`);
+}
+
+function handlePlayAudio(assessment) {
+  showFeedback(`Reproduciendo audio de lectura de ${assessment.studentName} (${assessment.testCode}).`);
+}
+
+function handleViewDetail(assessment) {
+  showFeedback(`Consultando ficha pedagógica completa de ${assessment.studentName}.`);
+}
+</script>
+
 <style scoped>
-.dashboard {
-  flex: 1;
-  padding: 2.5rem;
-  background: linear-gradient(135deg, #f5faf9 0%, #f0fdf4 100%);
-  overflow-y: auto;
+.dashboard-view {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 1.5rem;
+  max-width: 80rem;
+  margin: 0 auto;
+  width: 100%;
 }
 
-/* Cabecera */
-.page-header {
+/* Header */
+.dashboard-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-  background: linear-gradient(135deg, var(--white) 0%, #f8fdfb 100%);
-  padding: 2.5rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--gray-200);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(189, 201, 192, 0.25);
 }
 
-.header-left h1 {
-  margin: 0 0 0.75rem;
-  font-size: 2rem;
-  color: var(--green-950);
-  font-weight: 800;
-  letter-spacing: -0.5px;
+@media (min-width: 768px) {
+  .dashboard-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
 
-.subtitle {
-  margin: 0;
-  color: var(--gray-500);
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.header-right {
+.title-badge-row {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
-.badge-label {
-  padding: 0.65rem 1.25rem;
-  background: linear-gradient(135deg, #ecfdf5, #dbeafe);
-  color: #065f46;
-  border-radius: 999px;
-  font-size: 0.8rem;
+.page-title {
+  font-family: var(--font-family-display, 'Plus Jakarta Sans', sans-serif);
+  font-size: 1.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: 1px solid #86efac;
-}
-
-/* Tarjetas de Métricas */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
-}
-
-.metric-card {
-  background: linear-gradient(135deg, var(--white) 0%, #f9fffe 100%);
-  border: 1.5px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.metric-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--green-500), var(--green-400));
-}
-
-.metric-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border-color: var(--green-300);
-}
-
-.metric-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1.25rem;
-}
-
-.metric-header h3 {
+  color: var(--color-on-surface, #191c1b);
+  letter-spacing: -0.02em;
   margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--gray-600);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 
-.metric-value {
-  font-size: 2.5rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--green-600), var(--green-500));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 0.75rem;
-  letter-spacing: -1px;
-}
-
-.metric-subtext {
-  font-size: 0.9rem;
-  color: var(--gray-500);
-  font-weight: 500;
-}
-
-.badge {
-  display: inline-block;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+.badge-baremo {
+  background-color: var(--color-primary-fixed, #8ef7c7);
+  color: var(--color-on-primary-fixed-variant, #005136);
   font-size: 0.75rem;
   font-weight: 600;
-  white-space: nowrap;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  letter-spacing: 0.01em;
 }
 
-.badge-success {
-  background-color: #ecfdf5;
-  color: #065f46;
+.page-subtitle {
+  font-size: 0.9375rem;
+  color: var(--color-on-surface-variant, #3f4943);
+  margin: 0.25rem 0 0 0;
 }
 
-.badge-danger {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.badge-info {
-  background-color: #e0f2fe;
-  color: #0c4a6e;
-}
-
-/* Gráficos */
-.charts-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 1.5rem;
-}
-
-.chart-card,
-.distribution-card {
-  background-color: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.chart-header {
-  margin-bottom: 1.5rem;
-}
-
-.chart-card h2,
-.distribution-card h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--green-950);
-}
-
-.chart-card p,
-.distribution-card p {
-  margin: 0 0 1rem;
-  font-size: 0.85rem;
-  color: var(--gray-500);
-}
-
-.chart-tabs {
+/* Button Group */
+.action-buttons-group {
   display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.btn-dashboard {
+  display: inline-flex;
+  align-items: center;
   gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.tab-btn {
-  padding: 0.5rem 1rem;
-  font-size: 0.8rem;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-lg, 0.5rem);
+  font-size: 0.875rem;
   font-weight: 600;
-  color: var(--gray-600);
-  background-color: var(--gray-100);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.15s ease-in-out;
+  border: 1px solid transparent;
 }
 
-.tab-btn:hover {
-  background-color: #f0fdf4;
-  border-color: #86efac;
+.btn-dashboard--secondary {
+  background-color: var(--color-surface-container-lowest, #ffffff);
+  color: var(--color-on-surface, #191c1b);
+  border-color: rgba(189, 201, 192, 0.6);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
 }
 
-.tab-btn.active {
-  background-color: var(--green-600);
-  color: var(--white);
-  border-color: var(--green-600);
+.btn-dashboard--secondary:hover {
+  background-color: var(--color-surface-container-low, #f2f5f2);
 }
 
-.chart-placeholder,
-.distribution-placeholder {
-  min-height: 250px;
+.btn-icon-secondary {
+  color: var(--color-secondary, #006c49);
+}
+
+.btn-icon-muted {
+  color: var(--color-on-surface-variant, #3f4943);
+}
+
+.btn-dashboard--primary {
+  background-color: var(--color-primary-container, #0f3e2e);
+  color: var(--color-surface-container-lowest, #ffffff);
+  border-color: rgba(0, 108, 73, 0.4);
+  box-shadow: 0 2px 4px rgba(15, 62, 46, 0.2);
+}
+
+.btn-dashboard--primary:hover {
+  background-color: var(--color-primary, #0f3e2e);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 8px rgba(15, 62, 46, 0.28);
+}
+
+.btn-icon-accent {
+  color: var(--color-secondary-fixed, #6ffbbe);
+}
+
+/* Feedback Notice */
+.feedback-banner {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background-color: var(--gray-50);
-  border: 1px dashed var(--gray-300);
-  border-radius: var(--radius-md);
-  color: var(--gray-500);
-  font-size: 0.9rem;
-  font-style: italic;
+  gap: 0.5rem;
+  background-color: var(--color-primary-fixed, #8ef7c7);
+  color: var(--color-on-primary-fixed-variant, #005136);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-lg, 0.5rem);
+  font-size: 0.875rem;
+  font-weight: 600;
+  animation: fadeIn 0.2s ease-out;
 }
 
-/* Acción Pedagógica */
-.pedagogical-action {
-  display: flex;
-  align-items: center;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 8 / 4 Split Grid */
+.analytics-split-grid {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
-  background-color: #fff5f0;
-  border: 1px solid #fecaca;
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.action-icon {
-  font-size: 2rem;
-  flex-shrink: 0;
-}
-
-.action-content {
-  flex: 1;
-}
-
-.action-content h3 {
-  margin: 0 0 0.35rem;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #991b1b;
-}
-
-.action-content p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #991b1b;
-  line-height: 1.5;
-}
-
-/* Botones */
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.85rem;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--green-600), var(--green-500));
-  color: var(--white);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, var(--green-700), var(--green-600));
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background-color: var(--white);
-  color: var(--gray-700);
-  border: 1.5px solid var(--gray-300);
-  font-weight: 600;
-}
-
-.btn-secondary:hover {
-  background-color: var(--gray-50);
-  border-color: var(--green-400);
-  color: var(--green-700);
-}
-
-/* Responsivo */
-@media (max-width: 1024px) {
-  .charts-grid {
-    grid-template-columns: 1fr;
+@media (min-width: 1024px) {
+  .analytics-split-grid {
+    grid-template-columns: repeat(12, 1fr);
   }
 
-  .page-header {
-    flex-direction: column;
+  .grid-col-chart {
+    grid-column: span 8;
   }
 
-  .header-right {
-    width: 100%;
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard {
-    padding: 1rem;
-    gap: 1rem;
-  }
-
-  .metrics-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .page-header {
-    padding: 1rem;
-  }
-
-  .pedagogical-action {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .btn {
-    width: 100%;
+  .grid-col-distribution {
+    grid-column: span 4;
   }
 }
 </style>
