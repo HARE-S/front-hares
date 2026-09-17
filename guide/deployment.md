@@ -2,7 +2,7 @@
 
 > Interfaz de **HARE-S** (Peñascal).
 > Cubre la compilación, el contenedor que sirve los estáticos y el proxy de entrada.
-> La base de datos y la API están en `back-hares/guide/deployment.md`.
+> La base de datos y la API están en `../infra-hares/guide/deployment.md`.
 
 ---
 
@@ -16,25 +16,29 @@ Compilar la interfaz y servirla como ficheros estáticos desde nginx, con el pro
 
 ## 2. Dónde vive cada pieza
 
-El sistema se orquesta desde **`back-hares/docker-compose.yml`**, que construye ambos repositorios. Los tres servicios implicados en la interfaz:
+El sistema se orquesta desde **`infra-hares/docker-compose.yml`**, que construye los repos hermanos. Los tres servicios implicados en la interfaz:
 
 | Servicio | Imagen | Función | Puertos |
 |---|---|---|---|
 | `frontend` | Propia, base `nginx:1.27-alpine` | Sirve los estáticos compilados | Ninguno |
-| `proxy` | `nginx:1.27-alpine` | Único punto de entrada | `80:80` |
-| `backend` | Propia | La API | Ninguno en producción |
+| `proxy` | Propia (`proxy-hares`), base `nginx:1.27-alpine` | Único punto de entrada | `80:80` |
+| `backend` | Propia (`back-hares`) | La API | Ninguno en producción |
 
 ```
-back-hares/
+infra-hares/
 ├── docker-compose.yml          # orquesta todo el sistema
-└── nginx/nginx.conf            # configuración del PROXY
+└── guide/deployment.md
+
+proxy-hares/
+├── Dockerfile                  # imagen del proxy
+└── nginx.conf                  # configuración del PROXY (enrutado)
 
 front-hares/
 ├── Dockerfile                  # multietapa
 └── nginx.conf                  # configuración del servidor de ESTÁTICOS
 ```
 
-> **Requisito:** `back-hares/` y `front-hares/` deben estar como carpetas hermanas en el disco. El compose tiene `build: ../front-hares`. Si alguien clona solo el backend, no arranca.
+> **Requisito:** los cuatro repos (`back-hares`, `front-hares`, `proxy-hares`, `infra-hares`) deben estar como carpetas hermanas en el disco. El compose tiene `build: ../front-hares` (y `../back-hares`, `../proxy-hares`). Quien clone solo el frontend no arranca el sistema.
 
 ### Dos nginx que no hacen lo mismo
 
@@ -117,7 +121,7 @@ Dos reglas causan fallos difíciles de diagnosticar si faltan:
 
 ## 5. Configuración del proxy
 
-Vive en `back-hares/nginx/nginx.conf`. Se monta como fichero completo, de ahí los bloques `events` y `http`:
+Vive en **`proxy-hares/nginx.conf`**, que se copia en su imagen (`proxy-hares/Dockerfile`). Es un fichero completo, de ahí los bloques `events` y `http`:
 
 ```nginx
 events {}
@@ -155,7 +159,7 @@ http {
 
 **`client_max_body_size 10m`.** Por defecto nginx corta en 1 MB, y la subida del CSV de importación fallaría con un `413`.
 
-**El proxy no lleva `Dockerfile`.** Usa la imagen oficial y se le monta el `nginx.conf` con `volumes` en modo solo lectura. Así se cambia el enrutado y se reinicia sin reconstruir nada.
+**El proxy no construye código, pero tiene su propio repo y Dockerfile** (`proxy-hares`): la configuración se copia en la imagen y se activa/reinicia con `docker compose up -d proxy`.
 
 ---
 
@@ -165,7 +169,7 @@ http {
 
 ```bash
 docker network create public          # red externa, Docker no la crea sola
-cd back-hares
+cd ../infra-hares
 docker compose build
 docker compose up -d
 ```
@@ -175,7 +179,7 @@ La aplicación queda en `http://localhost`.
 ### Solo cambios de interfaz
 
 ```bash
-cd back-hares
+cd ../infra-hares
 docker compose build frontend
 docker compose up -d frontend
 ```
@@ -277,4 +281,4 @@ Cuando haya dominio y certificado, el proxy necesita un `server` en el 443 con `
 
 ---
 
-*Última actualización: 15/09/2026 · Ver también `structure.md`, `testing.md` y `workflow.md` · Servidor en `back-hares/guide/deployment.md`*
+*Última actualización: 15/09/2026 · Ver también `structure.md`, `testing.md` y `workflow.md` · Orquestación en `../infra-hares/guide/deployment.md`*

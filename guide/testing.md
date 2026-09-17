@@ -181,6 +181,7 @@ npm run test -- --coverage
 Dentro de Docker, si hiciera falta:
 
 ```bash
+# Desde ../infra-hares (orquestación del stack)
 docker compose run --rm frontend npm run test
 ```
 

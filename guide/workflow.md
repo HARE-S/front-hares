@@ -178,7 +178,7 @@ GET /api/v1/students/{id}
 - [ ] Filtro por rango de fechas (sale en FE-31)
 
 ## Cómo probarlo
-docker compose up -d && navegar a /students/<id>
+cd ../infra-hares && docker compose up -d && navegar a /students/<id>
 
 ## Capturas
 [antes / después]
