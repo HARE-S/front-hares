@@ -79,11 +79,11 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE11-01 | **Componente StateBlock** Con variantes vacío, error, sin permiso y no encontrado. | - | Pendiente |
-| T-FE11-02 | **Esqueletos de carga** Para tabla, tarjeta de métrica y ficha. | - | Pendiente |
-| T-FE11-03 | **Composable useFetch** Devuelve datos, cargando y error de forma uniforme. | - | Pendiente |
-| T-FE11-04 | **Revisión de cobertura** Vista por vista. | - | Pendiente |
-| T-FE11-05 | **Pruebas** Escenarios 2, 3, 4 y 5. | - | Pendiente |
+| T-FE11-01 | **Componente StateBlock** Con variantes vacío, error, sin permiso y no encontrado. | Marlen | Completado |
+| T-FE11-02 | **Esqueletos de carga** Para tabla, tarjeta de métrica y ficha. | Marlen | Completado |
+| T-FE11-03 | **Composable useFetch** Devuelve datos, cargando y error de forma uniforme. | Santiago | Pendiente |
+| T-FE11-04 | **Revisión de cobertura** Vista por vista. | Equipo | Pendiente |
+| T-FE11-05 | **Pruebas** Escenarios 2, 3, 4 y 5. | Marlen | Completado |
 
 ---
 

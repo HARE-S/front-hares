@@ -35,7 +35,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-09](FE-09-interfaz-segun-rol.md) | Interfaz adaptada al rol | BE-42 | 5 | Alta | Pendiente |
 | [FE-10](FE-10-gestion-usuarios.md) | Gestión de usuarios y roles | BE-43 | 5 | Alta | Pendiente |
 | **Transversales** | | | | | |
-| [FE-11](FE-11-estados-pantalla.md) | Estados de pantalla | — | 3 | Alta | Pendiente |
+| [FE-11](FE-11-estados-pantalla.md) | Estados de pantalla | — | 3 | Alta | **Completado** |
 | [FE-12](FE-12-formularios-validacion.md) | Formularios con validación | — | 5 | Alta | Pendiente |
 | [FE-13](FE-13-uso-tableta.md) | Uso en tableta | — | 5 | Baja | Pendiente |
 | **Catálogos** | | | | | |
