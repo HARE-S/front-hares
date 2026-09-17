@@ -299,3 +299,149 @@ label {
   border: 1px solid var(--warning-border);
   color: var(--warning);
 }
+
+/* --- ESTADOS DE PANTALLA (FE-11) --- */
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  min-height: 180px;
+}
+
+.state__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+}
+
+.state--empty .state__icon {
+  background-color: var(--surface-container-low);
+  color: var(--outline);
+}
+
+.state--error .state__icon {
+  background-color: var(--error-container);
+  color: var(--on-error-container);
+}
+
+.state--forbidden .state__icon {
+  background-color: var(--warning-bg);
+  color: var(--warning);
+}
+
+.state--notfound .state__icon {
+  background-color: var(--surface-container-low);
+  color: var(--outline);
+}
+
+.state__title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+
+.state__text {
+  margin: 0;
+  max-width: 420px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--on-surface-variant);
+}
+
+.state__action {
+  margin-top: 0.5rem;
+}
+
+/* --- ESQUELETOS DE CARGA (FE-11) --- */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--outline-variant);
+  background-color: var(--surface-container-lowest);
+  text-align: left;
+}
+
+.skeleton--card {
+  max-width: 480px;
+}
+
+.skeleton--table {
+  max-width: 720px;
+}
+
+.skeleton--detail {
+  max-width: 360px;
+}
+
+.skeleton-line,
+.skeleton-block,
+.skeleton-avatar,
+.skeleton-row {
+  background: linear-gradient(
+    90deg,
+    var(--surface-container-low) 25%,
+    var(--surface-container-high) 37%,
+    var(--surface-container-low) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border-radius: var(--radius-xs);
+}
+
+.skeleton-line {
+  height: 0.875rem;
+}
+
+.skeleton-block {
+  align-self: center;
+  height: 2.25rem;
+}
+
+.skeleton-avatar {
+  align-self: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  height: 1.5rem;
+  background: none;
+  animation: none;
+  border-radius: 0;
+}
+
+.skeleton-row > .skeleton-line {
+  flex: 1;
+}
+
+.skeleton-table-header {
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid var(--surface-container-high);
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
