@@ -2,11 +2,13 @@
 
 Frontend de la aplicación HARE-S (Gestión y Catálogo de Pruebas de Lectura y Rendimiento Escolar), desarrollado con **Vue 3** y **Vite**.
 
+> Este repositorio contiene **solo la interfaz**. La orquestación Docker vive en el repo hermano **`../infra-hares`**, la API en **`../back-hares`** y el proxy de entrada en **`../proxy-hares`**.
+
 ## Requisitos previos
 
 - **Node.js**: v18 o superior recomendado.
 - **npm**: v9 o superior.
-- Backend HARE-S (Flask) ejecutándose en `http://localhost:5000` (opcional para desarrollo offline, pero necesario para comunicación con la API).
+- Backend HARE-S (Flask) ejecutándose en `http://localhost:5000` (opcional para desarrollo offline, pero necesario para comunicación con la API). En el stack Docker, la orquestación se ejecuta desde `../infra-hares`.
 
 ## Instalación
 
