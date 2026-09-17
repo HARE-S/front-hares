@@ -3,7 +3,7 @@
 **HARE-S** · Programa de Gestión de Mejora de Comprensión Lectora (Peñascal)
 Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andrés Ocina
 **Stack:** Vue 3 + Vite + JavaScript + CSS puro + Vitest
-40 historias · 171 puntos · Actualizado: 16/09/2026
+40 historias · 168 puntos · Actualizado: 15/09/2026
 **Reparto entre el equipo:** ver [REPARTO.md](REPARTO.md)
 
 ---
@@ -30,7 +30,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-05](FE-05-enrutado-layout.md) | Enrutado y estructura de navegación | BE-10 | 8 | Crítica | Pendiente |
 | **Autenticación e identidad** | | | | | |
 | [FE-06](FE-06-pantalla-acceso.md) | Pantalla de acceso con Google | BE-38, BE-39 | 3 | Crítica | Pendiente |
-| [FE-07](FE-07-manejo-sesion.md) | Manejo de la sesión | BE-40 | 5 | Crítica | **Completado** |
+| [FE-07](FE-07-manejo-sesion.md) | Manejo de la sesión | BE-40 | 5 | Crítica | Pendiente |
 | [FE-08](FE-08-usuario-pendiente.md) | Pantalla de usuario pendiente | BE-41 | 3 | Alta | Pendiente |
 | [FE-09](FE-09-interfaz-segun-rol.md) | Interfaz adaptada al rol | BE-42 | 5 | Alta | Pendiente |
 | [FE-10](FE-10-gestion-usuarios.md) | Gestión de usuarios y roles | BE-43 | 5 | Alta | Pendiente |
@@ -52,14 +52,14 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-23](FE-23-pantalla-importacion.md) | Pantalla de importación | BE-09 | 5 | Alta | Pendiente |
 | [FE-24](FE-24-informe-errores-importacion.md) | Informe de errores de importación | BE-08 | 3 | Media | Pendiente |
 | **Consulta** | | | | | |
-| [FE-25](FE-25-navegacion-centros-secciones.md) | Navegación por centros y secciones → Dashboard | BE-10 | 3 | Alta | Pendiente |
+| [FE-25](FE-25-navegacion-centros-secciones.md) | Navegación por centros y secciones | BE-10 | 3 | Alta | Pendiente |
 | [FE-26](FE-26-ficha-alumno.md) | Ficha del alumno | BE-28 | 5 | Alta | Pendiente |
 | [FE-27](FE-27-buscador-alumnos.md) | Buscador de alumnos | BE-29 | 3 | Media | Pendiente |
 | [FE-28](FE-28-filtros-multicriterio.md) | Filtros multicriterio | BE-27 | 5 | Alta | **Bloqueada** |
 | [FE-29](FE-29-historial-por-seccion.md) | Historial por sección | BE-51 | 3 | Media | Pendiente |
 | **Visualización** | | | | | |
 | [FE-30](FE-30-graficos.md) | Componentes de gráfico | — | 5 | Media | Pendiente |
-| [FE-31](FE-31-evolucion-individual.md) | Panel de Rendimiento Lector y Evolución individual | BE-31 | 8 | Alta | **En curso** |
+| [FE-31](FE-31-evolucion-individual.md) | Evolución individual | BE-31 | 5 | Alta | Pendiente |
 | [FE-32](FE-32-comparativa-grupos.md) | Comparativa por grupos | BE-32 | 5 | Media | Pendiente |
 | [FE-33](FE-33-proyeccion.md) | Proyección de evolución | BE-33 | 5 | Media | Pendiente |
 | [FE-34](FE-34-clasificacion-nivel.md) | Clasificación por nivel lector | BE-30 | 5 | Alta | Pendiente |
@@ -71,7 +71,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Calidad** | | | | | |
 | [FE-39](FE-39-pruebas-interfaz.md) | Batería de pruebas de interfaz | — | 5 | Alta | Pendiente |
 | [FE-40](FE-40-manual-usuario.md) | Manual de usuario | — | 3 | Media | Pendiente |
-| | **Total** | | **171** | | **6 de 40** |
+| | **Total** | | **168** | | **3 de 40** |
 
 ---
 

@@ -81,11 +81,11 @@ Crítica
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE07-01 | **Composable useAuth** Usuario, carga, rol y comprobación de permisos. | Santiago | **Completado** |
-| T-FE07-02 | **Carga inicial** Consulta a `/api/v1/auth/me` al montar la aplicación. | Santiago | **Completado** |
-| T-FE07-03 | **Mensaje de sesión expirada** Al llegar al login por un `401`. | Santiago | **Completado** |
-| T-FE07-04 | **Menú de usuario en cabecera** Nombre, correo, rol y cierre de sesión. | Santiago | **Completado** |
-| T-FE07-05 | **Pruebas de sesión** Escenarios 2, 3 y 6. | Santiago | **Completado** |
+| T-FE07-01 | **Composable useAuth** Usuario, carga, rol y comprobación de permisos. | - | Pendiente |
+| T-FE07-02 | **Carga inicial** Consulta a `/api/v1/auth/me` al montar la aplicación. | - | Pendiente |
+| T-FE07-03 | **Mensaje de sesión expirada** Al llegar al login por un `401`. | - | Pendiente |
+| T-FE07-04 | **Menú de usuario en cabecera** Nombre, correo, rol y cierre de sesión. | - | Pendiente |
+| T-FE07-05 | **Pruebas de sesión** Escenarios 2, 3 y 6. | - | Pendiente |
 
 ---
 
