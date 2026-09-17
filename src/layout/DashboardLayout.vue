@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
+import DashboardView from '@/views/dashboard/DashboardView.vue';
 import TestForm from '@/components/TestForm.vue';
 import TestList from '@/components/TestList.vue';
 
@@ -20,7 +21,7 @@ import {
   LayoutDashboard
 } from 'lucide-vue-next';
 
-const currentTab = ref('catalog'); // 'catalog' | 'form'
+const currentTab = ref('statistics'); // 'statistics' | 'catalog' | 'form'
 const testListRef = ref(null);
 const testToEdit = ref(null);
 const userRole = ref('coordinator'); // 'coordinator' | 'tutor'
@@ -109,11 +110,11 @@ async function handleLogout() {
         <nav class="sidebar-nav">
           <button
             class="nav-item"
-            :class="{ active: currentTab === 'dashboard' }"
-            @click="currentTab = 'catalog'"
+            :class="{ active: currentTab === 'statistics' }"
+            @click="currentTab = 'statistics'"
           >
             <LayoutDashboard :size="18" />
-            <span>Dashboard</span>
+            <span>Estadísticas</span>
           </button>
 
           <button
@@ -198,8 +199,14 @@ async function handleLogout() {
 
           <!-- Vistas Activas -->
           <transition name="fade" mode="out-in">
+            <DashboardView
+              v-if="currentTab === 'statistics'"
+              key="statistics"
+              @new-assessment="showToast('Abriendo formulario de nueva evaluación en directo...')"
+              @assign-book="showToast('Abriendo asignador de libros...')"
+            />
             <TestList
-              v-if="currentTab === 'catalog'"
+              v-else-if="currentTab === 'catalog'"
               ref="testListRef"
               key="catalog"
               :user-role="userRole"
