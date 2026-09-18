@@ -39,10 +39,10 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-12](FE-12-formularios-validacion.md) | Formularios con validación | — | 5 | Alta | **En revisión** |
 | [FE-13](FE-13-uso-tableta.md) | Uso en tableta | — | 5 | Baja | Pendiente |
 | **Catálogos** | | | | | |
-| [FE-14](FE-14-alta-prueba.md) | Alta de prueba | BE-11 | 3 | Alta | Pendiente |
-| [FE-15](FE-15-edicion-baja-pruebas.md) | Edición y baja de pruebas | BE-13 | 3 | Media | Pendiente |
-| [FE-16](FE-16-listado-pruebas.md) | Listado paginado de pruebas | BE-14 | 3 | Media | Pendiente |
-| [FE-17](FE-17-catalogo-libros.md) | Catálogo de libros | BE-16, BE-17 | 3 | Alta | Pendiente |
+| [FE-14](FE-14-alta-prueba.md) | Alta de prueba | BE-11 | 3 | Alta | **Completado** |
+| [FE-15](FE-15-edicion-baja-pruebas.md) | Edición y baja de pruebas | BE-13 | 3 | Media | **Completado** |
+| [FE-16](FE-16-listado-pruebas.md) | Listado paginado de pruebas | BE-14 | 3 | Media | **Completado** |
+| [FE-17](FE-17-catalogo-libros.md) | Catálogo de libros | BE-16, BE-17 | 3 | Alta | **Completado** |
 | **Registro de datos** | | | | | |
 | [FE-18](FE-18-registrar-prueba.md) | Registrar el resultado de una prueba | BE-18 | 5 | **Crítica** | Pendiente |
 | [FE-19](FE-19-corregir-resultado.md) | Corregir o anular un resultado | BE-21 | 3 | Alta | **Completado** |

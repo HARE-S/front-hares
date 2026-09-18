@@ -70,11 +70,11 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE15-01 | **Formulario de edición** Reutilizando el de alta. | - | Pendiente |
-| T-FE15-02 | **Bloqueo del código** Según si la prueba tiene resultados. | - | Pendiente |
-| T-FE15-03 | **Diálogo de baja** Con explicación de la consecuencia. | - | Pendiente |
-| T-FE15-04 | **Opción de mostrar deshabilitadas** | - | Pendiente |
-| T-FE15-05 | **Pruebas** Escenarios 2, 3 y 4. | - | Pendiente |
+| T-FE15-01 | **Formulario de edición** Reutilizando el de alta. | Yeremi | Completado |
+| T-FE15-02 | **Bloqueo del código** Según si la prueba tiene resultados. | Yeremi | Completado |
+| T-FE15-03 | **Diálogo de baja** Con explicación de la consecuencia. | Yeremi | Completado |
+| T-FE15-04 | **Opción de mostrar deshabilitadas** | Yeremi | Completado |
+| T-FE15-05 | **Pruebas** Escenarios 2, 3 y 4. | Yeremi | Completado |
 
 ---
 

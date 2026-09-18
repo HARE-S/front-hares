@@ -59,9 +59,9 @@ El día a día del docente en el aula y las salidas documentales. La gestión de
 | :--- | :--- | :--- | :---: | :--- |
 | FE-01 | Andamiaje del proyecto | — | 5 | Crítica *(Completado)* |
 | FE-13 | Uso en tableta | — | 5 | Baja |
-| FE-14 | Alta de prueba | BE-11 | 3 | Alta |
-| FE-15 | Edición y baja de pruebas | BE-13 | 3 | Media |
-| FE-16 | Listado paginado de pruebas | BE-14 | 3 | Media |
+| FE-14 | Alta de prueba | BE-11 | 3 | Alta *(Completado)* |
+| FE-15 | Edición y baja de pruebas | BE-13 | 3 | Media *(Completado)* |
+| FE-16 | Listado paginado de pruebas | BE-14 | 3 | Media *(Completado)* |
 | FE-17 | Catálogo de libros | BE-16, BE-17 | 3 | Alta *(Completado)* |
 | FE-18 | Registrar el resultado de una prueba | BE-18 | 5 | **Crítica** |
 | FE-19 | Corregir o anular un resultado | BE-21 | 3 | Alta *(Completado)* |

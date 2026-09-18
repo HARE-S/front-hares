@@ -69,11 +69,11 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE16-01 | **Composable usePagination** Reutilizable por otros listados. | - | Pendiente |
-| T-FE16-02 | **Barra de filtros** Texto, curso, letra y tipo. | - | Pendiente |
-| T-FE16-03 | **Sincronización con la URL** Filtros como parámetros de consulta. | - | Pendiente |
-| T-FE16-04 | **Estado vacío con limpieza de filtros** | - | Pendiente |
-| T-FE16-05 | **Pruebas** Escenarios 3, 4 y 5. | - | Pendiente |
+| T-FE16-01 | **Composable usePagination** Reutilizable por otros listados. | Yeremi | Completado |
+| T-FE16-02 | **Barra de filtros** Texto, curso, letra y tipo. | Yeremi | Completado |
+| T-FE16-03 | **Sincronización con la URL** Filtros como parámetros de consulta. | Yeremi | Completado |
+| T-FE16-04 | **Estado vacío con limpieza de filtros** | Yeremi | Completado |
+| T-FE16-05 | **Pruebas** Escenarios 3, 4 y 5. | Yeremi | Completado |
 
 ---
 

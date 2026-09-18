@@ -71,11 +71,11 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE14-01 | **Servicio de pruebas** Alta con JSDoc del recurso. | - | Pendiente |
-| T-FE14-02 | **Formulario de alta** Con desplegables cerrados de letra y tipo. | - | Pendiente |
-| T-FE14-03 | **Manejo del 409** Mensaje de código duplicado. | - | Pendiente |
-| T-FE14-04 | **Ocultación según rol** | - | Pendiente |
-| T-FE14-05 | **Pruebas** Escenarios 2, 3 y 4. | - | Pendiente |
+| T-FE14-01 | **Servicio de pruebas** Alta con JSDoc del recurso. | Yeremi | Completado |
+| T-FE14-02 | **Formulario de alta** Con desplegables cerrados de letra y tipo. | Yeremi | Completado |
+| T-FE14-03 | **Manejo del 409** Mensaje de código duplicado. | Yeremi | Completado |
+| T-FE14-04 | **Ocultación según rol** | Yeremi | Completado |
+| T-FE14-05 | **Pruebas** Escenarios 2, 3 y 4. | Yeremi | Completado |
 
 ---
 
