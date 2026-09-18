@@ -88,10 +88,10 @@ La infraestructura troncal del frontend: sistema de diseño, cliente HTTP de API
 | ID | Título | Backend | Pts | Prioridad |
 | :--- | :--- | :--- | :---: | :--- |
 | FE-02 | Sistema de diseño en CSS puro | — | 5 | Crítica *(Completado)* |
-| FE-03 | Cliente de API centralizado | BE-40 | 5 | Crítica |
-| FE-05 | Enrutado y layout base | BE-10 | 8 | Crítica |
-| FE-06 | Pantalla de acceso con Google | BE-38, BE-39 | 3 | Crítica |
-| FE-07 | Manejo de la sesión | BE-40 | 5 | Crítica |
+| FE-03 | Cliente de API centralizado | BE-40 | 5 | Crítica *(Completado)* |
+| FE-05 | Enrutado y layout base | BE-10 | 8 | Crítica *(Completado)* |
+| FE-06 | Pantalla de acceso con Google | BE-38, BE-39 | 3 | Crítica *(Completado)* |
+| FE-07 | Manejo de la sesión | BE-40 | 5 | Crítica *(Completado)* |
 | FE-08 | Pantalla de usuario pendiente | BE-41 | 3 | Alta |
 | FE-09 | Interfaz adaptada al rol | BE-42 | 5 | Alta |
 | FE-10 | Gestión de usuarios y roles | BE-43 | 5 | Alta |
