@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import DashboardView from '@/views/dashboard/DashboardView.vue';
 import BooksCatalogView from '@/views/books-catalog/BooksCatalogView.vue';
+import BulkEntryView from '@/views/bulk-entry/BulkEntryView.vue';
+import SectionDetailView from '@/views/section-detail/SectionDetailView.vue';
 import TestForm from '@/components/TestForm.vue';
 import TestList from '@/components/TestList.vue';
 
@@ -22,11 +24,17 @@ import {
   LayoutDashboard
 } from 'lucide-vue-next';
 
-const currentTab = ref('statistics'); // 'statistics' | 'catalog' | 'form'
+const currentTab = ref('statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
+const activeSectionId = ref('sec-1');
 const testListRef = ref(null);
 const testToEdit = ref(null);
 const userRole = ref('coordinator'); // 'coordinator' | 'tutor'
 const toastNotification = ref(null);
+
+function handleViewSectionHistory(sectionId) {
+  if (sectionId) activeSectionId.value = sectionId;
+  currentTab.value = 'section-detail';
+}
 
 function showToast(message) {
   toastNotification.value = message;
@@ -128,9 +136,14 @@ async function handleLogout() {
             <span v-if="currentTab === 'catalog'" class="nav-active-dot"></span>
           </button>
 
-          <button class="nav-item disabled" title="Próximamente">
+          <button
+            class="nav-item"
+            :class="{ active: currentTab === 'bulk-entry' || currentTab === 'section-detail' }"
+            @click="currentTab = 'bulk-entry'; testToEdit = null;"
+          >
             <Edit3 :size="18" />
-            <span>Registro en Aula</span>
+            <span class="flex-1">Registro en Aula</span>
+            <span v-if="currentTab === 'bulk-entry' || currentTab === 'section-detail'" class="nav-active-dot"></span>
           </button>
 
           <button
@@ -221,6 +234,18 @@ async function handleLogout() {
             <BooksCatalogView
               v-else-if="currentTab === 'books'"
               key="books"
+              :user-role="userRole"
+            />
+            <BulkEntryView
+              v-else-if="currentTab === 'bulk-entry'"
+              key="bulk-entry"
+              :user-role="userRole"
+              @view-history="handleViewSectionHistory"
+            />
+            <SectionDetailView
+              v-else-if="currentTab === 'section-detail'"
+              key="section-detail"
+              :section-id="activeSectionId"
               :user-role="userRole"
             />
             <TestForm

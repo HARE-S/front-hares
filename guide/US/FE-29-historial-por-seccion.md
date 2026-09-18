@@ -70,11 +70,11 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE29-01 | **Servicio de historial por sección** | - | Pendiente |
-| T-FE29-02 | **Tabla del grupo** Alumno, prueba, fecha y métricas. | - | Pendiente |
-| T-FE29-03 | **Alternador de agrupación** Por prueba o cronológico. | - | Pendiente |
-| T-FE29-04 | **Acotación por fechas** | - | Pendiente |
-| T-FE29-05 | **Pruebas** Escenarios 2 y 5. | - | Pendiente |
+| T-FE29-01 | **Servicio de historial por sección** | Yeremi | Completado |
+| T-FE29-02 | **Tabla del grupo** Alumno, prueba, fecha y métricas. | Yeremi | Completado |
+| T-FE29-03 | **Alternador de agrupación** Por prueba o cronológico. | Yeremi | Completado |
+| T-FE29-04 | **Acotación por fechas** | Yeremi | Completado |
+| T-FE29-05 | **Pruebas** Escenarios 2 y 5. | Yeremi | Completado |
 
 ---
 

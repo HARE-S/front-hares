@@ -79,12 +79,12 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE20-01 | **Selección de grupo, prueba y fecha** | - | Pendiente |
-| T-FE20-02 | **Rejilla editable** Tres campos por alumno, filas opcionales. | - | Pendiente |
-| T-FE20-03 | **Navegación con teclado** Orden de tabulación por filas. | - | Pendiente |
-| T-FE20-04 | **Guardado en bloque** Una sola petición con resumen. | - | Pendiente |
-| T-FE20-05 | **Errores por fila** Señalados sin perder el resto. | - | Pendiente |
-| T-FE20-06 | **Pruebas** Escenarios 2, 4 y 6. | - | Pendiente |
+| T-FE20-01 | **Selección de grupo, prueba y fecha** | Yeremi | Completado |
+| T-FE20-02 | **Rejilla editable** Tres campos por alumno, filas opcionales. | Yeremi | Completado |
+| T-FE20-03 | **Navegación con teclado** Orden de tabulación por filas. | Yeremi | Completado |
+| T-FE20-04 | **Guardado en bloque** Una sola petición con resumen. | Yeremi | Completado |
+| T-FE20-05 | **Errores por fila** Señalados sin perder el resto. | Yeremi | Completado |
+| T-FE20-06 | **Pruebas** Escenarios 2, 4 y 6. | Yeremi | Completado |
 
 ---
 

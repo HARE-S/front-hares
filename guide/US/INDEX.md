@@ -45,10 +45,10 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-17](FE-17-catalogo-libros.md) | Catálogo de libros | BE-16, BE-17 | 3 | Alta | Pendiente |
 | **Registro de datos** | | | | | |
 | [FE-18](FE-18-registrar-prueba.md) | Registrar el resultado de una prueba | BE-18 | 5 | **Crítica** | Pendiente |
-| [FE-19](FE-19-corregir-resultado.md) | Corregir o anular un resultado | BE-21 | 3 | Alta | Pendiente |
-| [FE-20](FE-20-registro-lote.md) | Registro de resultados en lote | BE-22 | 8 | Alta | Pendiente |
-| [FE-21](FE-21-asignar-libro.md) | Asignar un libro | BE-23, BE-25 | 3 | Alta | Pendiente |
-| [FE-22](FE-22-cerrar-lectura.md) | Cerrar una lectura | BE-24 | 2 | Alta | Pendiente |
+| [FE-19](FE-19-corregir-resultado.md) | Corregir o anular un resultado | BE-21 | 3 | Alta | **Completado** |
+| [FE-20](FE-20-registro-lote.md) | Registro de resultados en lote | BE-22 | 8 | Alta | **Completado** |
+| [FE-21](FE-21-asignar-libro.md) | Asignar un libro | BE-23, BE-25 | 3 | Alta | **Completado** |
+| [FE-22](FE-22-cerrar-lectura.md) | Cerrar una lectura | BE-24 | 2 | Alta | **Completado** |
 | [FE-23](FE-23-pantalla-importacion.md) | Pantalla de importación | BE-09 | 5 | Alta | Pendiente |
 | [FE-24](FE-24-informe-errores-importacion.md) | Informe de errores de importación | BE-08 | 3 | Media | Pendiente |
 | **Consulta** | | | | | |
@@ -56,7 +56,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-26](FE-26-ficha-alumno.md) | Ficha del alumno | BE-28 | 5 | Alta | Pendiente |
 | [FE-27](FE-27-buscador-alumnos.md) | Buscador de alumnos | BE-29 | 3 | Media | Pendiente |
 | [FE-28](FE-28-filtros-multicriterio.md) | Filtros multicriterio | BE-27 | 5 | Alta | **Bloqueada** |
-| [FE-29](FE-29-historial-por-seccion.md) | Historial por sección | BE-51 | 3 | Media | Pendiente |
+| [FE-29](FE-29-historial-por-seccion.md) | Historial por sección | BE-51 | 3 | Media | **Completado** |
 | **Visualización** | | | | | |
 | [FE-30](FE-30-graficos.md) | Componentes de gráfico | — | 5 | Media | Pendiente |
 | [FE-31](FE-31-evolucion-individual.md) | Evolución individual | BE-31 | 5 | Alta | Pendiente |

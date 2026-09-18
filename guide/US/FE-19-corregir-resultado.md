@@ -68,11 +68,11 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE19-01 | **Acciones en el histórico** Editar y eliminar por fila. | - | Pendiente |
-| T-FE19-02 | **Formulario de edición** Reutilizando el de registro. | - | Pendiente |
-| T-FE19-03 | **Diálogo de confirmación** Con advertencia de definitivo. | - | Pendiente |
-| T-FE19-04 | **Recálculo visible** Métricas y banda actualizadas. | - | Pendiente |
-| T-FE19-05 | **Pruebas** Escenarios 2, 3 y 4. | - | Pendiente |
+| T-FE19-01 | **Acciones en el histórico** Editar y eliminar por fila. | Yeremi | Completado |
+| T-FE19-02 | **Formulario de edición** Reutilizando el de registro. | Yeremi | Completado |
+| T-FE19-03 | **Diálogo de confirmación** Con advertencia de definitivo. | Yeremi | Completado |
+| T-FE19-04 | **Recálculo visible** Métricas y banda actualizadas. | Yeremi | Completado |
+| T-FE19-05 | **Pruebas** Escenarios 2, 3 y 4. | Yeremi | Completado |
 
 ---
 
