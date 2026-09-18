@@ -79,12 +79,12 @@ Crítica
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE18-01 | **Servicio de resultados** Alta con JSDoc del recurso. | - | Pendiente |
-| T-FE18-02 | **Formulario de registro** Con selector de prueba y fecha. | - | Pendiente |
-| T-FE18-03 | **Validación de rangos** Negativos y suma mayor que 20. | - | Pendiente |
-| T-FE18-04 | **Aviso de tiempo sospechoso** Con confirmación. | - | Pendiente |
-| T-FE18-05 | **Panel de resultado** Las tres métricas con su banda. | - | Pendiente |
-| T-FE18-06 | **Pruebas** Escenarios 3, 4, 5 y 6. | - | Pendiente |
+| T-FE18-01 | **Servicio de resultados** Alta con JSDoc del recurso. | Yeremi | Completado |
+| T-FE18-02 | **Formulario de registro** Con selector de prueba y fecha. | Yeremi | Completado |
+| T-FE18-03 | **Validación de rangos** Negativos y suma mayor que 20. | Yeremi | Completado |
+| T-FE18-04 | **Aviso de tiempo sospechoso** Con confirmación. | Yeremi | Completado |
+| T-FE18-05 | **Panel de resultado** Las tres métricas con su banda. | Yeremi | Completado |
+| T-FE18-06 | **Pruebas** Escenarios 3, 4, 5 y 6. | Yeremi | Completado |
 
 ---
 

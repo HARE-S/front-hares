@@ -63,7 +63,7 @@ El día a día del docente en el aula y las salidas documentales. La gestión de
 | FE-15 | Edición y baja de pruebas | BE-13 | 3 | Media *(Completado)* |
 | FE-16 | Listado paginado de pruebas | BE-14 | 3 | Media *(Completado)* |
 | FE-17 | Catálogo de libros | BE-16, BE-17 | 3 | Alta *(Completado)* |
-| FE-18 | Registrar el resultado de una prueba | BE-18 | 5 | **Crítica** |
+| FE-18 | Registrar el resultado de una prueba | BE-18 | 5 | Crítica *(Completado)* |
 | FE-19 | Corregir o anular un resultado | BE-21 | 3 | Alta *(Completado)* |
 | FE-20 | Registro de resultados en lote | BE-22 | 8 | Alta *(Completado)* |
 | FE-21 | Asignar un libro | BE-23, BE-25 | 3 | Alta *(Completado)* |
