@@ -507,9 +507,6 @@ defineExpose({
                   </div>
                   <ChevronRight :size="18" class="chevron" />
                 </div>
-                <button type="button" class="report-btn" @click="viewStudentReport(student)" title="Ver informe">
-                  <BarChart3 :size="20" />
-                </button>
               </div>
             </div>
           </div>

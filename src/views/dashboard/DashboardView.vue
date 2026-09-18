@@ -12,9 +12,22 @@
 
       <!-- Action Button Group -->
       <div class="action-buttons-group">
+        <!-- Super Admin: Panel de Aprobación -->
+        <button
+          v-if="user?.role === 'superadmin'"
+          type="button"
+          class="btn-dashboard btn-dashboard--secondary"
+          @click="router.push('/admin/approval')"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="btn-icon-secondary">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <span>Panel de Aprobación</span>
+        </button>
+
         <!-- Secondary Action: Assign Book -->
-        <button 
-          type="button" 
+        <button
+          type="button"
           class="btn-dashboard btn-dashboard--secondary"
           @click="handleAssignBook"
         >
@@ -113,6 +126,8 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuth } from '@/composables/useAuth';
 import KpiOverview from '../../components/dashboard/KpiOverview.vue';
 import FluencyChart from '../../components/dashboard/FluencyChart.vue';
 import LevelsDistribution from '../../components/dashboard/LevelsDistribution.vue';
@@ -121,6 +136,8 @@ import BookAssignModal from '../../components/dashboard/BookAssignModal.vue';
 import NewAssessmentModal from '../../components/dashboard/NewAssessmentModal.vue';
 import StudentReportModal from '../../components/dashboard/StudentReportModal.vue';
 
+const router = useRouter();
+const { user } = useAuth();
 const emit = defineEmits(['new-assessment', 'assign-book']);
 
 const feedbackMessage = ref(null);

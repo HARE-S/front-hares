@@ -19,6 +19,7 @@ const emit = defineEmits(['close', 'assign']);
 
 const studentId = ref('');
 const selectedBookIds = ref([]);
+const assignDate = ref(new Date().toISOString().split('T')[0]);
 const showAddForm = ref(false);
 const searchQuery = ref('');
 
@@ -122,10 +123,14 @@ function handleAssign() {
 
   if (studentId.value && selectedBookIds.value.length > 0) {
     const selectedBooks = books.value.filter(b => selectedBookIds.value.includes(b.id));
-    console.log('Emitting assign with:', { studentId: parseInt(studentId.value), books: selectedBooks });
+    const booksWithDate = selectedBooks.map(book => ({
+      ...book,
+      date: assignDate.value
+    }));
+    console.log('Emitting assign with:', { studentId: parseInt(studentId.value), books: booksWithDate });
     emit('assign', {
       studentId: parseInt(studentId.value),
-      books: selectedBooks
+      books: booksWithDate
     });
     close();
   } else {
@@ -136,6 +141,7 @@ function handleAssign() {
 function close() {
   studentId.value = '';
   selectedBookIds.value = [];
+  assignDate.value = new Date().toISOString().split('T')[0];
   showAddForm.value = false;
   newBookForm.value = { title: '', author: '', format: '', level: '', category: '', center: '', quantity: '' };
   emit('close');
@@ -263,6 +269,16 @@ function close() {
                 {{ s.name }}
               </option>
             </select>
+          </div>
+
+          <div class="form-group">
+            <label for="assignDate">Fecha de Asignación</label>
+            <input
+              id="assignDate"
+              v-model="assignDate"
+              type="date"
+              class="form-control"
+            />
           </div>
 
           <div class="books-section">
