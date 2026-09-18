@@ -44,7 +44,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-16](FE-16-listado-pruebas.md) | Listado paginado de pruebas | BE-14 | 3 | Media | **Completado** |
 | [FE-17](FE-17-catalogo-libros.md) | Catálogo de libros | BE-16, BE-17 | 3 | Alta | **Completado** |
 | **Registro de datos** | | | | | |
-| [FE-18](FE-18-registrar-prueba.md) | Registrar el resultado de una prueba | BE-18 | 5 | **Crítica** | Pendiente |
+| [FE-18](FE-18-registrar-prueba.md) | Registrar el resultado de una prueba | BE-18 | 5 | **Crítica** | **Completado** |
 | [FE-19](FE-19-corregir-resultado.md) | Corregir o anular un resultado | BE-21 | 3 | Alta | **Completado** |
 | [FE-20](FE-20-registro-lote.md) | Registro de resultados en lote | BE-22 | 8 | Alta | **Completado** |
 | [FE-21](FE-21-asignar-libro.md) | Asignar un libro | BE-23, BE-25 | 3 | Alta | **Completado** |
