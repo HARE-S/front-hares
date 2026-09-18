@@ -2,6 +2,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { getStudentRecord } from '@/services/studentService';
+import RegisterResultModal from '@/components/results/RegisterResultModal.vue';
+import { PlusCircle } from 'lucide-vue-next';
 
 const route = useRoute();
 
@@ -9,6 +11,7 @@ const studentId = computed(() => route.params.studentId);
 const loading = ref(false);
 const error = ref(null);
 const forbidden = ref(false);
+const showRegisterModal = ref(false);
 
 const studentData = ref(null);
 
@@ -30,6 +33,11 @@ async function loadStudentRecord() {
   } finally {
     loading.value = false;
   }
+}
+
+function handleResultSaved() {
+  showRegisterModal.value = false;
+  loadStudentRecord();
 }
 
 onMounted(() => {
@@ -64,6 +72,17 @@ onMounted(() => {
           <div class="header-meta">
             <span class="meta-item">📚 {{ studentData.grade }}</span>
             <span class="meta-item">👥 {{ studentData.section }}</span>
+          </div>
+          <div class="header-actions" style="margin-top: 0.75rem;">
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-testid="open-register-test-btn"
+              @click="showRegisterModal = true"
+            >
+              <PlusCircle :size="16" />
+              <span>Registrar Prueba</span>
+            </button>
           </div>
         </div>
         <div class="header-stats">
@@ -220,6 +239,17 @@ onMounted(() => {
       <p>No hay información disponible para este alumno.</p>
       <button class="btn btn-secondary" @click="loadStudentRecord">Recargar</button>
     </div>
+
+    <!-- Modal para Registrar Resultado de Prueba (FE-18) -->
+    <RegisterResultModal
+      v-if="studentData"
+      :is-open="showRegisterModal"
+      :student-id="studentData.id"
+      :student-name="studentData.name"
+      :section-id="studentData.section"
+      @close="showRegisterModal = false"
+      @saved="handleResultSaved"
+    />
   </div>
 </template>
 

@@ -10,6 +10,7 @@ import ReportsView from '@/views/reports/ReportsView.vue';
 import TestForm from '@/components/TestForm.vue';
 import TestList from '@/components/TestList.vue';
 import TestsCatalogView from '@/views/tests-catalog/TestsCatalogView.vue';
+import RegisterResultModal from '@/components/results/RegisterResultModal.vue';
 
 const router = useRouter();
 const { logout, user } = useAuth();
@@ -33,6 +34,7 @@ const testsCatalogRef = ref(null);
 const testToEdit = ref(null);
 const userRole = ref('coordinator'); // 'coordinator' | 'tutor'
 const toastNotification = ref(null);
+const showRegisterResultModal = ref(false);
 
 function handleViewSectionHistory(sectionId) {
   if (sectionId) activeSectionId.value = sectionId;
@@ -44,6 +46,10 @@ function showToast(message) {
   setTimeout(() => {
     toastNotification.value = null;
   }, 5000);
+}
+
+function handleResultSavedFromDashboard(result) {
+  showToast(`Prueba registrada para ${result.studentName || 'alumno'}: ${result.ppm} PPM (${result.band})`);
 }
 
 function handleOpenCreate() {
@@ -230,7 +236,7 @@ async function handleLogout() {
             <DashboardView
               v-if="currentTab === 'statistics'"
               key="statistics"
-              @new-assessment="showToast('Abriendo formulario de nueva evaluación en directo...')"
+              @new-assessment="showRegisterResultModal = true"
               @assign-book="showToast('Abriendo asignador de libros...')"
             />
             <TestsCatalogView
@@ -271,6 +277,13 @@ async function handleLogout() {
               @cancel-edit="handleCancelEdit"
             />
           </transition>
+
+          <!-- Modal para registrar resultado individual (FE-18) -->
+          <RegisterResultModal
+            :is-open="showRegisterResultModal"
+            @close="showRegisterResultModal = false"
+            @saved="handleResultSavedFromDashboard"
+          />
         </div>
       </main>
 

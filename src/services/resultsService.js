@@ -127,6 +127,137 @@ export function _getInMemoryResults() {
 }
 
 /**
+ * @typedef {Object} SingleResultInput
+ * @property {string|number} studentId - ID del alumno
+ * @property {string} [studentName] - Nombre del alumno
+ * @property {string} testId - ID o código de la prueba
+ * @property {string} [testName] - Nombre de la prueba
+ * @property {number} [testWords] - Palabras del texto
+ * @property {string} [sectionId] - ID de la sección
+ * @property {string} testDate - Fecha en formato YYYY-MM-DD
+ * @property {number|string} time - Tiempo en segundos (> 0)
+ * @property {number|string} successes - Aciertos de comprensión (0-20)
+ * @property {number|string} mistakes - Errores de lectura (>= 0)
+ * @property {string} [notes] - Observaciones
+ */
+
+/**
+ * Registra el resultado individual de una prueba de lectura (FE-18 / BE-18).
+ *
+ * @param {SingleResultInput} input
+ * @returns {Promise<ResultItem>}
+ */
+export async function registerSingleResult({
+  studentId,
+  studentName = 'Alumno',
+  testId,
+  testName = 'Prueba',
+  testWords = 108,
+  sectionId = 'sec-1',
+  testDate,
+  time,
+  successes,
+  mistakes,
+  notes = ''
+}) {
+  if (!studentId) throw new Error('El alumno es obligatorio.');
+  if (!testId) throw new Error('La prueba es obligatoria.');
+  if (!testDate) throw new Error('La fecha es obligatoria.');
+
+  const numTime = Number(time);
+  const numSuccesses = Number(successes);
+  const numMistakes = Number(mistakes);
+
+  if (isNaN(numTime) || numTime <= 0) {
+    throw new Error('El tiempo debe ser un número mayor a cero segundos.');
+  }
+  if (isNaN(numSuccesses) || numSuccesses < 0) {
+    throw new Error('Los aciertos no pueden ser negativos.');
+  }
+  if (isNaN(numMistakes) || numMistakes < 0) {
+    throw new Error('Los errores no pueden ser negativos.');
+  }
+  if (numSuccesses + numMistakes > 20) {
+    throw new Error('La suma de aciertos y errores no puede superar 20.');
+  }
+
+  const words = Number(testWords) > 0 ? Number(testWords) : 108;
+  const ppm = calculatePPM(words, numTime);
+  const vef = calculateVef(ppm, numSuccesses, 20);
+  const band = getReadingBand(vef);
+  const comprehensionPercentage = Math.round((numSuccesses / 20) * 100);
+
+  const payload = {
+    student_id: String(studentId),
+    test_id: String(testId),
+    section_id: sectionId ? String(sectionId) : undefined,
+    test_date: testDate,
+    time: numTime,
+    successes: numSuccesses,
+    mistakes: numMistakes,
+    test_words: words,
+    ppm,
+    vef,
+    band,
+    comprehension_percentage: comprehensionPercentage,
+    notes
+  };
+
+  try {
+    const res = await request('/results', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    return res;
+  } catch (err) {
+    if (err.status === 409) {
+      const conflictErr = new Error('Ya existe un registro para este alumno con la misma prueba y fecha.');
+      conflictErr.status = 409;
+      throw conflictErr;
+    }
+    if (err.status === 403) {
+      const forbiddenErr = new Error('No tienes permiso sobre la sección de este alumno para registrar resultados.');
+      forbiddenErr.status = 403;
+      throw forbiddenErr;
+    }
+    if (err.status === 0 || err.message?.includes('No se pudo conectar')) {
+      const duplicate = inMemoryResults.find(
+        r => String(r.studentId) === String(studentId) &&
+             String(r.testId) === String(testId) &&
+             r.testDate === testDate
+      );
+      if (duplicate) {
+        const conflictErr = new Error('Ya existe un registro para este alumno con la misma prueba y fecha.');
+        conflictErr.status = 409;
+        throw conflictErr;
+      }
+
+      const created = {
+        id: `res-${Date.now()}`,
+        studentId: String(studentId),
+        studentName,
+        testId: String(testId),
+        testName,
+        sectionId: String(sectionId),
+        testDate,
+        time: numTime,
+        successes: numSuccesses,
+        mistakes: numMistakes,
+        ppm,
+        vef,
+        band,
+        comprehensionPercentage,
+        notes,
+        createdAt: new Date().toISOString()
+      };
+      inMemoryResults.unshift(created);
+      return created;
+    }
+    throw err;
+  }
+}
+
+/**
  * Registrar un lote de resultados de una sección (FE-20 / BE-22).
  *
  * @param {Object} params
