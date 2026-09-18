@@ -9,6 +9,7 @@ import SectionDetailView from '@/views/section-detail/SectionDetailView.vue';
 import ReportsView from '@/views/reports/ReportsView.vue';
 import TestForm from '@/components/TestForm.vue';
 import TestList from '@/components/TestList.vue';
+import TestsCatalogView from '@/views/tests-catalog/TestsCatalogView.vue';
 
 const router = useRouter();
 const { logout, user } = useAuth();
@@ -28,6 +29,7 @@ import {
 const currentTab = ref('statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
 const activeSectionId = ref('sec-1');
 const testListRef = ref(null);
+const testsCatalogRef = ref(null);
 const testToEdit = ref(null);
 const userRole = ref('coordinator'); // 'coordinator' | 'tutor'
 const toastNotification = ref(null);
@@ -46,7 +48,8 @@ function showToast(message) {
 
 function handleOpenCreate() {
   testToEdit.value = null;
-  currentTab.value = 'form';
+  currentTab.value = 'catalog';
+  testsCatalogRef.value?.openCreate?.();
 }
 
 function handleEditTest(test) {
@@ -230,12 +233,11 @@ async function handleLogout() {
               @new-assessment="showToast('Abriendo formulario de nueva evaluación en directo...')"
               @assign-book="showToast('Abriendo asignador de libros...')"
             />
-            <TestList
+            <TestsCatalogView
               v-else-if="currentTab === 'catalog'"
-              ref="testListRef"
+              ref="testsCatalogRef"
               key="catalog"
               :user-role="userRole"
-              @edit-test="handleEditTest"
             />
             <BooksCatalogView
               v-else-if="currentTab === 'books'"
