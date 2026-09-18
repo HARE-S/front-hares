@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import DashboardView from '@/views/dashboard/DashboardView.vue';
+import BooksCatalogView from '@/views/books-catalog/BooksCatalogView.vue';
 import TestForm from '@/components/TestForm.vue';
 import TestList from '@/components/TestList.vue';
 
@@ -132,9 +133,14 @@ async function handleLogout() {
             <span>Registro en Aula</span>
           </button>
 
-          <button class="nav-item disabled" title="Próximamente">
+          <button
+            class="nav-item"
+            :class="{ active: currentTab === 'books' }"
+            @click="currentTab = 'books'; testToEdit = null;"
+          >
             <Library :size="18" />
-            <span>Biblioteca de Libros</span>
+            <span class="flex-1">Biblioteca de Libros</span>
+            <span v-if="currentTab === 'books'" class="nav-active-dot"></span>
           </button>
 
           <button class="nav-item disabled" title="Próximamente">
@@ -211,6 +217,11 @@ async function handleLogout() {
               key="catalog"
               :user-role="userRole"
               @edit-test="handleEditTest"
+            />
+            <BooksCatalogView
+              v-else-if="currentTab === 'books'"
+              key="books"
+              :user-role="userRole"
             />
             <TestForm
               v-else-if="currentTab === 'form'"

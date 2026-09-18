@@ -157,6 +157,8 @@ function showFeedback(msg) {
 
 function handleAssignBook() {
   console.log('handleAssignBook triggered');
+  showFeedback('Módulo de asignación de libros: Abriendo catálogo pedagógico...');
+  emit('assign-book');
   if (kpiOverviewRef.value) {
     allBooks.value = kpiOverviewRef.value.getAllBooksFromStudents();
   }
@@ -177,6 +179,7 @@ function closeBookModal() {
 
 function handleNewAssessment() {
   console.log('handleNewAssessment triggered');
+  emit('new-assessment');
   showAssessmentModal.value = true;
 }
 

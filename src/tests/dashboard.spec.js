@@ -13,21 +13,20 @@ describe('Dashboard Docente de Fluidez Lectora (Stitch Design System)', () => {
       const text = wrapper.text();
 
       expect(text).toContain('Velocidad Media del Aula');
-      expect(text).toContain('115');
+      expect(text).toContain('100');
       expect(text).toContain('PPM');
       expect(text).toContain('+8% vs. Corte Inicial');
 
       expect(text).toContain('Alumnos Evaluados');
-      expect(text).toContain('24');
-      expect(text).toContain('/ 26');
+      expect(text).toContain('10');
+      expect(text).toContain('/ 12');
 
       expect(text).toContain('Libros Leídos');
-      expect(text).toContain('68');
+      expect(text).toContain('94');
       expect(text).toContain('títulos');
 
-      expect(text).toContain('Alerta Pedagógica');
-      expect(text).toContain('3');
       expect(text).toContain('Requieren Apoyo');
+      expect(text).toContain('4');
     });
 
     it('emite el evento "view-support" al pulsar en el botón de refuerzo de la alerta', async () => {

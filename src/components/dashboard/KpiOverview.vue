@@ -427,7 +427,7 @@ defineExpose({
         <div class="alert-value">{{ studentsNeedingSupport.length }}</div>
         <div class="alert-info">
           <span class="criteria">{{ kpiData.alerts.criteria }}</span>
-          <button class="support-btn" @click="handleViewSupport">
+          <button class="alert-btn support-btn" @click="handleViewSupport">
             Ver refuerzo
             <ArrowRight :size="14" />
           </button>
