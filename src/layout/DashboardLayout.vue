@@ -6,6 +6,7 @@ import DashboardView from '@/views/dashboard/DashboardView.vue';
 import BooksCatalogView from '@/views/books-catalog/BooksCatalogView.vue';
 import BulkEntryView from '@/views/bulk-entry/BulkEntryView.vue';
 import SectionDetailView from '@/views/section-detail/SectionDetailView.vue';
+import ReportsView from '@/views/reports/ReportsView.vue';
 import TestForm from '@/components/TestForm.vue';
 import TestList from '@/components/TestList.vue';
 
@@ -156,9 +157,14 @@ async function handleLogout() {
             <span v-if="currentTab === 'books'" class="nav-active-dot"></span>
           </button>
 
-          <button class="nav-item disabled" title="Próximamente">
+          <button
+            class="nav-item"
+            :class="{ active: currentTab === 'reports' }"
+            @click="currentTab = 'reports'; testToEdit = null;"
+          >
             <BarChart3 :size="18" />
-            <span>Informes y Exportación</span>
+            <span class="flex-1">Informes y Exportación</span>
+            <span v-if="currentTab === 'reports'" class="nav-active-dot"></span>
           </button>
         </nav>
       </div>
@@ -246,6 +252,11 @@ async function handleLogout() {
               v-else-if="currentTab === 'section-detail'"
               key="section-detail"
               :section-id="activeSectionId"
+              :user-role="userRole"
+            />
+            <ReportsView
+              v-else-if="currentTab === 'reports'"
+              key="reports"
               :user-role="userRole"
             />
             <TestForm

@@ -73,11 +73,11 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE37-01 | **Servicio del informe** Datos agregados en una llamada. | - | Pendiente |
-| T-FE37-02 | **Vista del informe** Con todos los bloques. | - | Pendiente |
-| T-FE37-03 | **Estilos de impresión** A4, sin navegación, sin cortes. | - | Pendiente |
-| T-FE37-04 | **Cabecera del documento** Centro y fecha de generación. | - | Pendiente |
-| T-FE37-05 | **Pruebas** Escenarios 4 y 5, más prueba manual de impresión. | - | Pendiente |
+| T-FE37-01 | **Servicio del informe** Datos agregados en una llamada. | Yeremi | Completado |
+| T-FE37-02 | **Vista del informe** Con todos los bloques. | Yeremi | Completado |
+| T-FE37-03 | **Estilos de impresión** A4, sin navegación, sin cortes. | Yeremi | Completado |
+| T-FE37-04 | **Cabecera del documento** Centro y fecha de generación. | Yeremi | Completado |
+| T-FE37-05 | **Pruebas** Escenarios 4 y 5, más prueba manual de impresión. | Yeremi | Completado |
 
 ---
 
