@@ -74,12 +74,12 @@ describe('Módulo 2 — Catálogo de Libros y Lecturas (FE-17, FE-21, FE-22)', (
       const coordinatorView = mount(BooksCatalogView, {
         props: { userRole: 'coordinator' }
       });
-      expect(coordinatorView.text()).toContain('+ Nuevo Libro');
+      expect(coordinatorView.text()).toContain('Nuevo Libro');
 
       const tutorView = mount(BooksCatalogView, {
         props: { userRole: 'tutor' }
       });
-      expect(tutorView.text()).not.toContain('+ Nuevo Libro');
+      expect(tutorView.text()).not.toContain('Nuevo Libro');
     });
   });
 

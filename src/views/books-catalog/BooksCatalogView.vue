@@ -34,7 +34,7 @@
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
           </svg>
-          <span>+ Nuevo Libro</span>
+          <span>Nuevo Libro</span>
         </button>
       </div>
     </div>
@@ -199,13 +199,11 @@
                   <button 
                     v-if="book.is_active"
                     type="button" 
-                    class="btn-action-icon text-secondary"
+                    class="btn-action-text"
                     title="Asignar libro a un alumno"
                     @click="openAssignModal(book.id)"
                   >
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                      <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
-                    </svg>
+                    Asignar
                   </button>
 
                   <button 
@@ -769,9 +767,22 @@ async function handleReopenReading(reading) {
   border-bottom-color: var(--color-secondary, #006c49);
 }
 
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Toolbar */
 .panel-toolbar {
-  padding: 1rem 1.25rem;
+  padding: 0.875rem 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -795,15 +806,41 @@ async function handleReopenReading(reading) {
   flex-wrap: wrap;
 }
 
+.filter-item {
+  display: inline-flex;
+  align-items: center;
+}
+
 .toolbar-right {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
+/* Uniform form controls */
+.form-control {
+  height: 2.375rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-on-surface, #191c1b);
+  background-color: var(--color-surface-container-lowest, #ffffff);
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-md, 0.375rem);
+  box-sizing: border-box;
+  vertical-align: middle;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-secondary, #006c49);
+  box-shadow: 0 0 0 3px rgba(0, 108, 73, 0.15);
+}
+
 .search-input-wrapper {
   position: relative;
-  display: flex;
+  display: inline-flex;
   align-items: center;
 }
 
@@ -814,25 +851,36 @@ async function handleReopenReading(reading) {
   color: var(--color-on-surface-variant, #3f4943);
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .pl-icon {
   padding-left: 2.25rem !important;
-  width: 14rem;
+  width: 15rem;
 }
 
 .select-compact {
-  padding: 0.5rem 0.75rem;
+  padding: 0.45rem 1.75rem 0.45rem 0.75rem;
   cursor: pointer;
 }
 
 .toggle-label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   font-size: 0.8125rem;
   color: var(--color-on-surface-variant, #3f4943);
   cursor: pointer;
+  margin-bottom: 0 !important;
+  user-select: none;
+}
+
+.checkbox-input {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: var(--color-secondary, #006c49);
+  margin: 0;
 }
 
 /* Segmented control for readings */
@@ -890,11 +938,12 @@ async function handleReopenReading(reading) {
 .data-table th,
 .data-table td {
   padding: 0.85rem 1rem;
+  vertical-align: middle;
 }
 
-.th-left { text-align: left; }
-.th-right { text-align: right; }
-.th-center { text-align: center; }
+.th-left, .td-title, .td-author, .td-copies { text-align: left; }
+.th-right, .td-actions { text-align: right; }
+.th-center, .td-level, .td-status, .td-duration { text-align: center; }
 
 .data-table tbody tr {
   border-bottom: 1px solid rgba(189, 201, 192, 0.2);
@@ -912,21 +961,25 @@ async function handleReopenReading(reading) {
 }
 
 .copies-tag {
+  display: inline-block;
   background-color: var(--color-surface-container-high, #e2e9e2);
   color: var(--color-on-surface-variant, #3f4943);
   font-size: 0.75rem;
-  padding: 0.15rem 0.5rem;
-  border-radius: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  font-weight: 500;
 }
 
 .status-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.15rem 0.55rem;
+  padding: 0.2rem 0.65rem;
   border-radius: 9999px;
+  line-height: 1.2;
 }
 
 .status-pill--active {
@@ -982,7 +1035,16 @@ async function handleReopenReading(reading) {
 .actions-wrapper {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.text-secondary {
+  color: var(--color-secondary, #006c49) !important;
+}
+
+.text-danger {
+  color: var(--color-error, #ba1a1a) !important;
 }
 
 .btn-action-icon {
@@ -992,7 +1054,10 @@ async function handleReopenReading(reading) {
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   border-radius: 0.25rem;
+  color: var(--color-secondary, #006c49);
+  transition: all 0.15s ease;
 }
 
 .btn-action-icon:hover {
@@ -1005,12 +1070,25 @@ async function handleReopenReading(reading) {
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 0.15rem 0.35rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: var(--radius-sm, 0.25rem);
   color: var(--color-secondary, #006c49);
+  transition: all 0.15s ease;
+  line-height: 1.25;
 }
 
 .btn-action-text:hover {
-  text-decoration: underline;
+  background-color: var(--color-surface-container-high, #e2e9e2);
+  text-decoration: none;
+}
+
+.btn-action-text.text-danger {
+  color: var(--color-error, #ba1a1a) !important;
+}
+
+.btn-action-text.text-danger:hover {
+  background-color: var(--color-error-container, #ffdad6);
+  color: #93000a !important;
 }
 
 .btn-action-highlight {
