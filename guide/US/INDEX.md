@@ -3,7 +3,7 @@
 **HARE-S** · Programa de Gestión de Mejora de Comprensión Lectora (Peñascal)
 Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andrés Ocina
 **Stack:** Vue 3 + Vite + JavaScript + CSS puro + Vitest
-40 historias · 168 puntos · Actualizado: 15/09/2026
+40 historias · 168 puntos · Actualizado: 18/09/2026
 **Reparto entre el equipo:** ver [REPARTO.md](REPARTO.md)
 
 ---
@@ -49,8 +49,8 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-20](FE-20-registro-lote.md) | Registro de resultados en lote | BE-22 | 8 | Alta | **Completado** |
 | [FE-21](FE-21-asignar-libro.md) | Asignar un libro | BE-23, BE-25 | 3 | Alta | **Completado** |
 | [FE-22](FE-22-cerrar-lectura.md) | Cerrar una lectura | BE-24 | 2 | Alta | **Completado** |
-| [FE-23](FE-23-pantalla-importacion.md) | Pantalla de importación | BE-09 | 5 | Alta | Pendiente |
-| [FE-24](FE-24-informe-errores-importacion.md) | Informe de errores de importación | BE-08 | 3 | Media | Pendiente |
+| [FE-23](FE-23-pantalla-importacion.md) | Pantalla de importación | BE-09 | 5 | Alta | **En revisión** |
+| [FE-24](FE-24-informe-errores-importacion.md) | Informe de errores de importación | BE-08 | 3 | Media | **En revisión** |
 | **Consulta** | | | | | |
 | [FE-25](FE-25-navegacion-centros-secciones.md) | Navegación por centros y secciones | BE-10 | 3 | Alta | Pendiente |
 | [FE-26](FE-26-ficha-alumno.md) | Ficha del alumno | BE-28 | 5 | Alta | Pendiente |
@@ -71,7 +71,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Calidad** | | | | | |
 | [FE-39](FE-39-pruebas-interfaz.md) | Batería de pruebas de interfaz | — | 5 | Alta | Pendiente |
 | [FE-40](FE-40-manual-usuario.md) | Manual de usuario | — | 3 | Media | Pendiente |
-| | **Total** | | **168** | | **3 de 40** |
+| | **Total** | | **168** | | **5 de 40** |
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Programa de Gestión de Mejora de Comprensión Lectora** (Peñascal)  
 40 historias · 168 puntos · 3 personas  
-Actualizado: 15/09/2026  
+Actualizado: 18/09/2026  
 
 ---
 
@@ -32,8 +32,8 @@ Todo lo relativo a la estructura organizativa (centros y secciones), el censo de
 | FE-04 | Dockerización y proxy | — | 5 | Alta *(Completado)* |
 | FE-11 | Estados de pantalla (`StateBlock`) | — | 3 | Alta *(Completado)* |
 | FE-12 | Formularios con validación | — | 5 | Alta *(Completado)*|
-| FE-23 | Pantalla de importación (Alexia) | BE-09 | 5 | Alta |
-| FE-24 | Informe de errores de importación | BE-08 | 3 | Media |
+| FE-23 | Pantalla de importación (Alexia) | BE-09 | 5 | Alta *(Completado)* |
+| FE-24 | Informe de errores de importación | BE-08 | 3 | Media *(Completado)* |
 | FE-25 | Navegación por centros y secciones | BE-10 | 3 | Alta |
 | FE-26 | Ficha del alumno (agregada) | BE-28 | 5 | Alta |
 | FE-27 | Buscador de alumnos | BE-29 | 3 | Media |

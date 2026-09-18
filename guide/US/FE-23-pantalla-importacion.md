@@ -77,12 +77,12 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE23-01 | **Selector de fichero** Con validación de extensión y tamaño. | - | Pendiente |
-| T-FE23-02 | **Previsualización** Tabla con las primeras filas interpretadas. | - | Pendiente |
-| T-FE23-03 | **Confirmación y progreso** Botón deshabilitado durante el proceso. | - | Pendiente |
-| T-FE23-04 | **Resumen de resultados** Contadores y enlace al informe de errores. | - | Pendiente |
-| T-FE23-05 | **Guarda de ruta** Solo administrador. | - | Pendiente |
-| T-FE23-06 | **Pruebas** Escenarios 4, 5 y 6. | - | Pendiente |
+| T-FE23-01 | **Selector de fichero** Con validación de extensión y tamaño. | Marlen | Completado |
+| T-FE23-02 | **Previsualización** Tabla con las primeras filas interpretadas. | Marlen | Completado |
+| T-FE23-03 | **Confirmación y progreso** Botón deshabilitado durante el proceso. | Marlen | Completado |
+| T-FE23-04 | **Resumen de resultados** Contadores y enlace al informe de errores. | Marlen | Completado |
+| T-FE23-05 | **Guarda de ruta** Solo administrador. | Santiago | Pendiente |
+| T-FE23-06 | **Pruebas** Escenarios 4, 5 y 6. | Marlen | Completado |
 
 ---
 

@@ -68,11 +68,11 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE24-01 | **Tabla de errores** Línea, columna y motivo. | - | Pendiente |
-| T-FE24-02 | **Resumen comprensible** Procesadas frente a rechazadas. | - | Pendiente |
-| T-FE24-03 | **Descarga del informe** | - | Pendiente |
-| T-FE24-04 | **Paginación** Para volúmenes grandes. | - | Pendiente |
-| T-FE24-05 | **Pruebas** Escenarios 2 y 4. | - | Pendiente |
+| T-FE24-01 | **Tabla de errores** Línea, columna y motivo. | Marlen | Completado |
+| T-FE24-02 | **Resumen comprensible** Procesadas frente a rechazadas. | Marlen | Completado |
+| T-FE24-03 | **Descarga del informe** | Marlen | Completado |
+| T-FE24-04 | **Paginación** Para volúmenes grandes. | Marlen | Completado |
+| T-FE24-05 | **Pruebas** Escenarios 2 y 4. | Marlen | Completado |
 
 ---
 
