@@ -76,12 +76,12 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE38-01 | **Servicio del informe de grupo** | - | Pendiente |
-| T-FE38-02 | **Tarjetas de agregados** Media, participantes y pruebas. | - | Pendiente |
-| T-FE38-03 | **Distribución por banda** Con barras y porcentajes. | - | Pendiente |
-| T-FE38-04 | **Progreso por recuento** | - | Pendiente |
-| T-FE38-05 | **Exportación e impresión** | - | Pendiente |
-| T-FE38-06 | **Pruebas** Escenarios 2, 4 y 6. | - | Pendiente |
+| T-FE38-01 | **Servicio del informe de grupo** | Yeremi | Completado |
+| T-FE38-02 | **Tarjetas de agregados** Media, participantes y pruebas. | Yeremi | Completado |
+| T-FE38-03 | **Distribución por banda** Con barras y porcentajes. | Yeremi | Completado |
+| T-FE38-04 | **Progreso por recuento** | Yeremi | Completado |
+| T-FE38-05 | **Exportación e impresión** | Yeremi | Completado |
+| T-FE38-06 | **Pruebas** Escenarios 2, 4 y 6. | Yeremi | Completado |
 
 ---
 

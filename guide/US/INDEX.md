@@ -65,9 +65,9 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-34](FE-34-clasificacion-nivel.md) | Clasificación por nivel lector | BE-30 | 5 | Alta | Pendiente |
 | [FE-35](FE-35-alumnos-sin-progreso.md) | Aviso de alumnos sin progreso | BE-34 | 3 | Baja | Pendiente |
 | **Salidas** | | | | | |
-| [FE-36](FE-36-exportacion-excel.md) | Exportación a Excel | BE-35 | 3 | Alta | Pendiente |
-| [FE-37](FE-37-informe-alumno.md) | Informe individual imprimible | BE-36 | 5 | Media | Pendiente |
-| [FE-38](FE-38-informe-grupo.md) | Informe agregado de grupo | BE-37 | 5 | Media | Pendiente |
+| [FE-36](FE-36-exportacion-excel.md) | Exportación a Excel | BE-35 | 3 | Alta | **Completado** |
+| [FE-37](FE-37-informe-alumno.md) | Informe individual imprimible | BE-36 | 5 | Media | **Completado** |
+| [FE-38](FE-38-informe-grupo.md) | Informe agregado de grupo | BE-37 | 5 | Media | **Completado** |
 | **Calidad** | | | | | |
 | [FE-39](FE-39-pruebas-interfaz.md) | Batería de pruebas de interfaz | — | 5 | Alta | Pendiente |
 | [FE-40](FE-40-manual-usuario.md) | Manual de usuario | — | 3 | Media | Pendiente |

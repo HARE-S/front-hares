@@ -70,11 +70,11 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE36-01 | **Servicio de exportación** Envío de los filtros activos. | - | Pendiente |
-| T-FE36-02 | **Botón con recuento** En las barras de acciones. | - | Pendiente |
-| T-FE36-03 | **Progreso y descarga** | - | Pendiente |
-| T-FE36-04 | **Estados vacío y error** | - | Pendiente |
-| T-FE36-05 | **Pruebas** Escenarios 1, 4 y 5. | - | Pendiente |
+| T-FE36-01 | **Servicio de exportación** Envío de los filtros activos. | Yeremi | Completado |
+| T-FE36-02 | **Botón con recuento** En las barras de acciones. | Yeremi | Completado |
+| T-FE36-03 | **Progreso y descarga** | Yeremi | Completado |
+| T-FE36-04 | **Estados vacío y error** | Yeremi | Completado |
+| T-FE36-05 | **Pruebas** Escenarios 1, 4 y 5. | Yeremi | Completado |
 
 ---
 

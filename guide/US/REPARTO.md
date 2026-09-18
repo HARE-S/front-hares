@@ -69,9 +69,9 @@ El día a día del docente en el aula y las salidas documentales. La gestión de
 | FE-21 | Asignar un libro | BE-23, BE-25 | 3 | Alta *(Completado)* |
 | FE-22 | Cerrar una lectura | BE-24 | 2 | Alta *(Completado)* |
 | FE-29 | Historial por sección | BE-51 | 3 | Media *(Completado)* |
-| FE-36 | Exportación a Excel | BE-35 | 3 | Alta |
-| FE-37 | Informe individual imprimible | BE-36 | 5 | Media |
-| FE-38 | Informe agregado de grupo | BE-37 | 5 | Media |
+| FE-36 | Exportación a Excel | BE-35 | 3 | Alta *(Completado)* |
+| FE-37 | Informe individual imprimible | BE-36 | 5 | Media *(Completado)* |
+| FE-38 | Informe agregado de grupo | BE-37 | 5 | Media *(Completado)* |
 
 **Vistas y carpetas propias:** `src/views/tests-catalog/`, `src/views/books-catalog/`, `src/views/bulk-entry/`, `src/views/section-detail/`, `src/views/reports/`  
 **Componentes propios:** `src/components/domain/TestTypeBadge.vue`, `src/components/domain/DeltaPill.vue`, componentes de tabla de lote  
