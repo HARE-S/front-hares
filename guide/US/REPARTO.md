@@ -95,9 +95,9 @@ La infraestructura troncal del frontend: sistema de diseño, cliente HTTP de API
 | FE-08 | Pantalla de usuario pendiente | BE-41 | 3 | Alta |
 | FE-09 | Interfaz adaptada al rol | BE-42 | 5 | Alta |
 | FE-10 | Gestión de usuarios y roles | BE-43 | 5 | Alta |
-| FE-30 | Componentes de gráfico | — | 5 | Media |
-| FE-31 | Evolución individual | BE-31 | 5 | Alta |
-| FE-33 | Proyección de evolución | BE-33 | 5 | Media |
+| FE-30 | Componentes de gráfico | — | 5 | Media *(Completado)* |
+| FE-31 | Evolución individual | BE-31 | 5 | Alta *(Completado)* |
+| FE-33 | Proyección de evolución | BE-33 | 5 | Media *(Completado)* |
 | FE-39 | Batería de pruebas de interfaz | — | 5 | Alta |
 
 **Vistas y carpetas propias:** `src/views/login/`, `src/views/pending/`, `src/views/users-admin/`, `src/views/dashboard/`  
