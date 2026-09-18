@@ -31,7 +31,7 @@ Todo lo relativo a la estructura organizativa (centros y secciones), el censo de
 | :--- | :--- | :--- | :---: | :--- |
 | FE-04 | Dockerización y proxy | — | 5 | Alta *(Completado)* |
 | FE-11 | Estados de pantalla (`StateBlock`) | — | 3 | Alta *(Completado)* |
-| FE-12 | Formularios con validación | — | 5 | Alta |
+| FE-12 | Formularios con validación | — | 5 | Alta *(Completado)*|
 | FE-23 | Pantalla de importación (Alexia) | BE-09 | 5 | Alta |
 | FE-24 | Informe de errores de importación | BE-08 | 3 | Media |
 | FE-25 | Navegación por centros y secciones | BE-10 | 3 | Alta |
