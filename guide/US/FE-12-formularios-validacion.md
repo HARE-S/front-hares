@@ -70,11 +70,11 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE12-01 | **Utilidades de validación** Obligatorio, rango numérico, coherencia de fechas. | - | Pendiente |
-| T-FE12-02 | **Componente BaseInput** Con estado de error y mensaje asociado. | - | Pendiente |
-| T-FE12-03 | **Mapeo de errores del servidor** Del campo devuelto al campo del formulario. | - | Pendiente |
-| T-FE12-04 | **Aviso de valor sospechoso** Umbrales configurables. | - | Pendiente |
-| T-FE12-05 | **Pruebas** Escenarios 3, 4 y 5. | - | Pendiente |
+| T-FE12-01 | **Utilidades de validación** Obligatorio, rango numérico, coherencia de fechas. | Bloque A | Completado |
+| T-FE12-02 | **Componente BaseInput** Con estado de error y mensaje asociado. | Bloque A | Completado |
+| T-FE12-03 | **Mapeo de errores del servidor** Del campo devuelto al campo del formulario. | Bloque A | Completado |
+| T-FE12-04 | **Aviso de valor sospechoso** Umbrales configurables. | Bloque A | Completado |
+| T-FE12-05 | **Pruebas** Escenarios 3, 4 y 5. | Bloque A | Completado |
 
 ---
 
