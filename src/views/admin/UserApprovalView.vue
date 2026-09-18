@@ -27,15 +27,31 @@ onMounted(async () => {
 async function loadUsers() {
   loading.value = true;
   try {
-    const response = await fetch('/api/v1/admin/users', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const data = await response.json();
+    const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
+      fetch('/api/v1/users/pending', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      }),
+      fetch('/api/v1/users/approved', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      }),
+      fetch('/api/v1/users/rejected', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      })
+    ]);
 
-    pendingUsers.value = data.pending || [];
-    approvedUsers.value = data.approved || [];
-    rejectedUsers.value = data.rejected || [];
+    const pendingData = await pendingRes.json();
+    const approvedData = await approvedRes.json();
+    const rejectedData = await rejectedRes.json();
+
+    pendingUsers.value = Array.isArray(pendingData) ? pendingData : [];
+    approvedUsers.value = Array.isArray(approvedData) ? approvedData : [];
+    rejectedUsers.value = Array.isArray(rejectedData) ? rejectedData : [];
   } catch (err) {
     console.error('Error cargando usuarios:', err);
   } finally {
@@ -45,9 +61,11 @@ async function loadUsers() {
 
 async function approveUser(userId) {
   try {
-    const response = await fetch(`/api/v1/admin/users/${userId}/approve`, {
+    const response = await fetch(`/api/v1/users/pending/${userId}/approve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ role: 'tutor' })
     });
 
     if (response.ok) {
@@ -60,9 +78,10 @@ async function approveUser(userId) {
 
 async function rejectUser(userId) {
   try {
-    const response = await fetch(`/api/v1/admin/users/${userId}/reject`, {
+    const response = await fetch(`/api/v1/users/pending/${userId}/reject`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -139,10 +158,10 @@ const displayUsers = computed(() => {
       <div v-else class="users-grid">
         <div v-for="u in displayUsers" :key="u.id" class="user-card">
           <div class="user-info">
-            <div class="user-name">{{ u.firstName }} {{ u.lastName }}</div>
+            <div class="user-name">{{ u.name }} {{ u.lastname }}</div>
             <div class="user-email">{{ u.email }}</div>
             <div class="user-meta">
-              <span class="center" v-if="u.center">{{ u.center }}</span>
+              <span class="center" v-if="u.area">{{ u.area }}</span>
               <span class="role">{{ u.role }}</span>
             </div>
           </div>

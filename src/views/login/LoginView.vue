@@ -45,7 +45,15 @@ async function handleLogin() {
     if (response) {
       // Establecer usuario inmediatamente para que el router guard lo detecte
       setUser(response);
-      const next = route.query.next || '/dashboard';
+      // Redirigir según el rol del usuario
+      let next = route.query.next;
+      if (!next) {
+        if (response.user?.role === 'superadmin') {
+          next = '/admin/approval';
+        } else {
+          next = '/dashboard';
+        }
+      }
       router.push(next);
     }
   } catch (err) {
@@ -94,13 +102,13 @@ async function handleRegister() {
     const res = await fetch('/api/v1/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({
         email: email.value,
         password: password.value,
-        firstName: firstName.value || email.value.split('@')[0],
-        lastName: lastName.value || '',
-        center: center.value || '',
-        role: role.value || ''
+        name: firstName.value || email.value.split('@')[0],
+        lastname: lastName.value || null,
+        area: center.value || null
       })
     });
 
