@@ -12,9 +12,22 @@
 
       <!-- Action Button Group -->
       <div class="action-buttons-group">
+        <!-- Super Admin: Panel de Aprobación -->
+        <button
+          v-if="user?.role === 'superadmin'"
+          type="button"
+          class="btn-dashboard btn-dashboard--secondary"
+          @click="router.push('/admin/approval')"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="btn-icon-secondary">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <span>Panel de Aprobación</span>
+        </button>
+
         <!-- Secondary Action: Assign Book -->
-        <button 
-          type="button" 
+        <button
+          type="button"
           class="btn-dashboard btn-dashboard--secondary"
           @click="handleAssignBook"
         >
@@ -37,10 +50,10 @@
         </button>
 
         <!-- Primary Forest Action: New Assessment -->
-        <button 
-          type="button" 
+        <button
+          type="button"
           class="btn-dashboard btn-dashboard--primary"
-          @click="$emit('new-assessment')"
+          @click="handleNewAssessment"
         >
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="btn-icon-accent">
             <path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
@@ -59,7 +72,11 @@
     </div>
 
     <!-- SECTION 2: Key Metric KPI Overview Cards -->
-    <KpiOverview @view-reinforcement="handleViewReinforcement" />
+    <KpiOverview
+      ref="kpiOverviewRef"
+      @view-reinforcement="handleViewReinforcement"
+      @view-report="(student) => { selectedReportStudent = student; showStudentReport = true; }"
+    />
 
     <!-- SECTION 3: Analytics Section (8/4 Split Grid) -->
     <section aria-label="Análisis de Rendimiento" class="analytics-split-grid">
@@ -75,24 +92,61 @@
     </section>
 
     <!-- SECTION 4: Data Table Section: Últimas Evaluaciones Registradas -->
-    <RecentAssessmentsTable 
+    <RecentAssessmentsTable
       @export="handleTableExport"
       @play-audio="handlePlayAudio"
       @view-detail="handleViewDetail"
+    />
+
+    <!-- Modals -->
+    <BookAssignModal
+      :is-open="showBookModal"
+      :students="kpiOverviewRef?.allStudents?.value || []"
+      :all-books="allBooks"
+      @close="closeBookModal"
+      @assign="handleBookAssign"
+    />
+
+    <NewAssessmentModal
+      :is-open="showAssessmentModal"
+      :students="kpiOverviewRef?.allStudents?.value || []"
+      :student-tests="kpiOverviewRef ? Object.assign({}, kpiOverviewRef.studentTests) : {}"
+      @close="closeAssessmentModal"
+      @create="handleAssessmentCreate"
+    />
+
+    <StudentReportModal
+      :is-open="showStudentReport"
+      :student="selectedReportStudent"
+      :student-tests="kpiOverviewRef?.studentTests"
+      @close="showStudentReport = false"
     />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuth } from '@/composables/useAuth';
 import KpiOverview from '../../components/dashboard/KpiOverview.vue';
 import FluencyChart from '../../components/dashboard/FluencyChart.vue';
 import LevelsDistribution from '../../components/dashboard/LevelsDistribution.vue';
 import RecentAssessmentsTable from '../../components/dashboard/RecentAssessmentsTable.vue';
+import BookAssignModal from '../../components/dashboard/BookAssignModal.vue';
+import NewAssessmentModal from '../../components/dashboard/NewAssessmentModal.vue';
+import StudentReportModal from '../../components/dashboard/StudentReportModal.vue';
 
+const router = useRouter();
+const { user } = useAuth();
 const emit = defineEmits(['new-assessment', 'assign-book']);
 
 const feedbackMessage = ref(null);
+const showBookModal = ref(false);
+const showAssessmentModal = ref(false);
+const showStudentReport = ref(false);
+const selectedReportStudent = ref(null);
+const kpiOverviewRef = ref(null);
+const allBooks = ref([]);
 
 function showFeedback(msg) {
   feedbackMessage.value = msg;
@@ -102,31 +156,96 @@ function showFeedback(msg) {
 }
 
 function handleAssignBook() {
-  emit('assign-book');
+  console.log('handleAssignBook triggered');
+  if (kpiOverviewRef.value) {
+    allBooks.value = kpiOverviewRef.value.getAllBooksFromStudents();
+  }
+  showBookModal.value = true;
+}
+
+function handleBookAssign(data) {
+  console.log('Libros asignados:', data);
+  if (kpiOverviewRef.value) {
+    kpiOverviewRef.value.addBooksToStudent(data.studentId, data.books);
+  }
+  showFeedback(`Se asignaron ${data.books.length} libro(s) a estudiante ${data.studentId}`);
+}
+
+function closeBookModal() {
+  showBookModal.value = false;
+}
+
+function handleNewAssessment() {
+  console.log('handleNewAssessment triggered');
+  showAssessmentModal.value = true;
+}
+
+function handleAssessmentCreate(data) {
+  console.log('Nueva evaluación creada:', data);
+  showFeedback(`Evaluación registrada para ${data.studentId} con prueba ${data.testId}`);
+}
+
+function closeAssessmentModal() {
+  showAssessmentModal.value = false;
 }
 
 function handleExportReport() {
-  showFeedback('Generando informe consolidado del Corte A (PDF/Excel)...');
+  console.log('handleExportReport triggered');
+  downloadCSV();
 }
 
 function handleViewReinforcement() {
+  console.log('handleViewReinforcement triggered');
   showFeedback('Filtrando alumnos prioritarios de intervención pedagógica (PPM < 85)...');
 }
 
 function handleOpenIntervention() {
+  console.log('handleOpenIntervention triggered');
   showFeedback('Abriendo protocolo de lectura asistida para casos de intervención.');
 }
 
 function handleTableExport(data) {
+  console.log('handleTableExport triggered', data);
   showFeedback(`Descarga iniciada: ${data.length} registros exportados a formato CSV/Excel.`);
 }
 
 function handlePlayAudio(assessment) {
+  console.log('handlePlayAudio triggered', assessment.studentName);
   showFeedback(`Reproduciendo audio de lectura de ${assessment.studentName} (${assessment.testCode}).`);
 }
 
 function handleViewDetail(assessment) {
+  console.log('handleViewDetail triggered', assessment.studentName);
   showFeedback(`Consultando ficha pedagógica completa de ${assessment.studentName}.`);
+}
+
+function viewStudentReport(student) {
+  selectedReportStudent.value = student;
+  showStudentReport.value = true;
+}
+
+function downloadCSV() {
+  const data = [
+    ['Alumno', 'Código', 'Prueba', 'Fecha', 'Velocidad', 'Exactitud', 'Comprensión', 'Nivel'],
+    ['Lucas Méndez Ruiz', '3AF', 'El bosque animado', '24 Ene 2025', '128 PPM', '98.5%', '4/4', 'Avanzado'],
+    ['Sofía Navarro Ortiz', '3AF', 'El bosque animado', '24 Ene 2025', '118 PPM', '96.0%', '4/4', 'En nivel'],
+    ['Mateo Barrenechea', '3BL', 'Aventuras en el mar', '23 Ene 2025', '82 PPM', '88.0%', '2/4', 'Requiere apoyo'],
+    ['Aitana Zubizarreta', '3AF', 'El bosque animado', '23 Ene 2025', '115 PPM', '95.0%', '3/4', 'En nivel']
+  ];
+
+  const csv = data.map(row => row.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+
+  link.setAttribute('href', url);
+  link.setAttribute('download', `evaluaciones-${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  showFeedback('Archivo CSV descargado correctamente');
 }
 </script>
 

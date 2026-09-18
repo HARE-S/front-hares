@@ -30,6 +30,12 @@ export const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/admin/approval',
+    name: 'user-approval',
+    component: () => import('@/views/admin/UserApprovalView.vue'),
+    meta: { requiresAuth: true, requiresRole: 'superadmin' }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/views/NotFoundView.vue'),
@@ -49,9 +55,12 @@ async function guard(to) {
 
   // Rutas públicas: login (/) y 404
   if (to.meta.public) {
-    // Si usuario está autenticado e intenta ir a login (/), redirigir a dashboard
+    // Si usuario está autenticado e intenta ir a login (/), redirigir al dashboard/admin
     if (to.name === 'login' && auth.isAuthenticated.value) {
-      console.log(`✅ Autenticado intenta login, redirigiendo a /dashboard`);
+      console.log(`✅ Autenticado intenta login`);
+      if (auth.user.value?.role === 'superadmin') {
+        return { name: 'user-approval' };
+      }
       return { name: 'dashboard' };
     }
     console.log(`✅ Ruta pública permitida`);

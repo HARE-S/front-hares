@@ -81,7 +81,7 @@ watch(() => form.code, (newCode) => {
 
 function applyDeductionManually() {
   const result = deduced.value;
-  if (result.course !== null) form.course = result.course;
+  if (result.course !== null) form.course = String(result.course);
   if (result.testLetter !== null) form.test_letter = result.testLetter;
   if (result.testType !== null) form.type = result.testType;
   autoDeductionApplied.value = true;

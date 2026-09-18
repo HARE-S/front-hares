@@ -12,7 +12,10 @@ const mode = ref('login'); // 'login', 'register', 'forgot'
 const email = ref('');
 const password = ref('');
 const passwordConfirm = ref('');
-const name = ref('');
+const firstName = ref('');
+const lastName = ref('');
+const center = ref('');
+const role = ref('');
 const error = ref('');
 const success = ref('');
 const loading = ref(false);
@@ -94,7 +97,10 @@ async function handleRegister() {
       body: JSON.stringify({
         email: email.value,
         password: password.value,
-        name: name.value || email.value.split('@')[0]
+        firstName: firstName.value || email.value.split('@')[0],
+        lastName: lastName.value || '',
+        center: center.value || '',
+        role: role.value || ''
       })
     });
 
@@ -109,7 +115,10 @@ async function handleRegister() {
     email.value = '';
     password.value = '';
     passwordConfirm.value = '';
-    name.value = '';
+    firstName.value = '';
+    lastName.value = '';
+    center.value = '';
+    role.value = '';
 
     setTimeout(() => {
       mode.value = 'login';
@@ -262,17 +271,31 @@ function handleKeydown(e) {
 
       <!-- Formulario Registro -->
       <form v-else @submit.prevent="handleRegister">
-        <div class="form-group">
-          <label for="name">Nombre (opcional)</label>
-          <input
-            id="name"
-            v-model="name"
-            type="text"
-            class="form-input"
-            placeholder="Tu nombre"
-            @keydown="handleKeydown"
-            :disabled="loading"
-          />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">Nombre</label>
+            <input
+              id="firstName"
+              v-model="firstName"
+              type="text"
+              class="form-input"
+              placeholder="Juan"
+              @keydown="handleKeydown"
+              :disabled="loading"
+            />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Apellido</label>
+            <input
+              id="lastName"
+              v-model="lastName"
+              type="text"
+              class="form-input"
+              placeholder="Pérez"
+              @keydown="handleKeydown"
+              :disabled="loading"
+            />
+          </div>
         </div>
 
         <div class="form-group">
@@ -287,6 +310,37 @@ function handleKeydown(e) {
             :disabled="loading"
             required
           />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="center">Centro (opcional)</label>
+            <input
+              id="center"
+              v-model="center"
+              type="text"
+              class="form-input"
+              placeholder="Ej: Botusbaru, Centro 2"
+              @keydown="handleKeydown"
+              :disabled="loading"
+            />
+          </div>
+          <div class="form-group">
+            <label for="role">Rol (opcional)</label>
+            <select
+              id="role"
+              v-model="role"
+              class="form-input"
+              :disabled="loading"
+            >
+              <option value="">Selecciona un rol</option>
+              <option value="teacher">Docente</option>
+              <option value="coordinator">Coordinador</option>
+              <option value="director">Director</option>
+              <option value="admin">Administrador</option>
+              <option value="superadmin">Super Administrador</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-group">
@@ -491,6 +545,24 @@ h1 {
 
 .form-group {
   margin-bottom: 1.25rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
+}
+
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
 }
 
 .password-wrapper {

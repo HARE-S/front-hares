@@ -2,25 +2,70 @@ import { http, HttpResponse } from 'msw';
 
 const mockUsers = [
   {
+    id: '0',
+    email: 'superadmin@grupopenascal.com',
+    password: 'superadmin123',
+    role: 'superadmin',
+    firstName: 'Super',
+    lastName: 'Administrador',
+    status: 'approved'
+  },
+  {
     id: '1',
     email: 'admin@grupopenascal.com',
     password: 'admin123',
     role: 'admin',
-    name: 'Administrador'
+    firstName: 'Admin',
+    lastName: 'User',
+    status: 'approved'
   },
   {
     id: '2',
     email: 'coordinator@grupopenascal.com',
     password: 'coord123',
     role: 'coordinator',
-    name: 'Coordinador'
+    firstName: 'Coordinador',
+    lastName: 'User',
+    status: 'approved'
   },
   {
     id: '3',
     email: 'teacher@grupopenascal.com',
     password: 'teacher123',
     role: 'teacher',
-    name: 'Profesor'
+    firstName: 'Profesor',
+    lastName: 'User',
+    status: 'approved'
+  },
+  {
+    id: '4',
+    email: 'juan.perez@grupopenascal.com',
+    password: 'pass123',
+    role: 'pending',
+    firstName: 'Juan',
+    lastName: 'Pérez García',
+    center: 'Botusbaru',
+    status: 'pending'
+  },
+  {
+    id: '5',
+    email: 'maria.lopez@grupopenascal.com',
+    password: 'pass123',
+    role: 'pending',
+    firstName: 'María',
+    lastName: 'López Ruiz',
+    center: 'Centro 2',
+    status: 'pending'
+  },
+  {
+    id: '6',
+    email: 'carlos.mendez@grupopenascal.com',
+    password: 'pass123',
+    role: 'pending',
+    firstName: 'Carlos',
+    lastName: 'Méndez Sánchez',
+    center: 'Botusbaru',
+    status: 'pending'
   }
 ];
 
@@ -45,7 +90,7 @@ console.log('[MSW] Handlers de autenticación listos');
 export const authHandlers = [
   http.post('/api/v1/auth/register', async ({ request }) => {
     const body = await request.json();
-    const { email, password, name } = body;
+    const { email, password, firstName, lastName, center, role } = body;
 
     if (!email.endsWith('@grupopenascal.com')) {
       return HttpResponse.json(
@@ -65,8 +110,11 @@ export const authHandlers = [
       id: String(mockUsers.length + 1),
       email,
       password,
-      name: name || email.split('@')[0],
-      role: 'pending' // Esperando aprobación del Super Admin
+      firstName: firstName || email.split('@')[0],
+      lastName: lastName || '',
+      center: center || '',
+      role: 'pending',
+      status: 'pending'
     };
 
     mockUsers.push(newUser);
@@ -227,5 +275,52 @@ export const authHandlers = [
       },
       { status: 200 }
     );
+  }),
+
+  http.get('/api/v1/admin/users', () => {
+    const pending = mockUsers.filter(u => u.role === 'pending');
+    const approved = mockUsers.filter(u => u.role !== 'pending' && u.status !== 'rejected');
+    const rejected = mockUsers.filter(u => u.status === 'rejected');
+
+    return HttpResponse.json({
+      pending,
+      approved,
+      rejected
+    });
+  }),
+
+  http.post('/api/v1/admin/users/:id/approve', ({ params }) => {
+    const user = mockUsers.find(u => u.id === params.id);
+
+    if (!user) {
+      return HttpResponse.json(
+        { error: 'Usuario no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    user.role = 'teacher'; // Rol por defecto al aprobar
+    user.status = 'approved';
+
+    return HttpResponse.json({
+      message: 'Usuario aprobado exitosamente'
+    });
+  }),
+
+  http.post('/api/v1/admin/users/:id/reject', ({ params }) => {
+    const user = mockUsers.find(u => u.id === params.id);
+
+    if (!user) {
+      return HttpResponse.json(
+        { error: 'Usuario no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    user.status = 'rejected';
+
+    return HttpResponse.json({
+      message: 'Usuario rechazado'
+    });
   })
 ];
