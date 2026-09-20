@@ -12,7 +12,7 @@ describe('studentService', () => {
   });
 
   describe('getStudentRecord', () => {
-    it('debe hacer una petición GET a /students/{studentId}/record', async () => {
+    it('debe hacer una petición GET a /students/{studentId}', async () => {
       const studentId = '123e4567-e89b-12d3-a456-426614174000';
       const mockData = {
         id: studentId,
@@ -26,7 +26,7 @@ describe('studentService', () => {
 
       const result = await getStudentRecord(studentId);
 
-      expect(api.request).toHaveBeenCalledWith(`/students/${studentId}/record`);
+      expect(api.request).toHaveBeenCalledWith(`/students/${studentId}`);
       expect(result).toEqual(mockData);
     });
 

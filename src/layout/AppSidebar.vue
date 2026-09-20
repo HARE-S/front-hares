@@ -1,23 +1,30 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useAuth } from '@/composables/useAuth';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import { LayoutDashboard, School, Users, Cloud, LogOut } from 'lucide-vue-next';
 
 const { user, logout } = useAuth();
 const router = useRouter();
+const route = useRoute();
 const showUserMenu = ref(false);
 
 const userInitials = computed(() => {
   if (!user.value) return '';
-  const parts = user.value.email.split('@')[0].split('.');
-  return parts.map(p => p.charAt(0).toUpperCase()).join('');
+  if (user.value.name) {
+    return user.value.name.substring(0, 2).toUpperCase();
+  }
+  const email = user.value.email || '';
+  return email.split('@')[0].substring(0, 2).toUpperCase();
 });
 
 const roleNames = {
   admin: 'Administrador',
   coordinator: 'Coordinador Pedagógico',
+  coordinador: 'Coordinador Pedagógico',
   teacher: 'Profesor',
-  tutor: 'Tutor'
+  tutor: 'Tutor',
+  superadmin: 'Administrador'
 };
 
 const formattedRole = computed(() => {
@@ -25,149 +32,94 @@ const formattedRole = computed(() => {
   return roleNames[user.value.role] || user.value.role;
 });
 
+const isAdmin = computed(() => ['admin', 'superadmin'].includes(user.value?.role));
+const isCentersActive = computed(() => route.path.startsWith('/centers'));
+
 async function handleLogout() {
   showUserMenu.value = false;
   await logout();
-  router.push('/login');
+  router.push({ name: 'login' });
 }
 </script>
 
 <template>
-  <aside class="app-sidebar">
-    <!-- Header con logo -->
-    <div class="sidebar-header">
-      <div class="logo-section">
-        <div class="logo-icon">
-          <img src="/logo-hares.png" alt="HARE-S" class="logo-image" />
+  <aside class="stitch-sidebar">
+    <div class="sidebar-top">
+      <!-- Branding -->
+      <router-link to="/dashboard" class="brand-header">
+        <div class="brand-icon-box">
+          <img src="/logo-hare.png" alt="HARE-S" class="brand-logo" />
         </div>
-        <div class="logo-text">
-          <h2 class="logo-title">HARE-S</h2>
-          <span class="logo-badge">EDU</span>
-        </div>
-      </div>
-      <p class="foundation-text">Fundación Peñascal</p>
-    </div>
-
-    <!-- Botón Nueva Evaluación -->
-    <div class="action-section">
-      <button class="btn-new-evaluation">
-        ➕ Nueva Evaluación
-      </button>
-    </div>
-
-    <!-- Navegación -->
-    <nav class="sidebar-nav">
-      <router-link to="/" class="nav-link" active-class="active">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-        <span class="nav-text">Dashboard</span>
-      </router-link>
-
-      <router-link to="/centers" class="nav-link" active-class="active">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-          <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          <line x1="9" y1="5" x2="9" y2="9"></line>
-          <line x1="15" y1="5" x2="15" y2="9"></line>
-        </svg>
-        <span class="nav-text">Centros</span>
-      </router-link>
-
-      <router-link to="/tests" class="nav-link" active-class="active">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M6 9l6-6 6 6M3 9v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9"></path>
-          <path d="M9 13v4M15 13v4"></path>
-        </svg>
-        <span class="nav-text">Catálogo de Pruebas</span>
-      </router-link>
-
-      <router-link to="/bulk-entry" class="nav-link" active-class="active">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-          <path d="M3 9h18M9 9v12M15 9v12"></path>
-        </svg>
-        <span class="nav-text">Registro en Aula</span>
-      </router-link>
-
-      <router-link to="/books" class="nav-link" active-class="active">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-          <line x1="10" y1="5" x2="10" y2="15"></line>
-        </svg>
-        <span class="nav-text">Biblioteca de Libros</span>
-      </router-link>
-
-      <router-link to="/reports" class="nav-link" active-class="active">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-          <path d="M7 12h10M7 15h10M7 9h10"></path>
-          <rect x="4" y="4" width="3" height="3" fill="currentColor"></rect>
-        </svg>
-        <span class="nav-text">Informes</span>
-      </router-link>
-
-      <router-link v-if="user?.role === 'admin'" to="/users-admin" class="nav-link" active-class="active">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-        <span class="nav-text">Usuarios</span>
-      </router-link>
-    </nav>
-
-    <!-- Footer -->
-    <div class="sidebar-footer">
-      <!-- Course Info -->
-      <div class="course-info">
-        <div class="course-dot"></div>
-        <div class="course-text">
-          <p class="course-name">Curso 2024-25</p>
-          <p class="course-status">Sincronizado</p>
-        </div>
-      </div>
-
-      <!-- User Avatar -->
-      <div v-if="user" class="user-section">
-        <button class="user-button" @click="showUserMenu = !showUserMenu">
-          <div class="user-avatar">
-            {{ userInitials }}
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <span class="brand-name">HARE-S</span>
+            <span class="brand-edu-chip">Edu</span>
           </div>
+          <span class="brand-org">Fundación Peñascal</span>
+        </div>
+      </router-link>
+
+      <!-- Navegación principal -->
+      <nav class="sidebar-nav">
+        <router-link to="/dashboard" class="nav-item" active-class="active">
+          <LayoutDashboard :size="18" />
+          <span class="flex-1">Dashboard</span>
+        </router-link>
+
+        <router-link to="/centers" class="nav-item" active-class="active">
+          <School :size="18" />
+          <span class="flex-1">Centros</span>
+          <span v-if="isCentersActive" class="nav-active-dot"></span>
+        </router-link>
+
+        <router-link
+          v-if="isAdmin"
+          to="/admin/approval"
+          class="nav-item"
+          active-class="active"
+        >
+          <Users :size="18" />
+          <span class="flex-1">Usuarios</span>
+        </router-link>
+      </nav>
+    </div>
+
+    <!-- Pie de la barra lateral -->
+    <div class="sidebar-bottom">
+      <div class="academic-session-card">
+        <div class="session-info">
+          <div class="pulse-indicator">
+            <span class="pulse-dot"></span>
+          </div>
+          <div class="session-labels">
+            <span class="session-year">Curso 2024-25</span>
+            <span class="session-status">Sincronizado</span>
+          </div>
+        </div>
+        <Cloud :size="16" class="session-icon" />
+      </div>
+
+      <!-- User Section -->
+      <div class="user-section">
+        <button class="user-avatar-wrapper" @click="showUserMenu = !showUserMenu">
+          <div class="user-avatar">{{ userInitials || 'U' }}</div>
           <div class="user-info">
-            <p class="user-name-label">{{ user.name }}</p>
-            <p class="user-role-label">{{ formattedRole }}</p>
+            <p class="user-name">{{ user?.name || userInitials || 'Usuario' }}</p>
+            <p class="user-role">{{ formattedRole }}</p>
           </div>
         </button>
 
         <div v-if="showUserMenu" class="user-menu">
           <div class="menu-header">
-            <p class="user-name">{{ user.email }}</p>
-            <p class="user-role">{{ user.role }}</p>
+            <p class="user-name">{{ user?.name || 'Usuario' }}</p>
+            <p class="user-role">{{ user?.email || 'Sin email' }}</p>
           </div>
 
           <div class="menu-divider"></div>
 
-          <div class="menu-actions">
-            <button class="menu-action-btn">
-              <span class="action-icon">❓</span>
-              <span class="action-label">Soporte</span>
-            </button>
-            <button class="menu-action-btn">
-              <span class="action-icon">⚙️</span>
-              <span class="action-label">Configuración</span>
-            </button>
-          </div>
-
-          <div class="menu-divider"></div>
-
-          <button @click="handleLogout" class="logout-btn">
-            🚪 Cerrar sesión
+          <button class="logout-btn" @click="handleLogout">
+            <LogOut :size="16" />
+            <span>Cerrar sesión</span>
           </button>
         </div>
       </div>
@@ -176,272 +128,228 @@ async function handleLogout() {
 </template>
 
 <style scoped>
-.app-sidebar {
-  width: 320px;
-  background: linear-gradient(180deg, #1a3a35 0%, #0f2e26 50%, #022c22 100%);
-  color: var(--white);
+/* --- BARRA LATERAL STITCH (#192134) --- */
+.stitch-sidebar {
+  width: 260px;
+  background-color: var(--tertiary);
+  color: var(--on-tertiary-container);
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  border-right: 1px solid var(--green-900);
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
+  justify-content: space-between;
+  padding: 1.5rem 1rem;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 40;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Header */
-.sidebar-header {
-  padding: 2rem 1.5rem 1.5rem;
-  border-bottom: 1px solid var(--green-900);
-}
-
-.logo-section {
+.brand-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.5rem 1.25rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none;
 }
 
-.logo-icon {
-  width: 48px;
-  height: 48px;
+.brand-header:hover .brand-name {
+  color: var(--secondary-fixed);
+}
+
+.brand-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-container-lowest);
+  border: 1px solid rgba(111, 251, 190, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--white);
-  border: 1.5px solid var(--green-500);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  color: var(--secondary-fixed);
   padding: 4px;
 }
 
-.logo-icon svg {
-  width: 32px;
-  height: 32px;
-}
-
-.logo-image {
-  width: 38px;
-  height: 38px;
+.brand-logo {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
-.logo-text {
+.brand-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.brand-name {
+  font-family: var(--font-headline);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--surface-container-lowest);
+  letter-spacing: -0.02em;
+}
+
+.brand-edu-chip {
+  background-color: rgba(0, 108, 73, 0.4);
+  color: var(--secondary-fixed);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(111, 251, 190, 0.3);
+  text-transform: uppercase;
+}
+
+.brand-org {
+  font-size: 0.75rem;
+  color: var(--on-tertiary-container);
+}
+
+/* Navegación */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 1rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--on-tertiary-container);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: left;
+  width: 100%;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background-color: var(--tertiary-container);
+  color: var(--surface-container-lowest);
+}
+
+.nav-item.active {
+  background-color: var(--primary-container);
+  color: var(--secondary-fixed);
+  border-color: rgba(111, 251, 190, 0.25);
+  font-weight: 600;
+}
+
+.nav-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--secondary-fixed);
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* Pie de la barra */
+.academic-session-card {
+  background-color: rgba(46, 54, 75, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.session-info {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.logo-title {
-  margin: 0;
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--white);
-  letter-spacing: -0.5px;
-}
-
-.logo-badge {
-  background: linear-gradient(135deg, var(--green-500), var(--green-400));
-  color: var(--green-950);
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
-
-.foundation-text {
-  margin: 0.5rem 0 0;
-  font-size: 0.8rem;
-  color: var(--green-300);
-  font-weight: 500;
-}
-
-/* Botón Nueva Evaluación */
-.action-section {
-  padding: 1rem 1rem;
-  border-bottom: 1px solid var(--green-900);
-}
-
-.btn-new-evaluation {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  background: linear-gradient(135deg, var(--green-500), var(--green-400));
-  color: var(--green-950);
-  border: 1px solid var(--green-400);
-  border-radius: var(--radius-md);
-  font-weight: 700;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: var(--transition);
-  text-align: center;
-}
-
-.btn-new-evaluation:hover {
-  background: linear-gradient(135deg, var(--green-400), var(--green-300));
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-/* Navegación */
-.sidebar-nav {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem 0;
-}
-
-.nav-link {
+.pulse-indicator {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
-  color: var(--green-200);
-  text-decoration: none;
-  transition: var(--transition);
-  border-left: 3px solid transparent;
-  font-size: 0.95rem;
-  font-weight: 500;
+  position: relative;
+  width: 8px;
+  height: 8px;
 }
 
-.nav-icon {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.nav-text {
-  flex: 1;
-}
-
-.nav-link:hover {
-  background-color: rgba(16, 185, 129, 0.1);
-  border-left-color: var(--green-400);
-  color: var(--green-100);
-}
-
-.nav-link.active {
-  background-color: rgba(16, 185, 129, 0.15);
-  border-left-color: var(--green-400);
-  color: var(--green-100);
-  font-weight: 700;
-}
-
-.nav-link.active::after {
-  content: '•';
-  position: absolute;
-  right: 1.5rem;
-  color: var(--green-400);
-  font-size: 1.5rem;
-}
-
-/* Footer */
-.sidebar-footer {
-  padding: 1.5rem;
-  border-top: 1px solid var(--green-900);
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-
-/* Course Info */
-.course-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  background: rgba(16, 185, 129, 0.05);
-  border: 1px solid var(--green-900);
-  border-radius: var(--radius-md);
-}
-
-.course-dot {
+.pulse-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #10b981;
-  animation: pulse 2s infinite;
+  background-color: var(--secondary-fixed);
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+.session-labels {
+  display: flex;
+  flex-direction: column;
 }
 
-.course-text {
-  flex: 1;
-}
-
-.course-name {
-  margin: 0;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--green-100);
-}
-
-.course-status {
-  margin: 0;
+.session-year {
   font-size: 0.75rem;
-  color: var(--green-400);
+  font-weight: 600;
+  color: var(--surface-container-lowest);
+}
+
+.session-status {
+  font-size: 0.7rem;
+  color: var(--on-tertiary-container);
+}
+
+.session-icon {
+  color: var(--on-tertiary-container);
 }
 
 /* User Section */
 .user-section {
   position: relative;
+  padding: 0 0.75rem;
 }
 
-.user-button {
+.user-avatar-wrapper {
   display: flex;
   align-items: center;
-  gap: 0.875rem;
-  padding: 0.5rem 0.75rem;
-  width: 100%;
-  background: transparent;
+  gap: 0.5rem;
+  background: none;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  padding: 0.5rem;
   border-radius: var(--radius-md);
-  text-align: left;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  overflow: hidden;
 }
 
-.user-button:hover {
-  background-color: rgba(16, 185, 129, 0.1);
+.user-avatar-wrapper:hover {
+  background-color: rgba(75, 85, 99, 0.2);
 }
 
 .user-avatar {
-  width: 52px;
-  height: 52px;
-  min-width: 52px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--green-500), var(--green-400));
-  color: var(--green-950);
-  border: 2px solid var(--green-300);
+  background-color: var(--secondary);
+  color: var(--surface-container-lowest);
+  border: 2px solid rgba(111, 251, 190, 0.3);
   font-weight: 800;
-  font-size: 1.2rem;
-  transition: all 0.3s ease;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  overflow: hidden;
+  flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
-.user-avatar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.15), transparent);
-  pointer-events: none;
-}
-
-.user-button:hover .user-avatar {
-  background: linear-gradient(135deg, var(--green-400), var(--green-300));
-  transform: scale(1.08);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
-  border-color: var(--green-200);
+.user-avatar-wrapper:hover .user-avatar {
+  border-color: rgba(111, 251, 190, 0.5);
 }
 
 .user-info {
@@ -449,121 +357,90 @@ async function handleLogout() {
   flex-direction: column;
   gap: 0;
   flex: 1;
-  text-align: left;
+  min-width: 0;
+  overflow: hidden;
 }
 
-.user-name-label {
+.user-info .user-name {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--green-100);
-  word-break: break-word;
-  line-height: 1.2;
+  color: var(--surface-container-lowest);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.user-role-label {
+.user-info .user-role {
   margin: 0;
-  font-size: 0.75rem;
-  color: var(--green-300);
-  letter-spacing: 0.02em;
-  line-height: 1.2;
-}
-
-/* Responsive: ocultar texto en tablet/mobile */
-@media (max-width: 1024px) {
-  .user-info {
-    display: none;
-  }
-
-  .user-button {
-    padding: 0.5rem;
-    justify-content: center;
-  }
+  font-size: 0.65rem;
+  color: var(--on-tertiary-container);
+  text-transform: capitalize;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-menu {
-  position: absolute;
-  bottom: calc(100% + 0.75rem);
-  left: 0;
-  right: 0;
-  background-color: var(--green-900);
-  border: 1px solid var(--green-800);
+  position: fixed;
+  bottom: 75px;
+  left: 75px;
+  width: 280px;
+  background-color: var(--tertiary-container);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
-  z-index: 10;
-  min-width: 220px;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  animation: slideRight 0.3s ease-out;
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .menu-header {
-  padding: 0.875rem 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.user-name {
+.user-menu .user-name {
   margin: 0 0 0.25rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--green-100);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--surface-container-lowest);
   word-break: break-all;
 }
 
-.user-role {
+.user-menu .user-role {
   margin: 0;
   font-size: 0.75rem;
-  color: var(--green-300);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--on-tertiary-container);
 }
 
 .menu-divider {
   height: 1px;
-  background: var(--green-800);
+  background: rgba(255, 255, 255, 0.12);
   margin: 0.5rem 0;
-}
-
-.menu-actions {
-  padding: 0.5rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.menu-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: transparent;
-  border: none;
-  color: var(--green-200);
-  cursor: pointer;
-  transition: var(--transition);
-  text-align: left;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.menu-action-btn:hover {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: var(--green-100);
-}
-
-.action-icon {
-  font-size: 1.1rem;
-}
-
-.action-label {
-  flex: 1;
 }
 
 .logout-btn {
   width: 100%;
   padding: 0.75rem 1rem;
   background-color: transparent;
-  color: #fca5a5;
+  color: var(--surface-container-lowest);
   border: none;
   cursor: pointer;
-  transition: var(--transition);
+  transition: var(--transition-fast);
   font-size: 0.9rem;
   font-weight: 500;
   text-align: left;
@@ -572,26 +449,54 @@ async function handleLogout() {
   gap: 0.75rem;
 }
 
+.logout-btn svg {
+  color: var(--level-low-dot);
+}
+
 .logout-btn:hover {
-  background-color: rgba(220, 38, 38, 0.15);
-  color: #fca5a5;
+  background-color: rgba(220, 38, 38, 0.2);
 }
 
-/* Scrollbar */
-.sidebar-nav::-webkit-scrollbar {
-  width: 6px;
-}
+@media (max-width: 1024px) {
+  .stitch-sidebar {
+    width: 72px;
+    padding: 1rem 0.5rem;
+  }
 
-.sidebar-nav::-webkit-scrollbar-track {
-  background: transparent;
-}
+  .brand-text,
+  .nav-item span,
+  .academic-session-card {
+    display: none;
+  }
 
-.sidebar-nav::-webkit-scrollbar-thumb {
-  background: var(--green-700);
-  border-radius: 3px;
-}
+  .brand-header {
+    padding: 0.5rem;
+    justify-content: center;
+  }
 
-.sidebar-nav::-webkit-scrollbar-thumb:hover {
-  background: var(--green-600);
+  .nav-item {
+    justify-content: center;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .user-avatar-wrapper {
+    justify-content: center;
+    padding: 0.35rem;
+  }
+
+  .user-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
+  }
+
+  .user-menu {
+    left: 75px;
+    width: 280px;
+    bottom: 75px;
+  }
 }
 </style>

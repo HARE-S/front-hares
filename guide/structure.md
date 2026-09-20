@@ -76,7 +76,10 @@ front-hares/
     │   ├── login/
     │   ├── pending/            # usuario sin rol asignado
     │   ├── dashboard/
-    │   ├── centers/
+    │   ├── centers/            # navegación FE-25 (centros → secciones → alumnado)
+    │   │   ├── CentersListView.vue
+    │   │   ├── CenterDetailView.vue
+    │   │   └── SectionStudentsView.vue
     │   ├── section-detail/
     │   ├── student-detail/
     │   ├── bulk-entry/         # registro de resultados en lote
@@ -103,10 +106,12 @@ front-hares/
     ├── services/               # ÚNICO punto de contacto con la API
     │   ├── api.js              # cliente base: sesión, 401, 403, errores
     │   ├── authService.js
-    │   ├── studentsService.js
+    │   ├── directoryService.js # centros, secciones y alumnado (FE-25, BE-10)
+    │   ├── studentService.js
     │   ├── resultsService.js
     │   ├── testsService.js
     │   ├── booksService.js
+    │   ├── importService.js
     │   └── reportsService.js
     │
     ├── composables/
@@ -119,9 +124,15 @@ front-hares/
     │   └── validation.js
     │
     └── tests/
-        ├── setup.js
-        ├── handlers.js         # respuestas simuladas de la API
-        └── helpers.js
+        ├── mswSetup.js           # registra los handlers MSW (dev)
+        ├── handlers/             # respuestas simuladas por módulo
+        │   ├── authHandlers.js
+        │   ├── dashboardHandlers.js
+        │   ├── testsHandlers.js
+        │   ├── booksHandlers.js
+        │   ├── importHandlers.js
+        │   └── sectionsHandlers.js   # centros/secciones/alumnado (FE-25)
+        └── *.spec.js             # pruebas por módulo (centers, directoryService, ...)
 ```
 
 ---
@@ -344,4 +355,4 @@ coverage/
 
 ---
 
-*Última actualización: 15/09/2026 · Ver también `deployment.md`, `testing.md` y `workflow.md` · Servidor en `back-hares/guide/structure.md`*
+*Última actualización: 19/09/2026 · Ver también `deployment.md`, `testing.md` y `workflow.md` · Servidor en `back-hares/guide/structure.md`*

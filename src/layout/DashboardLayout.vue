@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import DashboardView from '@/views/dashboard/DashboardView.vue';
 import BooksCatalogView from '@/views/books-catalog/BooksCatalogView.vue';
@@ -13,6 +13,7 @@ import TestsCatalogView from '@/views/tests-catalog/TestsCatalogView.vue';
 import RegisterResultModal from '@/components/results/RegisterResultModal.vue';
 
 const router = useRouter();
+const route = useRoute();
 const { logout, user } = useAuth();
 
 import {
@@ -24,7 +25,8 @@ import {
   BarChart3,
   CheckCircle2,
   Cloud,
-  LayoutDashboard
+  LayoutDashboard,
+  School
 } from 'lucide-vue-next';
 
 const currentTab = ref('statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
@@ -134,6 +136,16 @@ async function handleLogout() {
           >
             <LayoutDashboard :size="18" />
             <span>Estadísticas</span>
+          </button>
+
+          <button
+            class="nav-item"
+            :class="{ active: route.path.startsWith('/centers') }"
+            @click="router.push('/centers')"
+          >
+            <School :size="18" />
+            <span class="flex-1">Alumnado</span>
+            <span v-if="route.path.startsWith('/centers')" class="nav-active-dot"></span>
           </button>
 
           <button

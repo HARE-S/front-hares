@@ -20,7 +20,7 @@ import { request } from './api';
  * @returns {Promise<StudentRecord>}
  */
 export async function getStudentRecord(studentId) {
-  const response = await request(`/students/${studentId}/record`);
+  const response = await request(`/students/${studentId}`);
   return response;
 }
 

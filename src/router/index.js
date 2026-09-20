@@ -35,6 +35,45 @@ export const routes = [
     component: () => import('@/views/admin/UserApprovalView.vue'),
     meta: { requiresAuth: true, requiresRole: 'superadmin' }
   },
+  /**
+   * FE-25 (Marlen, 19/09/2026): rutas de "Alumnado" (centros → secciones →
+   * alumnado → ficha).
+   *
+   * POR QUÉ SE AÑADIERON: la navegación de FE-25 necesita estas rutas para
+   * funcionar y el índice de rutas no las tenía, aunque se había comunicado
+   * Se añaden aquí el mínimo necesario para
+   * FE-25 (no las rutas de otras historias).
+   */
+  {
+    path: '/centers',
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'centers',
+        component: () => import('@/views/centers/CentersListView.vue')
+      },
+      {
+        path: ':centerId',
+        name: 'center-detail',
+        component: () => import('@/views/centers/CenterDetailView.vue'),
+        props: true
+      },
+      {
+        path: ':centerId/sections/:sectionId/students',
+        name: 'section-students',
+        component: () => import('@/views/centers/SectionStudentsView.vue'),
+        props: true
+      },
+      {
+        path: ':centerId/sections/:sectionId/students/:studentId',
+        name: 'student-detail',
+        component: () => import('@/views/student-detail/StudentDetailView.vue'),
+        props: true
+      }
+    ]
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',

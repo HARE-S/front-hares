@@ -269,8 +269,8 @@ onMounted(() => {
   justify-content: space-between;
   align-items: flex-start;
   gap: 2rem;
-  background-color: var(--white);
-  border: 1px solid var(--gray-200);
+  background-color: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
 }
@@ -278,7 +278,7 @@ onMounted(() => {
 .header-info h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--green-950);
+  color: var(--on-surface);
   margin: 0 0 0.75rem 0;
 }
 
@@ -289,7 +289,7 @@ onMounted(() => {
 
 .meta-item {
   font-size: 0.95rem;
-  color: var(--gray-600);
+  color: var(--on-surface-variant);
 }
 
 .header-stats {
@@ -299,8 +299,8 @@ onMounted(() => {
 
 .stat-card {
   text-align: center;
-  background-color: var(--gray-50);
-  border: 1px solid var(--gray-200);
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
   border-radius: var(--radius-md);
   padding: 1rem;
   min-width: 120px;
@@ -316,14 +316,14 @@ onMounted(() => {
 .stat-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--gray-600);
+  color: var(--on-surface-variant);
   text-transform: uppercase;
 }
 
 /* Cards */
 .card {
-  background-color: var(--white);
-  border: 1px solid var(--gray-200);
+  background-color: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
 }
@@ -331,9 +331,9 @@ onMounted(() => {
 .card h2 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--green-950);
+  color: var(--on-surface);
   margin: 0 0 1rem 0;
-  border-bottom: 2px solid var(--green-100);
+  border-bottom: 2px solid var(--outline-variant);
   padding-bottom: 0.5rem;
 }
 
@@ -349,7 +349,7 @@ onMounted(() => {
 .group-title {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--gray-600);
+  color: var(--on-surface-variant);
   text-transform: uppercase;
   margin-bottom: 0.75rem;
 }
@@ -361,7 +361,7 @@ onMounted(() => {
 }
 
 .section-item {
-  background-color: var(--gray-50);
+  background-color: var(--surface-container-low);
   border-left: 4px solid var(--green-500);
   padding: 0.75rem;
   border-radius: var(--radius-md);
@@ -369,19 +369,19 @@ onMounted(() => {
 
 .section-name {
   font-weight: 600;
-  color: var(--green-950);
+  color: var(--on-surface);
   margin-bottom: 0.25rem;
 }
 
 .section-year {
   font-size: 0.85rem;
-  color: var(--gray-500);
+  color: var(--on-surface-variant);
   font-weight: 400;
 }
 
 .section-teacher {
   font-size: 0.85rem;
-  color: var(--gray-600);
+  color: var(--on-surface-variant);
 }
 
 /* Gráficos */
@@ -391,7 +391,7 @@ onMounted(() => {
 
 .chart-description {
   font-size: 0.8rem;
-  color: var(--gray-500);
+  color: var(--on-surface-variant);
   margin-top: 0.5rem;
 }
 
@@ -400,10 +400,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--gray-50);
+  background-color: var(--surface-container-low);
   border: 1px dashed var(--gray-300);
   border-radius: var(--radius-md);
-  color: var(--gray-500);
+  color: var(--on-surface-variant);
   font-size: 0.9rem;
   font-style: italic;
 }
@@ -422,18 +422,18 @@ table {
 th, td {
   padding: 0.75rem;
   text-align: left;
-  border-bottom: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--outline-variant);
 }
 
 th {
-  background-color: var(--gray-50);
+  background-color: var(--surface-container-low);
   font-weight: 600;
-  color: var(--green-950);
+  color: var(--on-surface);
   font-size: 0.8rem;
 }
 
 tr:hover {
-  background-color: var(--gray-50);
+  background-color: var(--surface-container-low);
 }
 
 .variance {
@@ -457,8 +457,8 @@ tr:hover {
 }
 
 .difference-card {
-  background-color: var(--gray-50);
-  border: 1px solid var(--gray-200);
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
   border-radius: var(--radius-md);
   padding: 1.5rem;
 }
@@ -466,7 +466,7 @@ tr:hover {
 .difference-card h3 {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--green-950);
+  color: var(--on-surface);
   margin: 0 0 1rem 0;
 }
 
@@ -480,7 +480,7 @@ tr:hover {
   padding: 0.5rem 0;
   padding-left: 1.5rem;
   position: relative;
-  color: var(--gray-700);
+  color: var(--on-surface);
   font-size: 0.9rem;
 }
 
@@ -493,7 +493,7 @@ tr:hover {
 }
 
 .empty-text {
-  color: var(--gray-500);
+  color: var(--on-surface-variant);
   font-style: italic;
   margin: 0;
 }
@@ -542,12 +542,12 @@ tr:hover {
 .state-error,
 .state-forbidden,
 .state-no-data {
-  background-color: var(--white);
-  border: 1px solid var(--gray-200);
+  background-color: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
   border-radius: var(--radius-lg);
   padding: 3rem;
   text-align: center;
-  color: var(--gray-600);
+  color: var(--on-surface-variant);
 }
 
 .state-error {
@@ -573,7 +573,7 @@ tr:hover {
 .empty-state {
   padding: 2rem;
   text-align: center;
-  color: var(--gray-500);
+  color: var(--on-surface-variant);
   font-style: italic;
 }
 

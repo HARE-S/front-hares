@@ -1,45 +1,66 @@
 <script setup>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
 import AppSidebar from './AppSidebar.vue';
-import AppHeader from './AppHeader.vue';
-
-const route = useRoute();
-
-// Las pantallas fuera del layout (login, 404) no muestran el shell.
-const showShell = computed(() => !route.meta.public);
 </script>
 
 <template>
-  <div v-if="showShell" class="app-shell">
+  <div class="stitch-app">
     <AppSidebar />
-    <div class="shell-main">
-      <AppHeader />
-      <main class="shell-content">
-        <router-view />
+    <div class="stitch-main-layout">
+      <main class="stitch-content-canvas">
+        <div class="content-container">
+          <router-view />
+        </div>
       </main>
+      <footer class="stitch-footer">
+        <p>HARE-S · Sistema de Evaluación de Fluidez y Comprensión Lectora · Fundación Peñascal</p>
+      </footer>
     </div>
   </div>
-  <router-view v-else />
 </template>
 
 <style scoped>
-.app-shell {
-  display: grid;
-  grid-template-columns: auto 1fr;
+.stitch-app {
+  display: flex;
   min-height: 100vh;
-  background-color: var(--gray-50);
+  background-color: var(--background);
 }
 
-.shell-main {
+.stitch-main-layout {
+  flex: 1;
+  margin-left: 260px;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-height: 100vh;
 }
 
-.shell-content {
+.stitch-content-canvas {
   flex: 1;
-  padding: 1.5rem;
-  overflow-y: auto;
+  padding: 2rem 1.75rem;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.content-container {
+  width: 100%;
+}
+
+.stitch-footer {
+  border-top: 1px solid var(--outline-variant);
+  background-color: var(--surface-container-lowest);
+  padding: 1rem 1.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+}
+
+.stitch-footer p {
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .stitch-main-layout {
+    margin-left: 72px;
+  }
 }
 </style>

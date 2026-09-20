@@ -3,8 +3,9 @@ import { authHandlers } from './handlers/authHandlers';
 import { testsHandlers } from './handlers/testsHandlers';
 import { dashboardHandlers } from './handlers/dashboardHandlers';
 import { booksHandlers } from './handlers/booksHandlers';
+import { sectionsHandlers } from './handlers/sectionsHandlers';
 
-export const worker = setupWorker(...authHandlers, ...testsHandlers, ...dashboardHandlers, ...booksHandlers);
+export const worker = setupWorker(...authHandlers, ...testsHandlers, ...dashboardHandlers, ...booksHandlers, ...sectionsHandlers);
 
 // En desarrollo, MSW debe estar listo antes de cualquier petición
 export const mswReady = import.meta.env.DEV

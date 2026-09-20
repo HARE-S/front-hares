@@ -78,11 +78,11 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE25-01 | **Servicio de centros y secciones** Con JSDoc. | - | Pendiente |
-| T-FE25-02 | **Listado de centros** Con recuento de secciones. | - | Pendiente |
-| T-FE25-03 | **Detalle de centro y de sección** Con migas de pan. | - | Pendiente |
-| T-FE25-04 | **Filtrado por ámbito del tutor** | - | Pendiente |
-| T-FE25-05 | **Pruebas** Escenarios 4 y 6. | - | Pendiente |
+| T-FE25-01 | **Servicio de centros y secciones** Con JSDoc. | - | Completado |
+| T-FE25-02 | **Listado de centros** Con recuento de secciones. | - | Completado |
+| T-FE25-03 | **Detalle de centro y de sección** Con migas de pan. | - | Completado |
+| T-FE25-04 | **Filtrado por ámbito del tutor** | - | Completado |
+| T-FE25-05 | **Pruebas** Escenarios 4 y 6. | - | Completado |
 
 ---
 
