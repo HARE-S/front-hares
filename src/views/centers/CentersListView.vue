@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getCenters } from '@/services/directoryService';
+import StudentSearch from '@/components/domain/StudentSearch.vue';
 
 const centers = ref([]);
 const loading = ref(false);
@@ -32,6 +33,10 @@ onMounted(loadCenters);
       <p class="subtitle">Selecciona un centro para ver sus secciones y su alumnado.</p>
     </header>
 
+    <div class="search-bar">
+      <StudentSearch data-testid="student-search" />
+    </div>
+
     <div v-if="loading" class="state-loading">
       <p>Cargando centros...</p>
     </div>
@@ -50,7 +55,7 @@ onMounted(loadCenters);
         <thead>
           <tr>
             <th>Centro</th>
-            <th class="col-count">Secciones</th>
+            <th class="col-count">Secciones activas</th>
           </tr>
         </thead>
         <tbody>
@@ -70,7 +75,7 @@ onMounted(loadCenters);
               </router-link>
             </td>
             <td class="col-count">
-              <span class="badge badge-count">{{ center.sections_count }}</span>
+              <span class="badge badge-count" title="N.º de secciones activas del centro">{{ center.sections_count }}</span>
             </td>
           </tr>
         </tbody>
@@ -106,6 +111,10 @@ onMounted(loadCenters);
   margin: 0;
   color: var(--on-surface-variant);
   font-size: 0.95rem;
+}
+
+.search-bar {
+  max-width: 480px;
 }
 
 .breadcrumb {

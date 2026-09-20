@@ -36,7 +36,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-10](FE-10-gestion-usuarios.md) | Gestión de usuarios y roles | BE-43 | 5 | Alta | Pendiente |
 | **Transversales** | | | | | |
 | [FE-11](FE-11-estados-pantalla.md) | Estados de pantalla | — | 3 | Alta | **Completado** |
-| [FE-12](FE-12-formularios-validacion.md) | Formularios con validación | — | 5 | Alta | **En revisión** |
+| [FE-12](FE-12-formularios-validacion.md) | Formularios con validación | — | 5 | Alta | **Completado** |
 | [FE-13](FE-13-uso-tableta.md) | Uso en tableta | — | 5 | Baja | Pendiente |
 | **Catálogos** | | | | | |
 | [FE-14](FE-14-alta-prueba.md) | Alta de prueba | BE-11 | 3 | Alta | **Completado** |
@@ -49,12 +49,12 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [FE-20](FE-20-registro-lote.md) | Registro de resultados en lote | BE-22 | 8 | Alta | **Completado** |
 | [FE-21](FE-21-asignar-libro.md) | Asignar un libro | BE-23, BE-25 | 3 | Alta | **Completado** |
 | [FE-22](FE-22-cerrar-lectura.md) | Cerrar una lectura | BE-24 | 2 | Alta | **Completado** |
-| [FE-23](FE-23-pantalla-importacion.md) | Pantalla de importación | BE-09 | 5 | Alta | **En revisión** |
-| [FE-24](FE-24-informe-errores-importacion.md) | Informe de errores de importación | BE-08 | 3 | Media | **En revisión** |
+| [FE-23](FE-23-pantalla-importacion.md) | Pantalla de importación | BE-09 | 5 | Alta | **Completado** |
+| [FE-24](FE-24-informe-errores-importacion.md) | Informe de errores de importación | BE-08 | 3 | Media | **Completado** |
 | **Consulta** | | | | | |
-| [FE-25](FE-25-navegacion-centros-secciones.md) | Navegación por centros y secciones | BE-10 | 3 | Alta | Pendiente |
-| [FE-26](FE-26-ficha-alumno.md) | Ficha del alumno | BE-28 | 5 | Alta | Pendiente |
-| [FE-27](FE-27-buscador-alumnos.md) | Buscador de alumnos | BE-29 | 3 | Media | Pendiente |
+| [FE-25](FE-25-navegacion-centros-secciones.md) | Navegación por centros y secciones | BE-10 | 3 | Alta | **Completado** |
+| [FE-26](FE-26-ficha-alumno.md) | Ficha del alumno | BE-28 | 5 | Alta | **Completado** |
+| [FE-27](FE-27-buscador-alumnos.md) | Buscador de alumnos | BE-29 | 3 | Media | **Completado** |
 | [FE-28](FE-28-filtros-multicriterio.md) | Filtros multicriterio | BE-27 | 5 | Alta | **Bloqueada** |
 | [FE-29](FE-29-historial-por-seccion.md) | Historial por sección | BE-51 | 3 | Media | **Completado** |
 | **Visualización** | | | | | |
@@ -71,7 +71,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Calidad** | | | | | |
 | [FE-39](FE-39-pruebas-interfaz.md) | Batería de pruebas de interfaz | — | 5 | Alta | Pendiente |
 | [FE-40](FE-40-manual-usuario.md) | Manual de usuario | — | 3 | Media | Pendiente |
-| | **Total** | | **168** | | **5 de 40** |
+| | **Total** | | **168** | | **23 de 40** |
 
 ---
 

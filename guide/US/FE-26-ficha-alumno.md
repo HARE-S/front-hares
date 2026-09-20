@@ -79,12 +79,12 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE26-01 | **Servicio de ficha** Con JSDoc del recurso agregado. | - | Pendiente |
-| T-FE26-02 | **Cabecera del alumno** Datos y secciones actuales e históricas. | - | Pendiente |
-| T-FE26-03 | **Tabla de histórico** Con las tres métricas y su banda. | - | Pendiente |
-| T-FE26-04 | **Bloque de lecturas** Con estado de cada una. | - | Pendiente |
-| T-FE26-05 | **Estados incompletos** Apartados vacíos explicados. | - | Pendiente |
-| T-FE26-06 | **Pruebas** Escenarios 3, 5 y 6. | - | Pendiente |
+| T-FE26-01 | **Servicio de ficha** Con JSDoc del recurso agregado. | - | Completado |
+| T-FE26-02 | **Cabecera del alumno** Datos y secciones actuales e históricas. | - | Completado |
+| T-FE26-03 | **Tabla de histórico** Con las tres métricas y su banda. | - | Completado |
+| T-FE26-04 | **Bloque de lecturas** Con estado de cada una. | - | Completado |
+| T-FE26-05 | **Estados incompletos** Apartados vacíos explicados. | - | Completado |
+| T-FE26-06 | **Pruebas** Escenarios 3, 5 y 6. | - | Completado |
 
 ---
 

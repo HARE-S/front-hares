@@ -67,7 +67,7 @@ onMounted(loadCenter);
         <thead>
           <tr>
             <th>Sección</th>
-            <th class="col-count">Alumnos</th>
+            <th class="col-count">Alumnos matriculados</th>
           </tr>
         </thead>
         <tbody>

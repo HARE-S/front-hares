@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as api from '@/services/api';
-import { getStudentRecord, getStudentEvolution, getStudentDifferences } from '@/services/studentService';
+import {
+  getStudentRecord,
+  getStudentEvolution,
+  getStudentDifferences,
+  searchStudents
+} from '@/services/studentService';
 
 vi.mock('@/services/api', () => ({
   request: vi.fn()
@@ -118,6 +123,38 @@ describe('studentService', () => {
 
       expect(result.functional).toEqual([]);
       expect(result.literary).toEqual([]);
+    });
+  });
+
+  describe('searchStudents', () => {
+    it('debe llamar a /students/search con q, page y limit', async () => {
+      const mockData = { items: [], total: 0, page: 1, limit: 10, pages: 1 };
+      api.request.mockResolvedValue(mockData);
+
+      const result = await searchStudents({ q: 'maria', page: 2, limit: 5 });
+
+      expect(api.request).toHaveBeenCalledWith(
+        '/students/search?q=maria&page=2&limit=5'
+      );
+      expect(result).toEqual(mockData);
+    });
+
+    it('debe aplicar valores por defecto si no se pasan opciones', async () => {
+      api.request.mockResolvedValue({ items: [] });
+
+      await searchStudents({ q: 'iker' });
+
+      expect(api.request).toHaveBeenCalledWith(
+        '/students/search?q=iker&page=1&limit=10'
+      );
+    });
+
+    it('debe propagar errores del servidor', async () => {
+      const error = new Error('Forbidden');
+      error.status = 403;
+      api.request.mockRejectedValue(error);
+
+      await expect(searchStudents({ q: 'maria' })).rejects.toThrow('Forbidden');
     });
   });
 });

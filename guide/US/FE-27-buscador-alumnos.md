@@ -76,11 +76,11 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE27-01 | **Campo de búsqueda en la cabecera** | - | Pendiente |
-| T-FE27-02 | **Control de frecuencia** Espera hasta que deja de escribir. | - | Pendiente |
-| T-FE27-03 | **Panel de resultados** Con centro y sección por fila. | - | Pendiente |
-| T-FE27-04 | **Navegación con teclado** Flechas y Enter. | - | Pendiente |
-| T-FE27-05 | **Pruebas** Escenarios 2, 3 y 5. | - | Pendiente |
+| T-FE27-01 | **Campo de búsqueda en la cabecera** | - | Completado |
+| T-FE27-02 | **Control de frecuencia** Espera hasta que deja de escribir. | - | Completado |
+| T-FE27-03 | **Panel de resultados** Con centro y sección por fila. | - | Completado |
+| T-FE27-04 | **Navegación con teclado** Flechas y Enter. | - | Completado |
+| T-FE27-05 | **Pruebas** Escenarios 2, 3 y 5. | - | Completado |
 
 ---
 

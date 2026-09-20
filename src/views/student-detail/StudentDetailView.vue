@@ -1,9 +1,13 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { getStudentRecord } from '@/services/studentService';
+import StateBlock from '@/components/ui/StateBlock.vue';
+import MetricCard from '@/components/domain/MetricCard.vue';
+import EvolutionChart from '@/components/charts/EvolutionChart.vue';
 import RegisterResultModal from '@/components/results/RegisterResultModal.vue';
 import { PlusCircle } from 'lucide-vue-next';
+import { classifyVefBand, VEF_BAND_LABELS, vefBandClass } from '@/utils/bands';
 
 const route = useRoute();
 
@@ -15,6 +19,39 @@ const showRegisterModal = ref(false);
 
 const studentData = ref(null);
 
+const currentSections = computed(() => studentData.value?.current_sections || []);
+const historicalSections = computed(() => studentData.value?.historical_sections || []);
+const results = computed(() => studentData.value?.results || []);
+const readings = computed(() => studentData.value?.readings || []);
+
+const currentSectionNames = computed(() => currentSections.value.map(section => section.name));
+const firstSectionId = computed(() => currentSections.value[0]?.id || null);
+const hasCurrentSection = computed(() => Boolean(firstSectionId.value));
+
+const averagePPM = computed(() => {
+  if (!results.value.length) return '—';
+  const total = results.value.reduce((sum, result) => sum + (Number(result.ppm) || 0), 0);
+  return Math.round(total / results.value.length);
+});
+
+const averageVEF = computed(() => {
+  if (!results.value.length) return '—';
+  const total = results.value.reduce((sum, result) => sum + (Number(result.vef) || 0), 0);
+  return Math.round(total / results.value.length);
+});
+
+const evolutionData = computed(() =>
+  results.value.map(result => ({
+    date: result.test_date || '',
+    ppm: result.ppm,
+    vef: result.vef
+  }))
+);
+
+function bandOf(result) {
+  return classifyVefBand(result?.vef);
+}
+
 async function loadStudentRecord() {
   loading.value = true;
   error.value = null;
@@ -25,10 +62,8 @@ async function loadStudentRecord() {
   } catch (err) {
     if (err.status === 403) {
       forbidden.value = true;
-      error.value = null;
     } else {
-      error.value = err.message || 'Error al cargar la ficha del alumno';
-      console.error('Error loading student record:', err);
+      error.value = err;
     }
   } finally {
     loading.value = false;
@@ -47,206 +82,201 @@ onMounted(() => {
 
 <template>
   <div class="student-detail">
-    <!-- Estado de carga -->
-    <div v-if="loading" class="state-loading">
-      <p>Cargando ficha del alumno...</p>
-    </div>
+    <!-- Carga (Escenario 1) -->
+    <StateBlock v-if="loading" state="loading" skeleton="detail" />
 
-    <!-- Acceso denegado -->
-    <div v-else-if="forbidden" class="state-forbidden">
-      <p>No tienes permiso para acceder a esta información.</p>
-    </div>
+    <!-- Acceso denegado (Escenario 6: no se filtra ningún dato) -->
+    <StateBlock
+      v-else-if="forbidden"
+      state="forbidden"
+      title="Acceso denegado"
+      message="No tienes permiso para consultar la ficha de este alumno."
+    />
 
-    <!-- Error -->
-    <div v-else-if="error" class="state-error">
-      <p>{{ error }}</p>
-      <button class="btn btn-secondary" @click="loadStudentRecord">Reintentar</button>
-    </div>
+    <!-- Alumno inexistente -->
+    <StateBlock v-else-if="error && error.status === 404" state="notfound" />
 
-    <!-- Contenido de la ficha -->
-    <div v-else-if="studentData" class="student-content">
-      <!-- Cabecera con datos del alumno -->
+    <!-- Error genérico -->
+    <StateBlock
+      v-else-if="error"
+      state="error"
+      :message="error.message || 'No se pudo cargar la ficha del alumno'"
+      @retry="loadStudentRecord"
+    />
+
+    <template v-else-if="studentData">
+      <!-- Cabecera con datos personales y resumen -->
       <div class="student-header">
         <div class="header-info">
-          <h1>{{ studentData.name }}</h1>
+          <h1 data-testid="student-name">{{ studentData.name }}</h1>
           <div class="header-meta">
-            <span class="meta-item">📚 {{ studentData.grade }}</span>
-            <span class="meta-item">👥 {{ studentData.section }}</span>
+            <span v-if="studentData.age != null" class="meta-item">{{ studentData.age }} años</span>
+            <span v-if="studentData.external_id" class="meta-item">Expediente {{ studentData.external_id }}</span>
+            <span v-if="currentSectionNames.length" class="meta-item">
+              {{ currentSectionNames.join(', ') }}
+            </span>
           </div>
-          <div class="header-actions" style="margin-top: 0.75rem;">
+          <div v-if="hasCurrentSection" class="header-actions">
             <button
               type="button"
               class="btn btn-primary"
               data-testid="open-register-test-btn"
               @click="showRegisterModal = true"
             >
-              <PlusCircle :size="16" />
+              <PlusCircle :size="16" aria-hidden="true" />
               <span>Registrar Prueba</span>
             </button>
           </div>
         </div>
         <div class="header-stats">
-          <div class="stat-card">
-            <div class="stat-value">{{ studentData.stats?.averagePPM || '—' }}</div>
-            <div class="stat-label">PPM Media</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">{{ studentData.stats?.completedTests || '0' }}</div>
-            <div class="stat-label">Pruebas Completadas</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">{{ studentData.stats?.totalBooks || '0' }}</div>
-            <div class="stat-label">Libros Leídos</div>
-          </div>
+          <MetricCard title="PPM media" :value="averagePPM" subtext="Velocidad espontánea" />
+          <MetricCard title="VEF media" :value="averageVEF" subtext="Velocidad eficaz" />
+          <MetricCard title="Pruebas" :value="studentData.total_results ?? results.length" />
+          <MetricCard title="Lecturas" :value="studentData.total_readings ?? readings.length" />
         </div>
       </div>
 
-      <!-- Secciones -->
-      <div v-if="studentData.currentSections?.length > 0 || studentData.historicSections?.length > 0" class="card">
+      <!-- Secciones actuales e históricas (Escenario 4) -->
+      <div class="card">
         <h2>Secciones</h2>
-        <div v-if="studentData.currentSections?.length > 0" class="section-group">
-          <h3 class="group-title">Actuales</h3>
-          <div class="section-list">
-            <div v-for="section in studentData.currentSections" :key="section.id" class="section-item">
-              <div class="section-name">{{ section.name }}</div>
-              <div class="section-teacher">{{ section.teacher }}</div>
+        <template v-if="currentSections.length || historicalSections.length">
+          <div v-if="currentSections.length" class="section-group">
+            <h3 class="group-title">Actuales</h3>
+            <div class="section-list">
+              <div v-for="section in currentSections" :key="section.id" class="section-item">
+                <div class="section-name">{{ section.name }}</div>
+                <div class="section-teacher">
+                  Curso {{ section.academic_year }}
+                  <template v-if="section.enrollment_date"> · desde {{ section.enrollment_date }}</template>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div v-if="studentData.historicSections?.length > 0" class="section-group">
-          <h3 class="group-title">Anteriores</h3>
-          <div class="section-list">
-            <div v-for="section in studentData.historicSections" :key="section.id" class="section-item">
-              <div class="section-name">{{ section.name }} <span class="section-year">({{ section.year }})</span></div>
-              <div class="section-teacher">{{ section.teacher }}</div>
+          <div v-else class="explained-empty">
+            Sin secciones actuales. El alumno aún no está asignado a un grupo este curso.
+          </div>
+
+          <div v-if="historicalSections.length" class="section-group">
+            <h3 class="group-title">Anteriores</h3>
+            <div class="section-list">
+              <div v-for="section in historicalSections" :key="section.id" class="section-item section-item--historical">
+                <div class="section-name">
+                  {{ section.name }} <span class="section-year">({{ section.academic_year }})</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+          <div v-else class="explained-empty">Sin secciones anteriores.</div>
+        </template>
+        <div v-else class="explained-empty">El alumno no tiene secciones asignadas.</div>
       </div>
 
-      <!-- Gráfico de evolución -->
+      <!-- Evolución de velocidad lectora (Escenario 1) -->
       <div class="card">
         <div class="chart-header">
           <h2>Evolución de Velocidad Lectora</h2>
-          <p class="chart-description">Progresión de PPM a lo largo del tiempo</p>
+          <p class="chart-description">Progresión de PPM y VEF a lo largo del tiempo.</p>
         </div>
-        <div class="chart-placeholder">
-          [Gráfico de serie temporal — FE-30]
+        <EvolutionChart
+          v-if="results.length"
+          :student-name="studentData.name"
+          :data="evolutionData"
+          data-testid="evolution-chart"
+        />
+        <div v-else class="explained-empty">
+          Sin resultados suficientes para dibujar la evolución. Aparecerá aquí cuando el alumno
+          realice su primera prueba.
         </div>
       </div>
 
-      <!-- Tabla histórica de pruebas -->
+      <!-- Histórico de pruebas con las tres métricas y su banda (Escenario 3) -->
       <div class="card">
         <h2>Histórico de Pruebas</h2>
-        <div v-if="studentData.tests?.length > 0" class="table-wrapper">
+        <div v-if="results.length" class="table-wrapper">
           <table class="tests-table">
             <thead>
               <tr>
                 <th>Fecha</th>
                 <th>Prueba</th>
-                <th>PPM Espontáneo</th>
+                <th>Vel. Espontánea</th>
                 <th>Comprensión</th>
-                <th>PPM Eficaz</th>
+                <th>Vel. Eficaz</th>
                 <th>Banda</th>
-                <th>Variación</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(test, idx) in studentData.tests" :key="test.id">
-                <td>{{ test.date }}</td>
-                <td>{{ test.name }}</td>
-                <td>{{ test.speedSpontaneous || '—' }}</td>
-                <td>{{ test.comprehension || '—' }}%</td>
-                <td>{{ test.effectiveSpeed || '—' }}</td>
+              <tr v-for="result in results" :key="result.id" data-testid="result-row">
+                <td>{{ result.test_date }}</td>
+                <td>{{ result.test_name }}</td>
+                <td>{{ result.ppm != null ? result.ppm : '—' }}</td>
+                <td>{{ result.comprehension != null ? `${result.comprehension}%` : '—' }}</td>
+                <td>{{ result.vef != null ? result.vef : '—' }}</td>
                 <td>
-                  <span v-if="test.band" class="badge" :class="`badge-${test.band}`">
-                    {{ test.band }}
+                  <span class="badge" :class="vefBandClass(bandOf(result))">
+                    {{ VEF_BAND_LABELS[bandOf(result)] }}
                   </span>
-                  <span v-else class="badge badge-info">Sin data</span>
-                </td>
-                <td>
-                  <span v-if="test.variance !== null && test.variance !== undefined" class="variance" :class="{ positive: test.variance > 0, negative: test.variance < 0 }">
-                    {{ test.variance > 0 ? '+' : '' }}{{ test.variance }}
-                  </span>
-                  <span v-else>—</span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div v-else class="empty-state">
-          <p>No hay pruebas registradas.</p>
+        <div v-else class="explained-empty">
+          Sin pruebas registradas. Al registrar la primera prueba se mostrará aquí su histórico
+          con las tres métricas.
         </div>
       </div>
 
-      <!-- Diferencias funcional/literario -->
+      <!-- Lecturas con su estado (Escenario 1) -->
       <div class="card">
-        <h2>Diferencias Funcional/Literario</h2>
-        <div class="differences-grid">
-          <div class="difference-card">
-            <h3>Aspectos Funcionales</h3>
-            <ul v-if="studentData.differences?.functional?.length > 0" class="difference-list">
-              <li v-for="(item, idx) in studentData.differences.functional" :key="`func-${idx}`">
-                {{ item }}
-              </li>
-            </ul>
-            <p v-else class="empty-text">Sin observaciones</p>
-          </div>
-          <div class="difference-card">
-            <h3>Aspectos Literarios</h3>
-            <ul v-if="studentData.differences?.literary?.length > 0" class="difference-list">
-              <li v-for="(item, idx) in studentData.differences.literary" :key="`lit-${idx}`">
-                {{ item }}
-              </li>
-            </ul>
-            <p v-else class="empty-text">Sin observaciones</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Libros leídos -->
-      <div v-if="studentData.books?.length > 0" class="card">
-        <h2>Libros Leídos</h2>
-        <div class="table-wrapper">
+        <h2>Lecturas</h2>
+        <div v-if="readings.length" class="table-wrapper">
           <table class="books-table">
             <thead>
               <tr>
                 <th>Título</th>
-                <th>Autor</th>
-                <th>Fecha de Lectura</th>
+                <th>Nivel</th>
+                <th>Inicio</th>
+                <th>Fin</th>
                 <th>Estado</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="book in studentData.books" :key="book.id">
-                <td><strong>{{ book.title }}</strong></td>
-                <td>{{ book.author }}</td>
-                <td>{{ book.readDate }}</td>
+              <tr v-for="reading in readings" :key="reading.id" data-testid="reading-row">
+                <td><strong>{{ reading.book_title || reading.title }}</strong></td>
+                <td>{{ reading.level || reading.book_level || '—' }}</td>
+                <td>{{ reading.start_date }}</td>
+                <td>{{ reading.end_date || '—' }}</td>
                 <td>
-                  <span class="badge" :class="`badge-${book.status}`">
-                    {{ book.status }}
+                  <span
+                    class="badge"
+                    :class="reading.status === 'finalizada' ? 'badge-finalizada' : 'badge-en-curso'"
+                  >
+                    {{ reading.status === 'finalizada' ? 'Finalizada' : 'En curso' }}
                   </span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+        <div v-else class="explained-empty">
+          Sin lecturas asignadas. Cuando se asigne un libro al alumno aparecerá aquí su
+          progreso.
+        </div>
       </div>
-    </div>
+    </template>
 
-    <!-- Sin datos -->
-    <div v-else class="state-no-data">
-      <p>No hay información disponible para este alumno.</p>
+    <!-- Sin ficha -->
+    <StateBlock v-else state="empty" title="Sin ficha" message="No hay información disponible para este alumno.">
       <button class="btn btn-secondary" @click="loadStudentRecord">Recargar</button>
-    </div>
+    </StateBlock>
 
-    <!-- Modal para Registrar Resultado de Prueba (FE-18) -->
+    <!-- Modal de registro de prueba (FE-18) -->
     <RegisterResultModal
-      v-if="studentData"
+      v-if="studentData && showRegisterModal"
       :is-open="showRegisterModal"
       :student-id="studentData.id"
       :student-name="studentData.name"
-      :section-id="studentData.section"
+      :section-id="firstSectionId"
       @close="showRegisterModal = false"
       @saved="handleResultSaved"
     />
@@ -284,7 +314,8 @@ onMounted(() => {
 
 .header-meta {
   display: flex;
-  gap: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
 }
 
 .meta-item {
@@ -293,31 +324,9 @@ onMounted(() => {
 }
 
 .header-stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
-}
-
-.stat-card {
-  text-align: center;
-  background-color: var(--surface-container-low);
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  min-width: 120px;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--green-600);
-  margin-bottom: 0.25rem;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--on-surface-variant);
-  text-transform: uppercase;
 }
 
 /* Cards */
@@ -337,9 +346,19 @@ onMounted(() => {
   padding-bottom: 0.5rem;
 }
 
+.explained-empty {
+  padding: 1.25rem;
+  border: 1px dashed var(--outline-variant);
+  border-radius: var(--radius-md);
+  color: var(--on-surface-variant);
+  font-size: 0.9rem;
+  font-style: italic;
+  background-color: var(--surface-container-low);
+}
+
 /* Secciones */
 .section-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .section-group:last-child {
@@ -365,6 +384,10 @@ onMounted(() => {
   border-left: 4px solid var(--green-500);
   padding: 0.75rem;
   border-radius: var(--radius-md);
+}
+
+.section-item--historical {
+  border-left-color: var(--outline);
 }
 
 .section-name {
@@ -395,19 +418,6 @@ onMounted(() => {
   margin-top: 0.5rem;
 }
 
-.chart-placeholder {
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--surface-container-low);
-  border: 1px dashed var(--gray-300);
-  border-radius: var(--radius-md);
-  color: var(--on-surface-variant);
-  font-size: 0.9rem;
-  font-style: italic;
-}
-
 /* Tablas */
 .table-wrapper {
   overflow-x: auto;
@@ -436,145 +446,49 @@ tr:hover {
   background-color: var(--surface-container-low);
 }
 
-.variance {
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.variance.positive {
-  color: var(--success-text);
-}
-
-.variance.negative {
-  color: var(--danger-text);
-}
-
-/* Diferencias */
-.differences-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-}
-
-.difference-card {
-  background-color: var(--surface-container-low);
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
-}
-
-.difference-card h3 {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--on-surface);
-  margin: 0 0 1rem 0;
-}
-
-.difference-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.difference-list li {
-  padding: 0.5rem 0;
-  padding-left: 1.5rem;
-  position: relative;
-  color: var(--on-surface);
-  font-size: 0.9rem;
-}
-
-.difference-list li::before {
-  content: '✓';
-  position: absolute;
-  left: 0;
-  color: var(--green-600);
-  font-weight: 700;
-}
-
-.empty-text {
-  color: var(--on-surface-variant);
-  font-style: italic;
-  margin: 0;
-}
-
-/* Badges */
+/* Bandas de velocidad eficaz */
 .badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: 0.75rem;
   font-weight: 600;
 }
 
-.badge-high {
-  background-color: #ecfdf5;
-  color: #065f46;
+.badge-alta {
+  background-color: var(--level-high-bg);
+  border: 1px solid var(--level-high-border);
+  color: var(--level-high-text);
 }
 
 .badge-normal {
-  background-color: #fff7ed;
-  color: #92400e;
+  background-color: var(--level-normal-bg);
+  border: 1px solid var(--level-normal-border);
+  color: var(--level-normal-text);
 }
 
-.badge-low {
-  background-color: #fecaca;
-  color: #991b1b;
+.badge-baja {
+  background-color: var(--level-low-bg);
+  border: 1px solid var(--level-low-border);
+  color: var(--level-low-text);
 }
 
-.badge-info {
-  background-color: #e0f2fe;
-  color: #0c4a6e;
+.badge-nodata {
+  background-color: var(--level-nodata-bg);
+  border: 1px solid var(--level-nodata-border);
+  color: var(--level-nodata-text);
 }
 
-.badge-completed {
-  background-color: #ecfdf5;
-  color: #065f46;
+.badge-finalizada {
+  background-color: var(--level-high-bg);
+  border: 1px solid var(--level-high-border);
+  color: var(--level-high-text);
 }
 
-.badge-in-progress {
-  background-color: #fff7ed;
-  color: #92400e;
-}
-
-/* Estados */
-.state-loading,
-.state-error,
-.state-forbidden,
-.state-no-data {
-  background-color: var(--surface-container-lowest);
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-lg);
-  padding: 3rem;
-  text-align: center;
-  color: var(--on-surface-variant);
-}
-
-.state-error {
-  background-color: var(--danger-bg);
-  border-color: var(--danger-border);
-  color: var(--danger-text);
-}
-
-.state-forbidden {
-  background-color: #fef3c7;
-  border-color: #fcd34d;
-  color: #92400e;
-  padding: 2rem;
-}
-
-.state-loading p,
-.state-error p,
-.state-forbidden p,
-.state-no-data p {
-  margin: 0 0 1rem 0;
-}
-
-.empty-state {
-  padding: 2rem;
-  text-align: center;
-  color: var(--on-surface-variant);
-  font-style: italic;
+.badge-en-curso {
+  background-color: var(--level-progress-bg);
+  border: 1px solid var(--level-progress-border);
+  color: var(--level-progress-text);
 }
 
 /* Responsive */
@@ -589,11 +503,8 @@ tr:hover {
 
   .header-stats {
     width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
-  }
-
-  .differences-grid {
-    grid-template-columns: 1fr;
   }
 
   table {

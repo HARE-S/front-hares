@@ -35,8 +35,8 @@ Todo lo relativo a la estructura organizativa (centros y secciones), el censo de
 | FE-23 | Pantalla de importación (Alexia) | BE-09 | 5 | Alta *(Completado)* |
 | FE-24 | Informe de errores de importación | BE-08 | 3 | Media *(Completado)* |
 | FE-25 | Navegación por centros y secciones | BE-10 | 3 | Alta *(Completado)* |
-| FE-26 | Ficha del alumno (agregada) | BE-28 | 5 | Alta |
-| FE-27 | Buscador de alumnos | BE-29 | 3 | Media |
+| FE-26 | Ficha del alumno (agregada) | BE-28 | 5 | Alta *(Completado)* |
+| FE-27 | Buscador de alumnos | BE-29 | 3 | Media *(Completado)* |
 | FE-28 | Filtros multicriterio | BE-27 | 5 | Alta *(Bloqueada)* |
 | FE-32 | Comparativa por grupos | BE-32 | 5 | Media |
 | FE-34 | Clasificación por nivel lector | BE-30 | 5 | Alta |
