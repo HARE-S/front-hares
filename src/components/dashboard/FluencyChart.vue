@@ -1,8 +1,24 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Sparkles } from 'lucide-vue-next';
 
+const props = defineProps({
+  course: {
+    type: String,
+    default: '2024-25'
+  }
+});
+
 const periodMode = ref('trimestral'); // 'trimestral' | 'anual'
+
+const courseDataMap = {
+  '2024-25': { current: 115, badge: '115 PPM ★', diagnostic: '88%' },
+  '2023-24': { current: 108, badge: '108 PPM ★', diagnostic: '85%' },
+  '2022-23': { current: 102, badge: '102 PPM ★', diagnostic: '82%' },
+  '2021-22': { current: 98, badge: '98 PPM ★', diagnostic: '80%' }
+};
+
+const currentData = computed(() => courseDataMap[props.course] || courseDataMap['2024-25']);
 </script>
 
 <template>
@@ -116,7 +132,7 @@ const periodMode = ref('trimestral'); // 'trimestral' | 'anual'
         </div>
         <!-- Enero (Activo) -->
         <div class="callout-point pos-ene">
-          <div class="callout-badge-active">115 PPM ★</div>
+          <div class="callout-badge-active">{{ currentData.badge }}</div>
           <span class="callout-date text-secondary font-bold">Enero (Corte A)</span>
         </div>
         <!-- Abril -->
@@ -136,7 +152,7 @@ const periodMode = ref('trimestral'); // 'trimestral' | 'anual'
     <div class="diagnostic-callout">
       <Sparkles :size="20" class="text-secondary flex-shrink-0" />
       <p class="diagnostic-text">
-        <strong>Diagnóstico pedagógico:</strong> El <span class="highlight-val">88% del alumnado</span> ha mejorado su ritmo de decodificación y prosodia, situándose 13 PPM por encima del baremo autonómico de corte de invierno.
+        <strong>Diagnóstico pedagógico:</strong> El <span class="highlight-val">{{ currentData.diagnostic }} del alumnado</span> ha mejorado su ritmo de decodificación y prosodia, situándose 13 PPM por encima del baremo autonómico de corte de invierno.
       </p>
     </div>
   </div>

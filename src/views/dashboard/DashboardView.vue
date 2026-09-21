@@ -10,6 +10,9 @@
         <p class="page-subtitle">Seguimiento sistemático de fluidez, velocidad (PPM) y comprensión lectora</p>
       </div>
 
+      <!-- Course Selector Dropdown -->
+      <CourseSelector v-model="selectedCourse" />
+
       <!-- Action Button Group -->
       <div class="action-buttons-group">
         <!-- Super Admin: Panel de Aprobación -->
@@ -74,6 +77,7 @@
     <!-- SECTION 2: Key Metric KPI Overview Cards -->
     <KpiOverview
       ref="kpiOverviewRef"
+      :course="selectedCourse"
       @view-reinforcement="handleViewReinforcement"
       @view-report="(student) => { selectedReportStudent = student; showStudentReport = true; }"
     />
@@ -82,17 +86,18 @@
     <section aria-label="Análisis de Rendimiento" class="analytics-split-grid">
       <!-- Main Analytical Chart: Fluidez Lectora PPM (8 cols) -->
       <div class="grid-col-chart">
-        <FluencyChart />
+        <FluencyChart :course="selectedCourse" />
       </div>
 
       <!-- Right Side: Distribución de Niveles (4 cols) -->
       <div class="grid-col-distribution">
-        <LevelsDistribution @open-intervention="handleOpenIntervention" />
+        <LevelsDistribution :course="selectedCourse" @open-intervention="handleOpenIntervention" />
       </div>
     </section>
 
     <!-- SECTION 4: Data Table Section: Últimas Evaluaciones Registradas -->
     <RecentAssessmentsTable
+      :course="selectedCourse"
       @export="handleTableExport"
       @play-audio="handlePlayAudio"
       @view-detail="handleViewDetail"
@@ -128,6 +133,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
+import CourseSelector from '../../components/dashboard/CourseSelector.vue';
 import KpiOverview from '../../components/dashboard/KpiOverview.vue';
 import FluencyChart from '../../components/dashboard/FluencyChart.vue';
 import LevelsDistribution from '../../components/dashboard/LevelsDistribution.vue';
@@ -140,6 +146,7 @@ const router = useRouter();
 const { user } = useAuth();
 const emit = defineEmits(['new-assessment', 'assign-book']);
 
+const selectedCourse = ref('2024-25');
 const feedbackMessage = ref(null);
 const showBookModal = ref(false);
 const showAssessmentModal = ref(false);

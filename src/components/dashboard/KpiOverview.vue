@@ -1,6 +1,13 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Gauge, UserCheck, BookOpen, AlertTriangle, ArrowUp, ArrowRight, X, ChevronRight, BarChart3 } from 'lucide-vue-next';
+
+const props = defineProps({
+  course: {
+    type: String,
+    default: '2024-25'
+  }
+});
 
 const emit = defineEmits(['view-support', 'view-students', 'view-books', 'view-report']);
 
@@ -11,32 +18,114 @@ const showRankingModal = ref(false);
 const showBooksModal = ref(false);
 const selectedStudent = ref(null);
 
-const kpiData = ref({
-  speed: {
-    current: 115,
-    unit: 'PPM',
-    delta: '+8% vs. Corte Inicial',
-    target: 125,
-    percentage: 92
+const courseDataMap = {
+  '2024-25': {
+    speed: {
+      current: 115,
+      unit: 'PPM',
+      delta: '+8% vs. Corte Inicial',
+      target: 125,
+      percentage: 92
+    },
+    students: {
+      evaluated: 24,
+      total: 26,
+      percentage: 92,
+      pendingCount: 2,
+      pendingPeriod: 'Corte A'
+    },
+    books: {
+      count: 68,
+      unit: 'títulos',
+      delta: '+14 este mes',
+      averagePerStudent: 2.6
+    },
+    alerts: {
+      label: 'Requieren Apoyo',
+      criteria: 'PPM < 85 o > 5% errores'
+    }
   },
-  students: {
-    evaluated: 24,
-    total: 26,
-    percentage: 92,
-    pendingCount: 2,
-    pendingPeriod: 'Corte A'
+  '2023-24': {
+    speed: {
+      current: 108,
+      unit: 'PPM',
+      delta: '+5% vs. Corte Inicial',
+      target: 120,
+      percentage: 90
+    },
+    students: {
+      evaluated: 25,
+      total: 27,
+      percentage: 93,
+      pendingCount: 2,
+      pendingPeriod: 'Corte A'
+    },
+    books: {
+      count: 65,
+      unit: 'títulos',
+      delta: '+12 este mes',
+      averagePerStudent: 2.4
+    },
+    alerts: {
+      label: 'Requieren Apoyo',
+      criteria: 'PPM < 85 o > 5% errores'
+    }
   },
-  books: {
-    count: 68,
-    unit: 'títulos',
-    delta: '+14 este mes',
-    averagePerStudent: 2.6
+  '2022-23': {
+    speed: {
+      current: 102,
+      unit: 'PPM',
+      delta: '+3% vs. Corte Inicial',
+      target: 115,
+      percentage: 89
+    },
+    students: {
+      evaluated: 23,
+      total: 25,
+      percentage: 92,
+      pendingCount: 2,
+      pendingPeriod: 'Corte A'
+    },
+    books: {
+      count: 58,
+      unit: 'títulos',
+      delta: '+10 este mes',
+      averagePerStudent: 2.5
+    },
+    alerts: {
+      label: 'Requieren Apoyo',
+      criteria: 'PPM < 85 o > 5% errores'
+    }
   },
-  alerts: {
-    label: 'Requieren Apoyo',
-    criteria: 'PPM < 85 o > 5% errores'
+  '2021-22': {
+    speed: {
+      current: 98,
+      unit: 'PPM',
+      delta: '+2% vs. Corte Inicial',
+      target: 110,
+      percentage: 89
+    },
+    students: {
+      evaluated: 22,
+      total: 24,
+      percentage: 92,
+      pendingCount: 2,
+      pendingPeriod: 'Corte A'
+    },
+    books: {
+      count: 52,
+      unit: 'títulos',
+      delta: '+8 este mes',
+      averagePerStudent: 2.3
+    },
+    alerts: {
+      label: 'Requieren Apoyo',
+      criteria: 'PPM < 85 o > 5% errores'
+    }
   }
-});
+};
+
+const kpiData = computed(() => courseDataMap[props.course] || courseDataMap['2024-25']);
 
 const allStudents = ref([
   { id: 1, center: 'Botusbaru', section: '1CARMED1', expediente: '64019', name: 'Mateo Barrenechea', ppm: 82, errors: '8%', status: 'support' },

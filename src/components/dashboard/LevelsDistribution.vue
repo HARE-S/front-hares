@@ -99,6 +99,15 @@
 </template>
 
 <script setup>
+const props = defineProps({
+  course: {
+    type: String,
+    default: '2024-25'
+  }
+});
+</script>
+
+<script setup>
 import { reactive, computed } from 'vue';
 
 defineEmits(['open-intervention']);
