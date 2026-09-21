@@ -28,9 +28,7 @@ import {
   LayoutDashboard,
   School
 } from 'lucide-vue-next';
-import CourseSelector from '@/components/dashboard/CourseSelector.vue';
 
-const selectedCourse = ref('2024-25');
 const currentTab = ref('statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
 const activeSectionId = ref('sec-1');
 const testListRef = ref(null);

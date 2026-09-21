@@ -143,7 +143,7 @@ function selectCourse(courseId) {
 
 .course-selector__dropdown {
   position: absolute;
-  top: calc(100% + 0.5rem);
+  bottom: calc(100% + 0.5rem);
   left: 0;
   right: 0;
   background: var(--white);
