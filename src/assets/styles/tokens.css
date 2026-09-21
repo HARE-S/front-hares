@@ -129,6 +129,9 @@
   --transition-normal: all 0.25s ease-in-out;
   --transition: all 0.15s ease-in-out;
 
+  /* --- ACCESIBILIDAD Y ERGONOMÍA TÁCTIL (FE-13 / WCAG 2.5.5) --- */
+  --touch-target-min: 44px;
+
   /* --- ALIAS DE COMPATIBILIDAD CON COMPONENTES PREVIOS --- */
   --green-950: #00271b;
   --green-900: #0f3e2e;
