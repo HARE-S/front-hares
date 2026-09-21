@@ -29,8 +29,19 @@ onMounted(loadCenters);
       <nav class="breadcrumb" aria-label="Migas de pan">
         <span class="crumb current">Centros</span>
       </nav>
-      <h1>Centros</h1>
-      <p class="subtitle">Selecciona un centro para ver sus secciones y su alumnado.</p>
+      <div class="header-row">
+        <div class="header-text">
+          <h1>Centros</h1>
+          <p class="subtitle">Selecciona un centro para ver sus secciones y su alumnado.</p>
+        </div>
+        <router-link
+          :to="{ name: 'comparison' }"
+          class="btn btn-secondary"
+          data-testid="comparison-entry"
+        >
+          Comparativa por grupos
+        </router-link>
+      </div>
     </header>
 
     <div class="search-bar">
@@ -101,7 +112,14 @@ onMounted(loadCenters);
   gap: 0.5rem;
 }
 
-.header h1 {
+.header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.header-text h1 {
   margin: 0;
   color: var(--on-surface);
   font-weight: 700;

@@ -71,6 +71,19 @@ export const routes = [
         name: 'student-detail',
         component: () => import('@/views/student-detail/StudentDetailView.vue'),
         props: true
+      },
+      /**
+       * FE-32 (Marlen, 21/09/2026): ruta de "Comparativa por grupos".
+       *
+       * POR QUÉ SE AÑADIÓ: FE-32 necesita una página accesible para la
+       * comparativa de evolución entre grupos (BE-32) y la única pantalla
+       * Alumnado de la que Marlen es responsable es esta subruta. Sigue el
+       * precedente de FE-25: se añade el mínimo necesario aquí.
+       */
+      {
+        path: 'comparison',
+        name: 'comparison',
+        component: () => import('@/views/comparison/ComparisonView.vue')
       }
     ]
   },

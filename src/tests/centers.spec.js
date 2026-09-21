@@ -38,6 +38,11 @@ function buildRouter() {
         path: '/centers/:centerId/sections/:sectionId/students/:studentId',
         name: 'student-detail',
         component: { template: '<div></div>' }
+      },
+      {
+        path: '/centers/comparison',
+        name: 'comparison',
+        component: { template: '<div></div>' }
       }
     ]
   });
