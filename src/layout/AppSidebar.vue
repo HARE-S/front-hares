@@ -290,11 +290,17 @@ async function handleLogout() {
   background-color: rgba(46, 54, 75, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
-  padding: 0.65rem 0.85rem;
+  padding: 0.75rem 0.85rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   margin-bottom: 0.85rem;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 50;
 }
 
 .session-info {
@@ -309,6 +315,7 @@ async function handleLogout() {
   position: relative;
   width: 8px;
   height: 8px;
+  flex-shrink: 0;
 }
 
 .pulse-dot {
@@ -321,6 +328,7 @@ async function handleLogout() {
 .session-labels {
   display: flex;
   flex-direction: column;
+  gap: 0.1rem;
 }
 
 .session-year {
@@ -338,6 +346,7 @@ async function handleLogout() {
 
 .session-icon {
   color: var(--on-tertiary-container);
+  flex-shrink: 0;
 }
 
 /* User Section */
@@ -430,25 +439,6 @@ async function handleLogout() {
 }
 
 /* Dropdown de cursos */
-.academic-session-card {
-  background-color: rgba(46, 54, 75, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-md);
-  padding: 0.75rem 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.85rem;
-  width: 100%;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--surface-container-lowest);
-  font-size: 0.85rem;
-  font-family: inherit;
-  position: relative;
-  z-index: 50;
-}
 
 .academic-session-card:hover {
   border-color: rgba(111, 251, 190, 0.3);
