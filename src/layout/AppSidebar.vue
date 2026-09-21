@@ -3,11 +3,13 @@ import { ref, computed } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useRouter, useRoute } from 'vue-router';
 import { LayoutDashboard, School, Users, Cloud, LogOut } from 'lucide-vue-next';
+import CourseSelector from '@/components/dashboard/CourseSelector.vue';
 
 const { user, logout } = useAuth();
 const router = useRouter();
 const route = useRoute();
 const showUserMenu = ref(false);
+const selectedCourse = ref('2024-25');
 
 const userInitials = computed(() => {
   if (!user.value) return '';
@@ -86,18 +88,7 @@ async function handleLogout() {
 
     <!-- Pie de la barra lateral -->
     <div class="sidebar-bottom">
-      <div class="academic-session-card">
-        <div class="session-info">
-          <div class="pulse-indicator">
-            <span class="pulse-dot"></span>
-          </div>
-          <div class="session-labels">
-            <span class="session-year">Curso 2024-25</span>
-            <span class="session-status">Sincronizado</span>
-          </div>
-        </div>
-        <Cloud :size="16" class="session-icon" />
-      </div>
+      <CourseSelector v-model="selectedCourse" />
 
       <!-- User Section -->
       <div class="user-section">
