@@ -109,18 +109,12 @@ describe('Dashboard Responsive Design Suite', () => {
     });
   });
 
-  describe('DashboardLayout TopNavBar Responsive Features', () => {
-    it('renders TopNavBar with selectors, responsive search and user profile', () => {
+  describe('DashboardLayout Responsive Features', () => {
+    it('renders clean content canvas without unnecessary top bar', () => {
       const wrapper = mount(DashboardLayout);
       const topBar = wrapper.find('header.stitch-top-navbar');
-      expect(topBar.exists()).toBe(true);
-
-      expect(topBar.text()).toContain('3º Primaria - Aula 3A');
-      expect(topBar.text()).toContain('Evaluación A - Enero');
-
-      // Search is hidden on smaller screens and visible on xl screens
-      const searchBox = topBar.find('.hidden.xl\\:block');
-      expect(searchBox.exists()).toBe(true);
+      expect(topBar.exists()).toBe(false);
+      expect(wrapper.find('.stitch-content-canvas').exists()).toBe(true);
     });
   });
 });
