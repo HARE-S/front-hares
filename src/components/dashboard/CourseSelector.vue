@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 
 const props = defineProps({
   modelValue: {
@@ -20,6 +20,8 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const isOpen = ref(false);
+const triggerRef = ref(null);
+const dropdownPos = ref({ left: 0, bottom: 0 });
 
 const selectedCourse = computed(() =>
   props.courses.find(c => c.id === props.modelValue)
@@ -29,12 +31,30 @@ function selectCourse(courseId) {
   emit('update:modelValue', courseId);
   isOpen.value = false;
 }
+
+async function toggleDropdown() {
+  isOpen.value = !isOpen.value;
+  if (isOpen.value) {
+    await nextTick();
+    updateDropdownPosition();
+  }
+}
+
+function updateDropdownPosition() {
+  if (!triggerRef.value) return;
+  const rect = triggerRef.value.getBoundingClientRect();
+  dropdownPos.value = {
+    left: rect.left,
+    bottom: window.innerHeight - rect.top + 8
+  };
+}
 </script>
 
 <template>
   <div class="course-selector">
     <button
-      @click="isOpen = !isOpen"
+      ref="triggerRef"
+      @click="toggleDropdown"
       class="course-selector__trigger"
       :class="{ 'course-selector__trigger--open': isOpen }"
       type="button"
@@ -50,7 +70,11 @@ function selectCourse(courseId) {
     </button>
 
     <transition name="dropdown">
-      <div v-if="isOpen" class="course-selector__dropdown">
+      <div
+        v-if="isOpen"
+        class="course-selector__dropdown"
+        :style="{ left: dropdownPos.left + 'px', bottom: dropdownPos.bottom + 'px' }"
+      >
         <button
           v-for="course in courses"
           :key="course.id"
@@ -142,16 +166,14 @@ function selectCourse(courseId) {
 }
 
 .course-selector__dropdown {
-  position: absolute;
-  bottom: calc(100% + 0.5rem);
-  left: 0;
-  right: 0;
+  position: fixed;
   background: var(--white);
   border: 1px solid var(--gray-200);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   min-width: 200px;
+  z-index: 1001;
 }
 
 .course-selector__option {
