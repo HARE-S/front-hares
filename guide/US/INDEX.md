@@ -3,7 +3,7 @@
 **HARE-S** · Programa de Gestión de Mejora de Comprensión Lectora (Peñascal)
 Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andrés Ocina
 **Stack:** Vue 3 + Vite + JavaScript + CSS puro + Vitest
-40 historias · 168 puntos · Actualizado: 18/09/2026
+40 historias · 168 puntos · Actualizado: 21/09/2026
 **Reparto entre el equipo:** ver [REPARTO.md](REPARTO.md)
 
 ---
@@ -60,7 +60,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Visualización** | | | | | |
 | [FE-30](FE-30-graficos.md) | Componentes de gráfico | — | 5 | Media | Pendiente |
 | [FE-31](FE-31-evolucion-individual.md) | Evolución individual | BE-31 | 5 | Alta | Pendiente |
-| [FE-32](FE-32-comparativa-grupos.md) | Comparativa por grupos | BE-32 | 5 | Media | Pendiente |
+| [FE-32](FE-32-comparativa-grupos.md) | Comparativa por grupos | BE-32 | 5 | Media | **Completado** |
 | [FE-33](FE-33-proyeccion.md) | Proyección de evolución | BE-33 | 5 | Media | Pendiente |
 | [FE-34](FE-34-clasificacion-nivel.md) | Clasificación por nivel lector | BE-30 | 5 | Alta | Pendiente |
 | [FE-35](FE-35-alumnos-sin-progreso.md) | Aviso de alumnos sin progreso | BE-34 | 3 | Baja | Pendiente |
@@ -71,7 +71,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Calidad** | | | | | |
 | [FE-39](FE-39-pruebas-interfaz.md) | Batería de pruebas de interfaz | — | 5 | Alta | Pendiente |
 | [FE-40](FE-40-manual-usuario.md) | Manual de usuario | — | 3 | Media | Pendiente |
-| | **Total** | | **168** | | **24 de 40** |
+| | **Total** | | **168** | | **25 de 40** |
 
 ---
 

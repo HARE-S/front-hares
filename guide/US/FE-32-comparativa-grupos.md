@@ -77,12 +77,12 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-FE32-01 | **Selector de grupos** Secciones, centros o ámbitos. | - | Pendiente |
-| T-FE32-02 | **Gráfico comparativo** Con leyenda y tamaño de muestra. | - | Pendiente |
-| T-FE32-03 | **Advertencia de poca representatividad** | - | Pendiente |
-| T-FE32-04 | **Grupos sin datos** Distinguidos del cero. | - | Pendiente |
-| T-FE32-05 | **Progreso por recuento** Alumnos que mejoran y porcentaje. | - | Pendiente |
-| T-FE32-06 | **Pruebas** Escenarios 2, 3 y 4. | - | Pendiente |
+| T-FE32-01 | **Selector de grupos** Secciones, centros o ámbitos. | - | Completado |
+| T-FE32-02 | **Gráfico comparativo** Con leyenda y tamaño de muestra. | - | Completado |
+| T-FE32-03 | **Advertencia de poca representatividad** | - | Completado |
+| T-FE32-04 | **Grupos sin datos** Distinguidos del cero. | - | Completado |
+| T-FE32-05 | **Progreso por recuento** Alumnos que mejoran y porcentaje. | - | Completado |
+| T-FE32-06 | **Pruebas** Escenarios 2, 3 y 4. | - | Completado |
 
 ---
 
