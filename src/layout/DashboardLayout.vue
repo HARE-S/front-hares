@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import DashboardView from '@/views/dashboard/DashboardView.vue';
@@ -33,6 +33,19 @@ import {
 
 const currentTab = ref('statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
 const isMobileNavOpen = ref(false);
+
+const currentTabName = computed(() => {
+  if (route.path.startsWith('/centers')) return 'Alumnado';
+  switch (currentTab.value) {
+    case 'statistics': return 'Estadísticas';
+    case 'catalog': return 'Catálogo de Pruebas';
+    case 'bulk-entry': return 'Registro en Aula';
+    case 'section-detail': return 'Detalle de Grupo';
+    case 'books': return 'Biblioteca de Libros';
+    case 'reports': return 'Informes';
+    default: return 'Panel Docente';
+  }
+});
 const activeSectionId = ref('sec-1');
 const testListRef = ref(null);
 const testsCatalogRef = ref(null);
@@ -120,7 +133,13 @@ async function handleLogout() {
             </div>
           </div>
 
-          <!-- Botón Toggle Menú Móvil (< 768px) -->
+          <!-- Indicador de sección activa en responsive -->
+          <div class="active-tab-chip xl:hidden flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/20 text-secondary-fixed text-xs font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+            <span>{{ currentTabName }}</span>
+          </div>
+
+          <!-- Botón Toggle Menú Móvil (< 1280px) -->
           <button 
             type="button" 
             class="mobile-menu-toggle"
@@ -144,7 +163,7 @@ async function handleLogout() {
           </button>
         </div>
 
-        <!-- Navegación Principal (Colapsable en móvil) -->
+        <!-- Navegación Principal (Colapsable en móvil y tablet, desliza hacia abajo) -->
         <nav class="sidebar-nav" :class="{ 'is-collapsed-mobile': !isMobileNavOpen }">
           <button
             class="nav-item"
@@ -153,7 +172,8 @@ async function handleLogout() {
             @click="currentTab = 'statistics'; isMobileNavOpen = false;"
           >
             <LayoutDashboard :size="18" />
-            <span>Estadísticas</span>
+            <span class="nav-label">Estadísticas</span>
+            <span v-if="currentTab === 'statistics'" class="nav-active-pill xl:hidden">Activo</span>
           </button>
 
           <button
@@ -163,8 +183,9 @@ async function handleLogout() {
             @click="router.push('/centers'); isMobileNavOpen = false;"
           >
             <School :size="18" />
-            <span class="flex-1">Alumnado</span>
-            <span v-if="route.path.startsWith('/centers')" class="nav-active-dot"></span>
+            <span class="flex-1 nav-label">Alumnado</span>
+            <span v-if="route.path.startsWith('/centers')" class="nav-active-pill xl:hidden">Activo</span>
+            <span v-else-if="route.path.startsWith('/centers')" class="nav-active-dot"></span>
           </button>
 
           <button
@@ -174,8 +195,8 @@ async function handleLogout() {
             @click="currentTab = 'catalog'; testToEdit = null; isMobileNavOpen = false;"
           >
             <Layers :size="18" />
-            <span class="flex-1">Catálogo de Pruebas</span>
-            <span v-if="currentTab === 'catalog'" class="nav-active-dot"></span>
+            <span class="flex-1 nav-label">Catálogo de Pruebas</span>
+            <span v-if="currentTab === 'catalog'" class="nav-active-pill xl:hidden">Activo</span>
           </button>
 
           <button
@@ -185,8 +206,8 @@ async function handleLogout() {
             @click="currentTab = 'bulk-entry'; testToEdit = null; isMobileNavOpen = false;"
           >
             <Edit3 :size="18" />
-            <span class="flex-1">Registro en Aula</span>
-            <span v-if="currentTab === 'bulk-entry' || currentTab === 'section-detail'" class="nav-active-dot"></span>
+            <span class="flex-1 nav-label">Registro en Aula</span>
+            <span v-if="currentTab === 'bulk-entry' || currentTab === 'section-detail'" class="nav-active-pill xl:hidden">Activo</span>
           </button>
 
           <button
@@ -196,8 +217,8 @@ async function handleLogout() {
             @click="currentTab = 'books'; testToEdit = null; isMobileNavOpen = false;"
           >
             <Library :size="18" />
-            <span class="flex-1">Biblioteca de Libros</span>
-            <span v-if="currentTab === 'books'" class="nav-active-dot"></span>
+            <span class="flex-1 nav-label">Biblioteca de Libros</span>
+            <span v-if="currentTab === 'books'" class="nav-active-pill xl:hidden">Activo</span>
           </button>
 
           <button
@@ -207,8 +228,8 @@ async function handleLogout() {
             @click="currentTab = 'reports'; testToEdit = null; isMobileNavOpen = false;"
           >
             <BarChart3 :size="18" />
-            <span class="flex-1">Informes y Exportación</span>
-            <span v-if="currentTab === 'reports'" class="nav-active-dot"></span>
+            <span class="flex-1 nav-label">Informes y Exportación</span>
+            <span v-if="currentTab === 'reports'" class="nav-active-pill xl:hidden">Activo</span>
           </button>
         </nav>
       </div>
@@ -774,79 +795,23 @@ async function handleLogout() {
   background-color: var(--tertiary-container, #283149);
 }
 
-/* Rail de iconos en tableta (< 1280px - FE-13 Escenario 1) */
-@media (min-width: 768px) and (max-width: 1279px) {
-  .stitch-sidebar {
-    width: 72px;
-    padding: 1rem 0.5rem;
-  }
-  .brand-text,
-  .brand-org,
-  .nav-item span,
-  .academic-session-card,
-  .sidebar-cta-wrap,
-  .sidebar-secondary-links,
-  .user-info {
-    display: none !important;
-  }
-  .mobile-menu-toggle {
-    display: none !important;
-  }
-  .brand-header {
-    justify-content: center;
-    padding: 0 0 1rem 0;
-  }
-  .brand-left {
-    justify-content: center;
-  }
-  .nav-item {
-    justify-content: center;
-    padding: 0.65rem 0.5rem;
-  }
-  .stitch-main-layout {
-    margin-left: 72px;
-  }
-  .stitch-content-canvas {
-    padding: 1.5rem 1rem;
-  }
-  .hidden-sm {
-    display: none;
-  }
-
-  /* En tablet: ocultar nombre y rol, solo mostrar avatar */
-  .user-info {
-    display: none;
-  }
-
-  .user-avatar-wrapper {
-    justify-content: center;
-    padding: 0.35rem;
-  }
-
-  .user-avatar {
-    width: 44px;
-    height: 44px;
-    font-size: 1rem;
-  }
-
-  .user-menu {
-    left: 75px;
-    width: 280px;
-    bottom: 75px;
-  }
-}
-
-/* Modo móvil (< 768px - FE-13 Escenario 5) */
-@media (max-width: 767px) {
+/* =========================================================================
+   DISEÑO RESPONSIVO: DESPLIEGUE VERTICAL HACIA ABAJO (< 1280px)
+   ========================================================================= */
+@media (max-width: 1279px) {
   .stitch-sidebar {
     width: 100%;
     position: sticky;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 50;
-    padding: 0.65rem 1rem;
+    padding: 0.75rem 1.25rem;
     border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background-color: var(--tertiary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: var(--tertiary, #192134);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .brand-header {
@@ -855,6 +820,7 @@ async function handleLogout() {
     justify-content: space-between;
     padding: 0;
     border-bottom: none;
+    width: 100%;
   }
 
   .brand-left {
@@ -865,39 +831,133 @@ async function handleLogout() {
 
   .mobile-menu-toggle {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-md, 8px);
+    color: var(--surface-container-lowest, #ffffff);
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
 
-  /* Colapsar elementos en móvil cuando el menú no está abierto */
+  .mobile-menu-toggle:hover {
+    background-color: var(--tertiary-container, #283149);
+    border-color: var(--secondary-fixed, #6ffbbe);
+  }
+
+  /* Estado colapsado: Todo el menú oculto hacia arriba */
   .sidebar-nav.is-collapsed-mobile,
   .sidebar-bottom.is-collapsed-mobile,
   .sidebar-cta-wrap {
     display: none !important;
   }
 
-  /* Cuando el menú móvil está abierto */
+  /* Estado desplegado: La pantalla se desliza suavemente HACIA ABAJO */
   .stitch-sidebar.mobile-nav-open {
-    max-height: 100vh;
+    max-height: 90vh;
     overflow-y: auto;
+    padding-bottom: 1.5rem;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+    animation: slideDownScreen 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   .stitch-sidebar.mobile-nav-open .brand-header {
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   .stitch-sidebar.mobile-nav-open .sidebar-nav {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    padding-top: 0.75rem;
+    padding-top: 1rem;
+    animation: slideDownContent 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .stitch-sidebar.mobile-nav-open .nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.15rem;
+    border-radius: var(--radius-lg, 10px);
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    min-height: 50px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.18s ease;
+  }
+
+  .stitch-sidebar.mobile-nav-open .nav-item:hover {
+    background-color: var(--tertiary-container, #283149);
+    border-color: rgba(111, 251, 190, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .stitch-sidebar.mobile-nav-open .nav-item.active {
+    background-color: var(--primary-container, #0f3e2e);
+    color: var(--secondary-fixed, #6ffbbe);
+    border-color: rgba(111, 251, 190, 0.5);
+    box-shadow: 0 4px 12px rgba(15, 62, 46, 0.35);
+  }
+
+  .stitch-sidebar.mobile-nav-open .nav-item span {
+    display: inline-block;
+  }
+
+  .nav-active-pill {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    background-color: rgba(111, 251, 190, 0.2);
+    color: var(--secondary-fixed, #6ffbbe);
+    border: 1px solid rgba(111, 251, 190, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .stitch-sidebar.mobile-nav-open .sidebar-bottom {
     display: flex;
     flex-direction: column;
-    margin-top: 1rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    animation: slideDownContent 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .stitch-sidebar.mobile-nav-open .user-info {
+    display: block !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .user-avatar-wrapper {
+    justify-content: flex-start;
+    padding: 0.75rem 1rem;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-lg, 10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    min-height: 52px;
+  }
+
+  .stitch-sidebar.mobile-nav-open .user-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 0.95rem;
+  }
+
+  .stitch-sidebar.mobile-nav-open .user-menu {
+    position: static;
+    width: 100%;
+    margin-top: 0.5rem;
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: rgba(25, 33, 52, 0.95);
+    border-radius: var(--radius-md, 8px);
   }
 
   .stitch-main-layout {
@@ -905,13 +965,36 @@ async function handleLogout() {
   }
 
   .stitch-content-canvas {
-    padding: 1rem 0.75rem;
+    padding: 1.25rem 1rem;
   }
 
   .header-left,
   .header-right {
     flex-wrap: wrap;
     gap: 0.5rem;
+  }
+}
+
+/* Animación pura hacia abajo (sin desplazamiento horizontal) */
+@keyframes slideDownScreen {
+  from {
+    opacity: 0.85;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDownContent {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
