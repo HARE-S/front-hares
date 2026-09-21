@@ -234,6 +234,34 @@ async function handleLogout() {
 
     <!-- ÁREA PRINCIPAL: CONTENIDO -->
     <div class="stitch-main-layout">
+      <!-- BARRA SUPERIOR DE CONTEXTO Y BÚSQUEDA (Stitch TopNavBar) -->
+      <header class="stitch-top-navbar sticky top-0 z-30 flex items-center justify-between px-6 py-3 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30">
+        <div class="flex items-center gap-3">
+          <div class="context-chip aula-chip flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low text-xs font-semibold text-on-surface">
+            <School :size="14" class="text-secondary" />
+            <span>3º Primaria - Aula 3A</span>
+          </div>
+          <div class="context-chip period-chip flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary-container/20 text-xs font-semibold text-secondary">
+            <span>Evaluación A - Enero</span>
+          </div>
+        </div>
+
+        <div class="hidden xl:block relative w-72">
+          <div class="relative flex items-center">
+            <span class="absolute left-3 text-outline">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z"/>
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Buscar alumnos, pruebas... (⌘K)"
+              class="w-full pl-9 pr-4 py-1.5 text-xs bg-surface-container-low border border-outline-variant/30 rounded-lg text-on-surface placeholder:text-outline focus:outline-none focus:border-secondary"
+            />
+          </div>
+        </div>
+      </header>
+
       <!-- LIENZO DE CONTENIDO -->
       <main class="stitch-content-canvas">
         <div class="content-container">

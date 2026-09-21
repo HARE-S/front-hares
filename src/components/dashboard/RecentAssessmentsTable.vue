@@ -1,7 +1,7 @@
 <template>
   <section aria-label="Tabla de Evaluaciones" class="recent-assessments-section">
     <!-- Table Control Toolbar -->
-    <div class="toolbar-container">
+    <div class="toolbar-container flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
         <h2 class="toolbar-title">Últimas Evaluaciones Registradas</h2>
         <p class="toolbar-subtitle">Sesiones de lectura individual cronometrada y comprensión inferencial</p>
@@ -52,7 +52,7 @@
     </div>
 
     <!-- Scrollable Table Canvas -->
-    <div class="table-responsive">
+    <div class="table-responsive overflow-x-auto">
       <table class="assessments-table">
         <thead>
           <tr>

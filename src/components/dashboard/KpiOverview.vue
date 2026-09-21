@@ -337,103 +337,105 @@ defineExpose({
 </script>
 
 <template>
-  <section aria-label="Métricas Principales" class="kpi-grid">
-    <!-- Card 1: Velocidad Media del Aula -->
-    <div class="kpi-card flat-card">
-      <div class="kpi-header">
-        <span class="kpi-label">Velocidad Media del Aula</span>
-        <div class="kpi-icon-box">
-          <Gauge :size="18" class="icon-secondary" />
-        </div>
-      </div>
-      <div class="kpi-content">
-        <div class="kpi-value-row">
-          <span class="kpi-value">{{ avgSpeedPPM }}</span>
-          <span class="kpi-unit">{{ kpiData.speed.unit }}</span>
-          <span class="kpi-delta">
-            <ArrowUp :size="12" />
-            {{ kpiData.speed.delta }}
-          </span>
-        </div>
-        <div class="progress-wrap">
-          <div class="progress-labels">
-            <span>Objetivo fin de curso</span>
-            <span class="progress-target">{{ kpiData.speed.target }} PPM ({{ speedPercentage }}%)</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" :style="{ width: `${speedPercentage}%` }"></div>
+  <div class="kpi-overview-wrapper w-full">
+    <section aria-label="Métricas Principales" class="kpi-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+      <!-- Card 1: Velocidad Media del Aula -->
+      <div class="kpi-card flat-card bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/40 shadow-sm flex flex-col justify-between">
+        <div class="kpi-header">
+          <span class="kpi-label">Velocidad Media del Aula</span>
+          <div class="kpi-icon-box">
+            <Gauge :size="18" class="icon-secondary" />
           </div>
         </div>
+        <div class="kpi-content">
+          <div class="kpi-value-row">
+            <span class="kpi-value">{{ avgSpeedPPM }}</span>
+            <span class="kpi-unit">{{ kpiData.speed.unit }}</span>
+            <span class="kpi-delta">
+              <ArrowUp :size="12" />
+              {{ kpiData.speed.delta }}
+            </span>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-labels">
+              <span>Objetivo fin de curso</span>
+              <span class="progress-target">{{ kpiData.speed.target }} PPM ({{ speedPercentage }}%)</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" :style="{ width: `${speedPercentage}%` }"></div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Card 2: Alumnos Evaluados -->
-    <div class="kpi-card flat-card">
-      <div class="kpi-header">
-        <span class="kpi-label">Alumnos Evaluados</span>
-        <div class="kpi-icon-box">
-          <UserCheck :size="18" class="icon-secondary" />
+      <!-- Card 2: Alumnos Evaluados -->
+      <div class="kpi-card flat-card bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/40 shadow-sm flex flex-col justify-between">
+        <div class="kpi-header">
+          <span class="kpi-label">Alumnos Evaluados</span>
+          <div class="kpi-icon-box">
+            <UserCheck :size="18" class="icon-secondary" />
+          </div>
+        </div>
+        <div class="kpi-content">
+          <div class="kpi-value-row">
+            <span class="kpi-value">{{ evaluatedStudents }}</span>
+            <span class="kpi-unit">/ {{ totalStudents }}</span>
+            <span class="kpi-delta">
+              <ArrowUp :size="12" />
+              {{ completionPercentage }}% completitud
+            </span>
+          </div>
+          <div class="info-row">
+            <span>{{ totalStudents - evaluatedStudents }} pendientes en {{ kpiData.students.pendingPeriod }}</span>
+            <button class="link-btn" @click="handleViewStudentsList">Ver lista</button>
+          </div>
         </div>
       </div>
-      <div class="kpi-content">
-        <div class="kpi-value-row">
-          <span class="kpi-value">{{ evaluatedStudents }}</span>
-          <span class="kpi-unit">/ {{ totalStudents }}</span>
-          <span class="kpi-delta">
-            <ArrowUp :size="12" />
-            {{ completionPercentage }}% completitud
-          </span>
-        </div>
-        <div class="info-row">
-          <span>{{ totalStudents - evaluatedStudents }} pendientes en {{ kpiData.students.pendingPeriod }}</span>
-          <button class="link-btn" @click="handleViewStudentsList">Ver lista</button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Card 3: Libros Leídos en Año -->
-    <div class="kpi-card flat-card">
-      <div class="kpi-header">
-        <span class="kpi-label">Libros Leídos en Año</span>
-        <div class="kpi-icon-box">
-          <BookOpen :size="18" class="icon-secondary" />
+      <!-- Card 3: Libros Leídos en Año -->
+      <div class="kpi-card flat-card bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/40 shadow-sm flex flex-col justify-between">
+        <div class="kpi-header">
+          <span class="kpi-label">Libros Leídos en Año</span>
+          <div class="kpi-icon-box">
+            <BookOpen :size="18" class="icon-secondary" />
+          </div>
+        </div>
+        <div class="kpi-content">
+          <div class="kpi-value-row">
+            <span class="kpi-value">{{ totalBooksRead }}</span>
+            <span class="kpi-unit">{{ kpiData.books.unit }}</span>
+            <span class="kpi-delta">
+              <ArrowUp :size="12" />
+              {{ kpiData.books.delta }}
+            </span>
+          </div>
+          <div class="info-row">
+            <span>Media: {{ avgBooksPerStudent }} libros / alumno</span>
+            <button class="link-btn" @click="handleViewRanking">Ranking</button>
+          </div>
         </div>
       </div>
-      <div class="kpi-content">
-        <div class="kpi-value-row">
-          <span class="kpi-value">{{ totalBooksRead }}</span>
-          <span class="kpi-unit">{{ kpiData.books.unit }}</span>
-          <span class="kpi-delta">
-            <ArrowUp :size="12" />
-            {{ kpiData.books.delta }}
-          </span>
-        </div>
-        <div class="info-row">
-          <span>Media: {{ avgBooksPerStudent }} libros / alumno</span>
-          <button class="link-btn" @click="handleViewRanking">Ranking</button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Card 4: Alerta Pedagógica -->
-    <div class="kpi-card flat-card alert-card">
-      <div class="kpi-header">
-        <span class="kpi-label alert-label">{{ kpiData.alerts.label }}</span>
-        <div class="kpi-icon-box alert-icon-box">
-          <AlertTriangle :size="18" class="icon-alert" />
+      <!-- Card 4: Alerta Pedagógica -->
+      <div class="kpi-card flat-card alert-card bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/40 shadow-sm flex flex-col justify-between">
+        <div class="kpi-header">
+          <span class="kpi-label alert-label">{{ kpiData.alerts.label }}</span>
+          <div class="kpi-icon-box alert-icon-box">
+            <AlertTriangle :size="18" class="icon-alert" />
+          </div>
+        </div>
+        <div class="kpi-content">
+          <div class="alert-value">{{ studentsNeedingSupport.length }}</div>
+          <div class="alert-info">
+            <span class="criteria">{{ kpiData.alerts.criteria }}</span>
+            <button class="alert-btn support-btn" @click="handleViewSupport">
+              Ver refuerzo
+              <ArrowRight :size="14" />
+            </button>
+          </div>
         </div>
       </div>
-      <div class="kpi-content">
-        <div class="alert-value">{{ studentsNeedingSupport.length }}</div>
-        <div class="alert-info">
-          <span class="criteria">{{ kpiData.alerts.criteria }}</span>
-          <button class="alert-btn support-btn" @click="handleViewSupport">
-            Ver refuerzo
-            <ArrowRight :size="14" />
-          </button>
-        </div>
-      </div>
-    </div>
+    </section>
 
     <!-- MODAL: Lista de todos los alumnos evaluados -->
     <div v-if="showStudentsListModal" class="modal-overlay" @click="closeStudentsListModal">
@@ -664,7 +666,7 @@ defineExpose({
         </template>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <style scoped>
