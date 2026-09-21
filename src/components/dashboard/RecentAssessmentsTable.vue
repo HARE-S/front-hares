@@ -192,16 +192,14 @@
 </template>
 
 <script setup>
+import { ref, computed } from 'vue';
+
 const props = defineProps({
   course: {
     type: String,
     default: '2024-25'
   }
 });
-</script>
-
-<script setup>
-import { ref, computed } from 'vue';
 
 const emit = defineEmits(['export', 'play-audio', 'view-detail']);
 
