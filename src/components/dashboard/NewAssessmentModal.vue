@@ -291,6 +291,8 @@ function resetForm() {
             <input
               v-model.number="form.hits"
               type="number"
+              inputmode="numeric"
+              pattern="[0-9]*"
               id="hits"
               placeholder="Ej: 45"
               min="0"
@@ -304,6 +306,8 @@ function resetForm() {
             <input
               v-model.number="form.errors"
               type="number"
+              inputmode="numeric"
+              pattern="[0-9]*"
               id="errors"
               placeholder="Ej: 3"
               min="0"
@@ -461,6 +465,8 @@ function resetForm() {
                     <input
                       v-model.number="batchStudents[student.id].hits"
                       type="number"
+                      inputmode="numeric"
+                      pattern="[0-9]*"
                       placeholder="0"
                       min="0"
                       class="batch-input small"
@@ -473,6 +479,8 @@ function resetForm() {
                     <input
                       v-model.number="batchStudents[student.id].errors"
                       type="number"
+                      inputmode="numeric"
+                      pattern="[0-9]*"
                       placeholder="0"
                       min="0"
                       class="batch-input small"
@@ -525,6 +533,8 @@ function resetForm() {
                     <input
                       v-model.number="batchStudents[student.id].hits"
                       type="number"
+                      inputmode="numeric"
+                      pattern="[0-9]*"
                       placeholder="45"
                       min="0"
                       class="batch-input"
@@ -534,6 +544,8 @@ function resetForm() {
                     <input
                       v-model.number="batchStudents[student.id].errors"
                       type="number"
+                      inputmode="numeric"
+                      pattern="[0-9]*"
                       placeholder="3"
                       min="0"
                       class="batch-input"

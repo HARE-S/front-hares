@@ -401,6 +401,7 @@ async function handleLogout() {
   font-size: 0.85rem;
   font-weight: 600;
   padding: 0.65rem 0.85rem;
+  min-height: var(--touch-target-min, 44px);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -426,6 +427,7 @@ async function handleLogout() {
   align-items: center;
   gap: 0.75rem;
   padding: 0.65rem 0.85rem;
+  min-height: var(--touch-target-min, 44px);
   border-radius: var(--radius-md);
   font-size: 0.85rem;
   font-weight: 500;
@@ -729,7 +731,8 @@ async function handleLogout() {
   color: var(--on-surface-variant);
 }
 
-@media (max-width: 1024px) {
+/* Rail de iconos en tableta (< 1280px - FE-13 Escenario 1) */
+@media (max-width: 1279px) {
   .stitch-sidebar {
     width: 72px;
     padding: 1rem 0.5rem;
@@ -748,6 +751,9 @@ async function handleLogout() {
   .stitch-main-layout {
     margin-left: 72px;
   }
+  .stitch-content-canvas {
+    padding: 1.5rem 1rem;
+  }
   .hidden-sm {
     display: none;
   }
@@ -763,15 +769,35 @@ async function handleLogout() {
   }
 
   .user-avatar {
-    width: 48px;
-    height: 48px;
-    font-size: 1.1rem;
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
   }
 
   .user-menu {
     left: 75px;
     width: 280px;
     bottom: 75px;
+  }
+}
+
+/* Modo móvil (< 768px - FE-13 Escenario 5) */
+@media (max-width: 767px) {
+  .stitch-sidebar {
+    width: 100%;
+    position: relative;
+    padding: 0.75rem 1rem;
+  }
+  .stitch-main-layout {
+    margin-left: 0;
+  }
+  .stitch-content-canvas {
+    padding: 1rem 0.75rem;
+  }
+  .header-left,
+  .header-right {
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 }
 
@@ -786,6 +812,7 @@ async function handleLogout() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-height: var(--touch-target-min, 44px);
   background: none;
   border: none;
   cursor: pointer;
@@ -910,6 +937,7 @@ async function handleLogout() {
 .logout-btn {
   width: 100%;
   padding: 0.75rem 1rem;
+  min-height: var(--touch-target-min, 44px);
   background-color: transparent;
   color: #fca5a5;
   border: none;

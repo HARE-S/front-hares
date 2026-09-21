@@ -69,10 +69,10 @@ Baja
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
 | T-FE13-01 | **Confirmar dispositivos con el cliente** | - | Bloqueado |
-| T-FE13-02 | **Rail de iconos en tableta** | - | Pendiente |
-| T-FE13-03 | **inputmode numérico** En los campos de resultado. | - | Pendiente |
-| T-FE13-04 | **Registro en lote adaptado** Sin desplazamiento horizontal. | - | Pendiente |
-| T-FE13-05 | **Áreas táctiles** Revisión de botones y campos. | - | Pendiente |
+| T-FE13-02 | **Rail de iconos en tableta** | Yeremi Peralta | Completado |
+| T-FE13-03 | **inputmode numérico** En los campos de resultado. | Yeremi Peralta | Completado |
+| T-FE13-04 | **Registro en lote adaptado** Sin desplazamiento horizontal. | Yeremi Peralta | Completado |
+| T-FE13-05 | **Áreas táctiles** Revisión de botones y campos. | Yeremi Peralta | Completado |
 | T-FE13-06 | **Prueba en dispositivo real** | - | Pendiente |
 
 ---

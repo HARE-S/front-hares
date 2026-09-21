@@ -11,6 +11,7 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.55rem 1.15rem;
+  min-height: var(--touch-target-min, 44px);
   border-radius: var(--radius-md);
   font-family: var(--font-headline);
   font-size: 0.875rem;
@@ -181,8 +182,10 @@
 }
 
 /* --- TABLAS PLANAS Y ANALÍTICAS --- */
-.flat-table-wrapper {
+.flat-table-wrapper,
+.table-responsive {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-md);
   border: 1px solid var(--outline-variant);
   background-color: var(--surface-container-lowest);
@@ -239,6 +242,7 @@ label {
 .form-input,
 .form-select {
   width: 100%;
+  min-height: var(--touch-target-min, 44px);
   padding: 0.55rem 0.85rem;
   border: 1px solid #cbd5e1;
   border-radius: var(--radius-md);
@@ -445,3 +449,11 @@ label {
     background-position: 0 50%;
   }
 }
+
+/* --- UTILIDADES RESPONSIVAS Y TÁCTILES (FE-13) --- */
+@media (max-width: 767px) {
+  .grid-cols-1-mobile {
+    grid-template-columns: 1fr !important;
+  }
+}
+
