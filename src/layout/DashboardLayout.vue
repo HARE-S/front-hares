@@ -26,10 +26,13 @@ import {
   CheckCircle2,
   Cloud,
   LayoutDashboard,
-  School
+  School,
+  Menu,
+  X
 } from 'lucide-vue-next';
 
 const currentTab = ref('statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
+const isMobileNavOpen = ref(false);
 const activeSectionId = ref('sec-1');
 const testListRef = ref(null);
 const testsCatalogRef = ref(null);
@@ -100,24 +103,38 @@ async function handleLogout() {
 <template>
   <div class="stitch-app">
     <!-- BARRA LATERAL PERSISTENTE (Stitch Dark Slate Theme: #192134) -->
-    <aside class="stitch-sidebar">
+    <aside class="stitch-sidebar" :class="{ 'mobile-nav-open': isMobileNavOpen }">
       <div class="sidebar-top">
-        <!-- Logo & Branding -->
+        <!-- Logo & Branding + Botón Toggle Móvil -->
         <div class="brand-header">
-          <div class="brand-icon-box">
-            <img src="/logo-hare.png" alt="HARE-S" class="brand-logo" />
-          </div>
-          <div class="brand-text">
-            <div class="brand-title-row">
-              <span class="brand-name">HARE-S</span>
-              <span class="brand-edu-chip">Edu</span>
+          <div class="brand-left flex items-center gap-3">
+            <div class="brand-icon-box">
+              <img src="/logo-hare.png" alt="HARE-S" class="brand-logo" />
             </div>
-            <span class="brand-org">Fundación Peñascal</span>
+            <div class="brand-text">
+              <div class="brand-title-row">
+                <span class="brand-name">HARE-S</span>
+                <span class="brand-edu-chip hidden sm:inline-block">Edu</span>
+              </div>
+              <span class="brand-org hidden xl:block">Fundación Peñascal</span>
+            </div>
           </div>
+
+          <!-- Botón Toggle Menú Móvil (< 768px) -->
+          <button 
+            type="button" 
+            class="mobile-menu-toggle"
+            :aria-expanded="isMobileNavOpen"
+            aria-label="Abrir menú de navegación"
+            @click="isMobileNavOpen = !isMobileNavOpen"
+          >
+            <X v-if="isMobileNavOpen" :size="20" />
+            <Menu v-else :size="20" />
+          </button>
         </div>
 
-        <!-- Quick Action CTA -->
-        <div v-if="userRole !== 'tutor'" class="sidebar-cta-wrap">
+        <!-- Quick Action CTA (Solo escritorio >= 1280px, innecesario en tableta y móvil) -->
+        <div v-if="userRole !== 'tutor'" class="sidebar-cta-wrap hidden xl:block">
           <button
             class="sidebar-cta-btn"
             @click="handleOpenCreate"
@@ -127,12 +144,13 @@ async function handleLogout() {
           </button>
         </div>
 
-        <!-- Navegación Principal -->
-        <nav class="sidebar-nav">
+        <!-- Navegación Principal (Colapsable en móvil) -->
+        <nav class="sidebar-nav" :class="{ 'is-collapsed-mobile': !isMobileNavOpen }">
           <button
             class="nav-item"
             :class="{ active: currentTab === 'statistics' }"
-            @click="currentTab = 'statistics'"
+            title="Estadísticas"
+            @click="currentTab = 'statistics'; isMobileNavOpen = false;"
           >
             <LayoutDashboard :size="18" />
             <span>Estadísticas</span>
@@ -141,7 +159,8 @@ async function handleLogout() {
           <button
             class="nav-item"
             :class="{ active: route.path.startsWith('/centers') }"
-            @click="router.push('/centers')"
+            title="Alumnado"
+            @click="router.push('/centers'); isMobileNavOpen = false;"
           >
             <School :size="18" />
             <span class="flex-1">Alumnado</span>
@@ -151,7 +170,8 @@ async function handleLogout() {
           <button
             class="nav-item"
             :class="{ active: currentTab === 'catalog' && !testToEdit }"
-            @click="currentTab = 'catalog'; testToEdit = null;"
+            title="Catálogo de Pruebas"
+            @click="currentTab = 'catalog'; testToEdit = null; isMobileNavOpen = false;"
           >
             <Layers :size="18" />
             <span class="flex-1">Catálogo de Pruebas</span>
@@ -161,7 +181,8 @@ async function handleLogout() {
           <button
             class="nav-item"
             :class="{ active: currentTab === 'bulk-entry' || currentTab === 'section-detail' }"
-            @click="currentTab = 'bulk-entry'; testToEdit = null;"
+            title="Registro en Aula"
+            @click="currentTab = 'bulk-entry'; testToEdit = null; isMobileNavOpen = false;"
           >
             <Edit3 :size="18" />
             <span class="flex-1">Registro en Aula</span>
@@ -171,7 +192,8 @@ async function handleLogout() {
           <button
             class="nav-item"
             :class="{ active: currentTab === 'books' }"
-            @click="currentTab = 'books'; testToEdit = null;"
+            title="Biblioteca de Libros"
+            @click="currentTab = 'books'; testToEdit = null; isMobileNavOpen = false;"
           >
             <Library :size="18" />
             <span class="flex-1">Biblioteca de Libros</span>
@@ -181,7 +203,8 @@ async function handleLogout() {
           <button
             class="nav-item"
             :class="{ active: currentTab === 'reports' }"
-            @click="currentTab = 'reports'; testToEdit = null;"
+            title="Informes y Exportación"
+            @click="currentTab = 'reports'; testToEdit = null; isMobileNavOpen = false;"
           >
             <BarChart3 :size="18" />
             <span class="flex-1">Informes y Exportación</span>
@@ -190,9 +213,10 @@ async function handleLogout() {
         </nav>
       </div>
 
-      <!-- Pie de la barra lateral con estado académico -->
-      <div class="sidebar-bottom">
-        <div class="academic-session-card">
+      <!-- Pie de la barra lateral -->
+      <div class="sidebar-bottom" :class="{ 'is-collapsed-mobile': !isMobileNavOpen }">
+        <!-- Eliminado en responsive: sesión académica oculta bajo 1280px -->
+        <div class="academic-session-card hidden xl:flex">
           <div class="session-info">
             <div class="pulse-indicator">
               <span class="pulse-dot"></span>
@@ -731,22 +755,53 @@ async function handleLogout() {
   color: var(--on-surface-variant);
 }
 
+/* Botón de alternancia de menú en móvil */
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md, 8px);
+  color: var(--surface-container-lowest, #ffffff);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background-color: var(--tertiary-container, #283149);
+}
+
 /* Rail de iconos en tableta (< 1280px - FE-13 Escenario 1) */
-@media (max-width: 1279px) {
+@media (min-width: 768px) and (max-width: 1279px) {
   .stitch-sidebar {
     width: 72px;
     padding: 1rem 0.5rem;
   }
   .brand-text,
-  .sidebar-cta-btn span,
+  .brand-org,
   .nav-item span,
   .academic-session-card,
-  .sidebar-secondary-links {
-    display: none;
+  .sidebar-cta-wrap,
+  .sidebar-secondary-links,
+  .user-info {
+    display: none !important;
   }
-  .sidebar-cta-btn {
-    padding: 0.5rem;
-    border-radius: 50%;
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+  .brand-header {
+    justify-content: center;
+    padding: 0 0 1rem 0;
+  }
+  .brand-left {
+    justify-content: center;
+  }
+  .nav-item {
+    justify-content: center;
+    padding: 0.65rem 0.5rem;
   }
   .stitch-main-layout {
     margin-left: 72px;
@@ -785,15 +840,74 @@ async function handleLogout() {
 @media (max-width: 767px) {
   .stitch-sidebar {
     width: 100%;
-    position: relative;
-    padding: 0.75rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: 0.65rem 1rem;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--tertiary);
   }
+
+  .brand-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .brand-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  /* Colapsar elementos en móvil cuando el menú no está abierto */
+  .sidebar-nav.is-collapsed-mobile,
+  .sidebar-bottom.is-collapsed-mobile,
+  .sidebar-cta-wrap {
+    display: none !important;
+  }
+
+  /* Cuando el menú móvil está abierto */
+  .stitch-sidebar.mobile-nav-open {
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .stitch-sidebar.mobile-nav-open .brand-header {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .stitch-sidebar.mobile-nav-open .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+  }
+
+  .stitch-sidebar.mobile-nav-open .sidebar-bottom {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
   .stitch-main-layout {
     margin-left: 0;
   }
+
   .stitch-content-canvas {
     padding: 1rem 0.75rem;
   }
+
   .header-left,
   .header-right {
     flex-wrap: wrap;

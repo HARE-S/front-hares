@@ -116,5 +116,51 @@ describe('Dashboard Responsive Design Suite', () => {
       expect(topBar.exists()).toBe(false);
       expect(wrapper.find('.stitch-content-canvas').exists()).toBe(true);
     });
+
+    it('hides unnecessary elements (academic session card, sidebar CTA) on responsive viewports', () => {
+      const wrapper = mount(DashboardLayout);
+      const ctaWrap = wrapper.find('.sidebar-cta-wrap');
+      expect(ctaWrap.classes()).toContain('hidden');
+      expect(ctaWrap.classes()).toContain('xl:block');
+
+      const sessionCard = wrapper.find('.academic-session-card');
+      expect(sessionCard.classes()).toContain('hidden');
+      expect(sessionCard.classes()).toContain('xl:flex');
+    });
+
+    it('renders a mobile hamburger toggle button with accessible aria attributes', () => {
+      const wrapper = mount(DashboardLayout);
+      const toggleBtn = wrapper.find('.mobile-menu-toggle');
+      expect(toggleBtn.exists()).toBe(true);
+      expect(toggleBtn.attributes('aria-label')).toBe('Abrir menú de navegación');
+    });
+
+    it('toggles mobile menu open and closed', async () => {
+      const wrapper = mount(DashboardLayout);
+      const toggleBtn = wrapper.find('.mobile-menu-toggle');
+      const nav = wrapper.find('.sidebar-nav');
+
+      // Initially collapsed on mobile
+      expect(nav.classes()).toContain('is-collapsed-mobile');
+
+      // Click to open
+      await toggleBtn.trigger('click');
+      expect(nav.classes()).not.toContain('is-collapsed-mobile');
+
+      // Click nav item closes menu
+      const navItem = wrapper.find('.nav-item');
+      await navItem.trigger('click');
+      expect(nav.classes()).toContain('is-collapsed-mobile');
+    });
+
+    it('provides tooltips (title attributes) for all navigation items in tablet rail mode', () => {
+      const wrapper = mount(DashboardLayout);
+      const navItems = wrapper.findAll('.nav-item');
+      expect(navItems.length).toBe(6);
+      navItems.forEach(item => {
+        expect(item.attributes('title')).toBeDefined();
+        expect(item.attributes('title').length).toBeGreaterThan(0);
+      });
+    });
   });
 });
