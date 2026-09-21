@@ -141,11 +141,13 @@
                   type="button" 
                   class="btn-audio" 
                   :title="'Escuchar audio de ' + assessment.studentName"
+                  :aria-label="'Escuchar audio de ' + assessment.studentName"
                   @click="playAudio(assessment)"
                 >
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                     <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                   </svg>
+                  <span class="btn-audio-text">Audio</span>
                 </button>
                 <button 
                   type="button" 
@@ -498,6 +500,7 @@ function viewDetail(assessment) {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  white-space: nowrap;
 }
 
 .student-avatar {
@@ -530,12 +533,14 @@ function viewDetail(assessment) {
 .student-name {
   font-weight: 600;
   color: var(--color-primary, #0f3e2e);
+  white-space: nowrap;
 }
 
 .code-cell {
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  white-space: nowrap;
 }
 
 .code-badge {
@@ -546,16 +551,19 @@ function viewDetail(assessment) {
   border-radius: 0.25rem;
   font-family: monospace;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .test-title {
   color: var(--color-on-surface-variant, #3f4943);
   font-size: 0.8125rem;
+  white-space: nowrap;
 }
 
 .td-date {
   color: var(--color-on-surface-variant, #3f4943);
   font-size: 0.8125rem;
+  white-space: nowrap;
 }
 
 .speed-metric {
@@ -749,5 +757,304 @@ function viewDetail(assessment) {
 
 .btn-page-num:not(.active):hover {
   background-color: var(--color-surface-container-low, #f2f5f2);
+}
+
+.btn-audio-text {
+  display: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-on-surface-variant, #3f4943);
+}
+
+/* =========================================================================
+   DISEÑO RESPONSIVO DEL RECUADRO DE EVALUACIONES
+   ========================================================================= */
+
+/* --- TABLETA & ESCRITORIO MEDIO (768px - 1100px) --- */
+@media (min-width: 768px) and (max-width: 1100px) {
+  .toolbar-container {
+    padding: 1rem 1.25rem;
+  }
+
+  .assessments-table th,
+  .assessments-table td {
+    padding: 0.65rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .student-cell {
+    gap: 0.5rem;
+  }
+
+  .student-avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.7rem;
+  }
+
+  .code-badge {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.35rem;
+  }
+
+  .test-title {
+    font-size: 0.75rem;
+  }
+
+  .status-badge {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.45rem;
+  }
+}
+
+/* --- MÓVIL Y TABLETAS PEQUEÑAS (< 768px): TRANSFORMACIÓN A FICHAS / TARJETAS --- */
+@media (max-width: 767px) {
+  .toolbar-container {
+    padding: 1rem;
+    gap: 0.85rem;
+  }
+
+  .toolbar-title {
+    font-size: 1.15rem;
+  }
+
+  .toolbar-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .filters-cluster {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100% !important;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .download-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Desactivar scroll horizontal forzado y pasar a vista de tarjetas */
+  .table-responsive {
+    overflow-x: visible !important;
+    padding: 0;
+  }
+
+  .assessments-table {
+    display: block !important;
+    width: 100% !important;
+    border: none !important;
+  }
+
+  .assessments-table thead {
+    display: none !important;
+  }
+
+  .assessments-table tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.85rem !important;
+    padding: 0.85rem !important;
+    background-color: var(--color-surface-container-low, #f4f6f4) !important;
+  }
+
+  .assessments-table .table-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      "student student status"
+      "test test date"
+      "speed accuracy comp"
+      "actions actions actions";
+    gap: 0.65rem;
+    padding: 1rem;
+    background-color: var(--color-surface-container-lowest, #ffffff) !important;
+    border: 1px solid rgba(189, 201, 192, 0.45) !important;
+    border-radius: var(--radius-lg, 12px) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+  }
+
+  .assessments-table .table-row:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 108, 73, 0.35) !important;
+  }
+
+  .assessments-table .table-row.row-alert {
+    background-color: rgba(254, 242, 242, 0.7) !important;
+    border-color: rgba(239, 68, 68, 0.35) !important;
+  }
+
+  .td-student {
+    grid-area: student;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  .student-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .student-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .td-status {
+    grid-area: status;
+    padding: 0 !important;
+    border: none !important;
+    justify-self: end;
+    align-self: center;
+  }
+
+  .td-test-code {
+    grid-area: test;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  .td-date {
+    grid-area: date;
+    padding: 0 !important;
+    border: none !important;
+    justify-self: end;
+    align-self: center;
+    font-size: 0.75rem;
+    color: var(--color-on-surface-variant, #64748b);
+  }
+
+  .td-speed {
+    grid-area: speed;
+    padding: 0.5rem 0.35rem !important;
+    border: 1px solid rgba(189, 201, 192, 0.35) !important;
+    border-radius: 8px;
+    background-color: var(--color-surface-container-low, #f2f5f2) !important;
+    text-align: center !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .td-speed::before {
+    content: "Velocidad";
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-on-surface-variant, #64748b);
+    margin-bottom: 0.2rem;
+    letter-spacing: 0.03em;
+  }
+
+  .td-accuracy {
+    grid-area: accuracy;
+    padding: 0.5rem 0.35rem !important;
+    border: 1px solid rgba(189, 201, 192, 0.35) !important;
+    border-radius: 8px;
+    background-color: var(--color-surface-container-low, #f2f5f2) !important;
+    text-align: center !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .td-accuracy::before {
+    content: "Exactitud";
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-on-surface-variant, #64748b);
+    margin-bottom: 0.2rem;
+    letter-spacing: 0.03em;
+  }
+
+  .td-comprension {
+    grid-area: comp;
+    padding: 0.5rem 0.35rem !important;
+    border: 1px solid rgba(189, 201, 192, 0.35) !important;
+    border-radius: 8px;
+    background-color: var(--color-surface-container-low, #f2f5f2) !important;
+    text-align: center !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .td-comprension::before {
+    content: "Comprensión";
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-on-surface-variant, #64748b);
+    margin-bottom: 0.2rem;
+    letter-spacing: 0.03em;
+  }
+
+  .td-actions {
+    grid-area: actions;
+    padding: 0.65rem 0 0 0 !important;
+    border: none !important;
+    border-top: 1px solid rgba(189, 201, 192, 0.25) !important;
+  }
+
+  .td-actions .actions-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .btn-audio {
+    padding: 0.4rem 0.75rem;
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 6px;
+    gap: 0.4rem;
+  }
+
+  .btn-audio-text {
+    display: inline-block;
+  }
+
+  .btn-detail {
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.45rem 0.85rem;
+    background-color: rgba(0, 108, 73, 0.08);
+    border-radius: 6px;
+  }
+
+  .empty-row {
+    display: block !important;
+    width: 100%;
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+
+  .pagination-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    text-align: center;
+  }
 }
 </style>
