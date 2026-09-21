@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick, onMounted } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useRouter, useRoute } from 'vue-router';
 import { LayoutDashboard, School, Users, Cloud, LogOut } from 'lucide-vue-next';
@@ -9,6 +9,9 @@ const router = useRouter();
 const route = useRoute();
 const showUserMenu = ref(false);
 const isOpen = ref(false);
+const courseButtonRef = ref(null);
+const dropdownPos = ref({ top: 0, left: 0 });
+const selectedCourse = ref('2024-25');
 const courses = ref([
   { id: '2024-25', name: 'Curso 2024-25' },
   { id: '2023-24', name: 'Curso 2023-24' },
@@ -16,8 +19,34 @@ const courses = ref([
   { id: '2021-22', name: 'Curso 2021-22' }
 ]);
 
+onMounted(() => {
+  const saved = localStorage.getItem('selectedCourse');
+  if (saved) {
+    selectedCourse.value = saved;
+  }
+});
+
 function selectCourse(courseId) {
+  selectedCourse.value = courseId;
+  localStorage.setItem('selectedCourse', courseId);
   isOpen.value = false;
+}
+
+async function toggleDropdown() {
+  isOpen.value = !isOpen.value;
+  if (isOpen.value) {
+    await nextTick();
+    updateDropdownPosition();
+  }
+}
+
+function updateDropdownPosition() {
+  if (!courseButtonRef.value) return;
+  const rect = courseButtonRef.value.getBoundingClientRect();
+  dropdownPos.value = {
+    top: rect.top - 8,
+    left: rect.left
+  };
 }
 
 const userInitials = computed(() => {
@@ -45,6 +74,10 @@ const formattedRole = computed(() => {
 
 const isAdmin = computed(() => ['admin', 'superadmin'].includes(user.value?.role));
 const isCentersActive = computed(() => route.path.startsWith('/centers'));
+const currentCourseName = computed(() => {
+  const course = courses.value.find(c => c.id === selectedCourse.value);
+  return course?.name || 'Seleccionar curso';
+});
 
 async function handleLogout() {
   showUserMenu.value = false;
@@ -97,31 +130,28 @@ async function handleLogout() {
 
     <!-- Pie de la barra lateral -->
     <div class="sidebar-bottom">
-      <button @click="isOpen = !isOpen" class="academic-session-card" :class="{ 'academic-session-card--open': isOpen }">
-        <div class="session-info">
-          <div class="pulse-indicator">
-            <span class="pulse-dot"></span>
-          </div>
-          <div class="session-labels">
-            <span class="session-year">Curso 2024-25</span>
-            <span class="session-status">Sincronizado</span>
-          </div>
-        </div>
-        <Cloud :size="16" class="session-icon" />
+      <button
+        ref="courseButtonRef"
+        @click="toggleDropdown"
+        class="academic-session-card"
+        :class="{ 'academic-session-card--open': isOpen }"
+        style="background-color: green; padding: 2rem; font-size: 1.5rem;"
+      >
+        SELECTOR CURSO - TEST-CURSO
       </button>
 
       <!-- Dropdown -->
       <transition name="dropdown">
-        <div v-if="isOpen" class="courses-dropdown">
+        <div v-if="isOpen" class="courses-dropdown" :style="{ top: dropdownPos.top + 'px', left: dropdownPos.left + 'px' }">
           <button
             v-for="course in courses"
             :key="course.id"
             @click="selectCourse(course.id)"
             class="course-option"
-            :class="{ 'course-option--active': course.id === '2024-25' }"
+            :class="{ 'course-option--active': course.id === selectedCourse }"
           >
             {{ course.name }}
-            <svg v-if="course.id === '2024-25'" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <svg v-if="course.id === selectedCourse" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
             </svg>
           </button>
@@ -293,21 +323,15 @@ async function handleLogout() {
   padding: 0.75rem 0.85rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  justify-content: flex-start;
+  gap: 0.75rem;
   margin-bottom: 0.85rem;
   width: 100%;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   z-index: 50;
-}
-
-.session-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
+  flex-wrap: wrap;
 }
 
 .pulse-indicator {
@@ -325,23 +349,18 @@ async function handleLogout() {
   background-color: var(--secondary-fixed);
 }
 
-.session-labels {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-}
-
 .session-year {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--secondary-fixed);
-  line-height: 1.2;
-}
-
-.session-status {
-  font-size: 0.7rem;
-  color: var(--on-tertiary-container);
-  line-height: 1.2;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  color: red !important;
+  line-height: 1.4;
+  white-space: normal;
+  flex: 1;
+  min-width: auto !important;
+  word-break: break-word;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .session-icon {
@@ -458,8 +477,8 @@ async function handleLogout() {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   z-index: 1001;
   min-width: 220px;
-  bottom: auto;
-  top: auto;
+  margin-top: -40px;
+  overflow: hidden;
 }
 
 .course-option {

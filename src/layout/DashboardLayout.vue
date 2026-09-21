@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
+import { useCourse } from '@/composables/useCourse';
 import DashboardView from '@/views/dashboard/DashboardView.vue';
 import BooksCatalogView from '@/views/books-catalog/BooksCatalogView.vue';
 import BulkEntryView from '@/views/bulk-entry/BulkEntryView.vue';
@@ -15,6 +16,14 @@ import RegisterResultModal from '@/components/results/RegisterResultModal.vue';
 const router = useRouter();
 const route = useRoute();
 const { logout, user } = useAuth();
+const { selectedCourse, courses, getCurrentCourseName } = useCourse();
+
+const isDropdownOpen = ref(false);
+
+function selectCourse(courseId) {
+  selectedCourse.value = courseId;
+  isDropdownOpen.value = false;
+}
 
 import {
   BookOpen,
@@ -192,16 +201,31 @@ async function handleLogout() {
 
       <!-- Pie de la barra lateral con estado académico -->
       <div class="sidebar-bottom">
-        <div class="academic-session-card">
-          <div class="session-info">
-            <div class="pulse-indicator">
-              <span class="pulse-dot"></span>
-            </div>
-            <div class="session-labels">
-<CourseSelector v-model="selectedCourse" />
-            </div>
+        <button
+          class="academic-session-card"
+          @click="isDropdownOpen = !isDropdownOpen"
+        >
+          <div class="pulse-indicator">
+            <span class="pulse-dot"></span>
           </div>
+          <span class="course-name-text">{{ getCurrentCourseName() }}</span>
           <Cloud :size="16" class="session-icon" />
+        </button>
+
+        <!-- Dropdown de cursos -->
+        <div v-if="isDropdownOpen" class="courses-dropdown">
+          <button
+            v-for="course in courses"
+            :key="course.id"
+            @click="selectCourse(course.id)"
+            class="course-option"
+            :class="{ 'course-option--active': course.id === selectedCourse }"
+          >
+            {{ course.name }}
+            <svg v-if="course.id === selectedCourse" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+            </svg>
+          </button>
         </div>
 
         <!-- User Section -->
@@ -247,6 +271,7 @@ async function handleLogout() {
             <DashboardView
               v-if="currentTab === 'statistics'"
               key="statistics"
+              :course="selectedCourse"
               @new-assessment="showRegisterResultModal = true"
               @assign-book="showToast('Abriendo asignador de libros...')"
             />
@@ -255,16 +280,19 @@ async function handleLogout() {
               ref="testsCatalogRef"
               key="catalog"
               :user-role="userRole"
+              :course="selectedCourse"
             />
             <BooksCatalogView
               v-else-if="currentTab === 'books'"
               key="books"
               :user-role="userRole"
+              :course="selectedCourse"
             />
             <BulkEntryView
               v-else-if="currentTab === 'bulk-entry'"
               key="bulk-entry"
               :user-role="userRole"
+              :course="selectedCourse"
               @view-history="handleViewSectionHistory"
             />
             <SectionDetailView
@@ -272,17 +300,20 @@ async function handleLogout() {
               key="section-detail"
               :section-id="activeSectionId"
               :user-role="userRole"
+              :course="selectedCourse"
             />
             <ReportsView
               v-else-if="currentTab === 'reports'"
               key="reports"
               :user-role="userRole"
+              :course="selectedCourse"
             />
             <TestForm
               v-else-if="currentTab === 'form'"
               key="form"
               :test-to-edit="testToEdit"
               :user-role="userRole"
+              :course="selectedCourse"
               @test-created="handleTestCreated"
               @test-updated="handleTestUpdated"
               @cancel-edit="handleCancelEdit"
@@ -470,11 +501,29 @@ async function handleLogout() {
   background-color: rgba(46, 54, 75, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
-  padding: 0.65rem 0.85rem;
+  padding: 0.75rem 0.85rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 0.75rem;
   margin-bottom: 0.85rem;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 50;
+  flex-wrap: wrap;
+}
+
+.academic-session-card:hover {
+  border-color: rgba(111, 251, 190, 0.3);
+  background-color: rgba(46, 54, 75, 0.9);
+}
+
+.academic-session-card:active,
+.academic-session-card.open {
+  border-color: rgba(111, 251, 190, 0.5);
+  background-color: rgba(46, 54, 75, 0.95);
 }
 
 .session-info {
@@ -736,7 +785,6 @@ async function handleLogout() {
   .brand-text,
   .sidebar-cta-btn span,
   .nav-item span,
-  .academic-session-card,
   .sidebar-secondary-links {
     display: none;
   }
@@ -749,6 +797,22 @@ async function handleLogout() {
   }
   .hidden-sm {
     display: none;
+  }
+
+  /* Selector de curso responsive en tablet */
+  .academic-session-card {
+    padding: 0.5rem 0.4rem;
+    width: 100%;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .academic-session-card span {
+    display: none;
+  }
+
+  .session-icon {
+    color: var(--on-tertiary-container);
   }
 
   /* En tablet: ocultar nombre y rol, solo mostrar avatar */
@@ -771,6 +835,12 @@ async function handleLogout() {
     left: 75px;
     width: 280px;
     bottom: 75px;
+  }
+
+  .courses-dropdown {
+    left: 10px !important;
+    right: 10px;
+    width: auto;
   }
 }
 
@@ -924,5 +994,74 @@ async function handleLogout() {
 
 .logout-btn:hover {
   background-color: rgba(220, 38, 38, 0.15);
+}
+
+.courses-dropdown {
+  position: fixed;
+  background: white;
+  border: 1px solid rgba(200, 200, 200, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  min-width: 200px;
+  max-width: 280px;
+  top: auto;
+  bottom: 130px;
+  left: 20px;
+  overflow: hidden;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.course-name-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6ffbbe;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.course-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(200, 200, 200, 0.1);
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  text-align: left;
+  font-weight: 500;
+  transition: background-color 0.15s ease;
+}
+
+.course-option:last-child {
+  border-bottom: none;
+}
+
+.course-option:hover {
+  background-color: rgba(200, 200, 200, 0.1);
+}
+
+.course-option--active {
+  background-color: rgba(111, 251, 190, 0.1);
+  color: #006c49;
+  font-weight: 600;
 }
 </style>
