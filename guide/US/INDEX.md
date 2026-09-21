@@ -37,7 +37,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Transversales** | | | | | |
 | [FE-11](FE-11-estados-pantalla.md) | Estados de pantalla | — | 3 | Alta | **Completado** |
 | [FE-12](FE-12-formularios-validacion.md) | Formularios con validación | — | 5 | Alta | **Completado** |
-| [FE-13](FE-13-uso-tableta.md) | Uso en tableta | — | 5 | Baja | Pendiente |
+| [FE-13](FE-13-uso-tableta.md) | Uso en tableta | — | 5 | Baja | **Completado** |
 | **Catálogos** | | | | | |
 | [FE-14](FE-14-alta-prueba.md) | Alta de prueba | BE-11 | 3 | Alta | **Completado** |
 | [FE-15](FE-15-edicion-baja-pruebas.md) | Edición y baja de pruebas | BE-13 | 3 | Media | **Completado** |
@@ -71,7 +71,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Calidad** | | | | | |
 | [FE-39](FE-39-pruebas-interfaz.md) | Batería de pruebas de interfaz | — | 5 | Alta | Pendiente |
 | [FE-40](FE-40-manual-usuario.md) | Manual de usuario | — | 3 | Media | Pendiente |
-| | **Total** | | **168** | | **23 de 40** |
+| | **Total** | | **168** | | **24 de 40** |
 
 ---
 
