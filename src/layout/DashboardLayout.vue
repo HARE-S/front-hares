@@ -133,9 +133,8 @@ async function handleLogout() {
             </div>
           </div>
 
-          <!-- Indicador de sección activa en responsive -->
-          <div class="active-tab-chip xl:hidden flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/20 text-secondary-fixed text-xs font-semibold">
-            <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+          <!-- Indicador de sección activa (oculto para limpieza visual) -->
+          <div class="active-tab-chip hidden">
             <span>{{ currentTabName }}</span>
           </div>
 
@@ -171,9 +170,13 @@ async function handleLogout() {
             title="Estadísticas"
             @click="currentTab = 'statistics'; isMobileNavOpen = false;"
           >
-            <LayoutDashboard :size="18" />
-            <span class="nav-label">Estadísticas</span>
-            <span v-if="currentTab === 'statistics'" class="nav-active-pill xl:hidden">Activo</span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <LayoutDashboard :size="18" />
+              </div>
+              <span class="nav-label">Estadísticas</span>
+            </div>
+            <span v-if="currentTab === 'statistics'" class="nav-active-pill">Activo</span>
           </button>
 
           <button
@@ -182,10 +185,13 @@ async function handleLogout() {
             title="Alumnado"
             @click="router.push('/centers'); isMobileNavOpen = false;"
           >
-            <School :size="18" />
-            <span class="flex-1 nav-label">Alumnado</span>
-            <span v-if="route.path.startsWith('/centers')" class="nav-active-pill xl:hidden">Activo</span>
-            <span v-else-if="route.path.startsWith('/centers')" class="nav-active-dot"></span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <School :size="18" />
+              </div>
+              <span class="nav-label">Alumnado</span>
+            </div>
+            <span v-if="route.path.startsWith('/centers')" class="nav-active-pill">Activo</span>
           </button>
 
           <button
@@ -194,9 +200,13 @@ async function handleLogout() {
             title="Catálogo de Pruebas"
             @click="currentTab = 'catalog'; testToEdit = null; isMobileNavOpen = false;"
           >
-            <Layers :size="18" />
-            <span class="flex-1 nav-label">Catálogo de Pruebas</span>
-            <span v-if="currentTab === 'catalog'" class="nav-active-pill xl:hidden">Activo</span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <Layers :size="18" />
+              </div>
+              <span class="nav-label">Catálogo de Pruebas</span>
+            </div>
+            <span v-if="currentTab === 'catalog'" class="nav-active-pill">Activo</span>
           </button>
 
           <button
@@ -205,9 +215,13 @@ async function handleLogout() {
             title="Registro en Aula"
             @click="currentTab = 'bulk-entry'; testToEdit = null; isMobileNavOpen = false;"
           >
-            <Edit3 :size="18" />
-            <span class="flex-1 nav-label">Registro en Aula</span>
-            <span v-if="currentTab === 'bulk-entry' || currentTab === 'section-detail'" class="nav-active-pill xl:hidden">Activo</span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <Edit3 :size="18" />
+              </div>
+              <span class="nav-label">Registro en Aula</span>
+            </div>
+            <span v-if="currentTab === 'bulk-entry' || currentTab === 'section-detail'" class="nav-active-pill">Activo</span>
           </button>
 
           <button
@@ -216,9 +230,13 @@ async function handleLogout() {
             title="Biblioteca de Libros"
             @click="currentTab = 'books'; testToEdit = null; isMobileNavOpen = false;"
           >
-            <Library :size="18" />
-            <span class="flex-1 nav-label">Biblioteca de Libros</span>
-            <span v-if="currentTab === 'books'" class="nav-active-pill xl:hidden">Activo</span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <Library :size="18" />
+              </div>
+              <span class="nav-label">Biblioteca de Libros</span>
+            </div>
+            <span v-if="currentTab === 'books'" class="nav-active-pill">Activo</span>
           </button>
 
           <button
@@ -227,9 +245,13 @@ async function handleLogout() {
             title="Informes y Exportación"
             @click="currentTab = 'reports'; testToEdit = null; isMobileNavOpen = false;"
           >
-            <BarChart3 :size="18" />
-            <span class="flex-1 nav-label">Informes y Exportación</span>
-            <span v-if="currentTab === 'reports'" class="nav-active-pill xl:hidden">Activo</span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <BarChart3 :size="18" />
+              </div>
+              <span class="nav-label">Informes y Exportación</span>
+            </div>
+            <span v-if="currentTab === 'reports'" class="nav-active-pill">Activo</span>
           </button>
         </nav>
       </div>
@@ -252,26 +274,44 @@ async function handleLogout() {
 
         <!-- User Section -->
         <div class="user-section">
-          <button class="user-avatar-wrapper" @click="showUserMenu = !showUserMenu">
-            <div class="user-avatar">{{ user?.name?.substring(0, 2).toUpperCase() || 'U' }}</div>
-            <div class="user-info">
-              <p class="user-name">{{ user?.name || 'Usuario' }}</p>
-              <p class="user-role">{{ userRole === 'coordinator' ? 'Coordinador' : 'Tutor' }}</p>
+          <!-- Mobile user profile card (visible when mobile nav is open) -->
+          <div class="user-profile-card xl:hidden">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="user-avatar">{{ user?.name?.substring(0, 2).toUpperCase() || 'U' }}</div>
+              <div class="user-info min-w-0">
+                <p class="user-name truncate">{{ user?.name || 'Usuario' }}</p>
+                <p class="user-role truncate">{{ userRole === 'coordinator' ? 'Coordinador' : 'Tutor' }}</p>
+              </div>
             </div>
-          </button>
-
-          <div v-if="showUserMenu" class="user-menu">
-            <div class="menu-header">
-              <p class="user-name">{{ user?.name || 'Usuario' }}</p>
-              <p class="user-role">{{ user?.email || 'Sin email' }}</p>
-            </div>
-
-            <div class="menu-divider"></div>
-
-            <button class="logout-btn" @click="handleLogout">
-              <span>🚪</span>
+            <button class="mobile-logout-btn" @click="handleLogout" title="Cerrar sesión">
               <span>Cerrar sesión</span>
+              <span>🚪</span>
             </button>
+          </div>
+
+          <!-- Desktop user avatar button & dropdown (>= 1280px) -->
+          <div class="desktop-user-menu-wrap hidden xl:block">
+            <button class="user-avatar-wrapper" @click="showUserMenu = !showUserMenu">
+              <div class="user-avatar">{{ user?.name?.substring(0, 2).toUpperCase() || 'U' }}</div>
+              <div class="user-info">
+                <p class="user-name">{{ user?.name || 'Usuario' }}</p>
+                <p class="user-role">{{ userRole === 'coordinator' ? 'Coordinador' : 'Tutor' }}</p>
+              </div>
+            </button>
+
+            <div v-if="showUserMenu" class="user-menu">
+              <div class="menu-header">
+                <p class="user-name">{{ user?.name || 'Usuario' }}</p>
+                <p class="user-role">{{ user?.email || 'Sin email' }}</p>
+              </div>
+
+              <div class="menu-divider"></div>
+
+              <button class="logout-btn" @click="handleLogout">
+                <span>🚪</span>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -470,7 +510,7 @@ async function handleLogout() {
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
   padding: 0.65rem 0.85rem;
   min-height: var(--touch-target-min, 44px);
   border-radius: var(--radius-md);
@@ -483,6 +523,33 @@ async function handleLogout() {
   transition: var(--transition-fast);
   text-align: left;
   width: 100%;
+}
+
+.nav-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm, 6px);
+  background-color: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.nav-item:hover:not(.disabled) .nav-item-icon {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active .nav-item-icon {
+  background-color: rgba(111, 251, 190, 0.2);
+  color: var(--secondary-fixed, #6ffbbe);
 }
 
 .nav-item:hover:not(.disabled) {
@@ -799,187 +866,332 @@ async function handleLogout() {
    DISEÑO RESPONSIVO: DESPLIEGUE VERTICAL HACIA ABAJO (< 1280px)
    ========================================================================= */
 @media (max-width: 1279px) {
+  /* Contenedor raíz: flujo 100% vertical en móvil y tableta */
+  .stitch-app {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+    background-color: var(--background) !important;
+  }
+
+  /* Header sticky compacto (60px) cuando el menú está colapsado */
   .stitch-sidebar {
-    width: 100%;
-    position: sticky;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-    padding: 0.75rem 1.25rem;
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    background-color: var(--tertiary, #192134);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100% !important;
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: auto !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    padding: 0 1rem !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--tertiary, #192134) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+    z-index: 50 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    transition: box-shadow 0.2s ease;
   }
 
   .brand-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0;
-    border-bottom: none;
-    width: 100%;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    border-bottom: none !important;
   }
 
   .brand-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    white-space: nowrap !important;
+  }
+
+  .brand-icon-box {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 3px !important;
+    border-radius: var(--radius-md, 8px) !important;
+  }
+
+  .brand-title-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    white-space: nowrap !important;
+  }
+
+  .brand-name {
+    font-size: 1.15rem !important;
+    white-space: nowrap !important;
+  }
+
+  .brand-edu-chip {
+    font-size: 0.6rem !important;
+    padding: 0.05rem 0.35rem !important;
+  }
+
+  .brand-org,
+  .active-tab-chip {
+    display: none !important;
   }
 
   .mobile-menu-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: var(--radius-md, 8px);
-    color: var(--surface-container-lowest, #ffffff);
-    cursor: pointer;
-    transition: all 0.2s ease;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: var(--radius-md, 8px) !important;
+    color: var(--surface-container-lowest, #ffffff) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
   }
 
   .mobile-menu-toggle:hover {
-    background-color: var(--tertiary-container, #283149);
-    border-color: var(--secondary-fixed, #6ffbbe);
+    background-color: var(--tertiary-container, #283149) !important;
+    border-color: var(--secondary-fixed, #6ffbbe) !important;
   }
 
-  /* Estado colapsado: Todo el menú oculto hacia arriba */
-  .sidebar-nav.is-collapsed-mobile,
-  .sidebar-bottom.is-collapsed-mobile,
+  /* Elementos eliminados en responsive (< 1280px) */
+  .academic-session-card,
+  .desktop-user-menu-wrap,
   .sidebar-cta-wrap {
     display: none !important;
   }
 
-  /* Estado desplegado: La pantalla se desliza suavemente HACIA ABAJO */
+  /* Estado colapsado: Todo el menú oculto */
+  .sidebar-nav.is-collapsed-mobile,
+  .sidebar-bottom.is-collapsed-mobile {
+    display: none !important;
+  }
+
+  /* Estado desplegado: La pantalla completa se desliza suavemente HACIA ABAJO */
   .stitch-sidebar.mobile-nav-open {
-    max-height: 90vh;
-    overflow-y: auto;
-    padding-bottom: 1.5rem;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-    animation: slideDownScreen 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    min-height: 100vh !important;
+    z-index: 100 !important;
+    padding: 0 1.25rem 1.75rem 1.25rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background-color: var(--tertiary, #192134) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65) !important;
+    animation: slideDownScreen 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
 
   .stitch-sidebar.mobile-nav-open .brand-header {
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    height: 60px !important;
+    min-height: 60px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    flex-shrink: 0 !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .sidebar-top {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
   }
 
   .stitch-sidebar.mobile-nav-open .sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding-top: 1rem;
-    animation: slideDownContent 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.6rem !important;
+    padding: 1.25rem 0 !important;
+    width: 100% !important;
+    animation: slideDownContent 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
 
   .stitch-sidebar.mobile-nav-open .nav-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.85rem 1.15rem;
-    border-radius: var(--radius-lg, 10px);
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    min-height: 50px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: all 0.18s ease;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.85rem 1.15rem !important;
+    border-radius: var(--radius-lg, 12px) !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    min-height: 52px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    transition: all 0.18s ease !important;
+    cursor: pointer !important;
   }
 
   .stitch-sidebar.mobile-nav-open .nav-item:hover {
-    background-color: var(--tertiary-container, #283149);
-    border-color: rgba(111, 251, 190, 0.35);
-    transform: translateY(-1px);
+    background-color: var(--tertiary-container, #283149) !important;
+    border-color: rgba(111, 251, 190, 0.35) !important;
+    transform: translateY(-1px) !important;
   }
 
   .stitch-sidebar.mobile-nav-open .nav-item.active {
-    background-color: var(--primary-container, #0f3e2e);
-    color: var(--secondary-fixed, #6ffbbe);
-    border-color: rgba(111, 251, 190, 0.5);
-    box-shadow: 0 4px 12px rgba(15, 62, 46, 0.35);
+    background-color: var(--primary-container, #0f3e2e) !important;
+    color: var(--secondary-fixed, #6ffbbe) !important;
+    border-color: rgba(111, 251, 190, 0.5) !important;
+    box-shadow: 0 4px 14px rgba(15, 62, 46, 0.4) !important;
   }
 
   .stitch-sidebar.mobile-nav-open .nav-item span {
-    display: inline-block;
+    display: inline-block !important;
   }
 
   .nav-active-pill {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.15rem 0.5rem;
-    border-radius: 9999px;
-    background-color: rgba(111, 251, 190, 0.2);
-    color: var(--secondary-fixed, #6ffbbe);
-    border: 1px solid rgba(111, 251, 190, 0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    padding: 0.15rem 0.55rem !important;
+    border-radius: 9999px !important;
+    background-color: rgba(111, 251, 190, 0.2) !important;
+    color: var(--secondary-fixed, #6ffbbe) !important;
+    border: 1px solid rgba(111, 251, 190, 0.4) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
   }
 
   .stitch-sidebar.mobile-nav-open .sidebar-bottom {
-    display: flex;
-    flex-direction: column;
-    margin-top: 1.25rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    animation: slideDownContent 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    margin-top: auto !important;
+    padding-top: 1.25rem !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+    width: 100% !important;
+    flex-shrink: 0 !important;
+    animation: slideDownContent 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
 
-  .stitch-sidebar.mobile-nav-open .user-info {
-    display: block !important;
+  .stitch-sidebar.mobile-nav-open .user-section {
+    padding: 0 !important;
+    width: 100% !important;
   }
 
-  .stitch-sidebar.mobile-nav-open .user-avatar-wrapper {
-    justify-content: flex-start;
-    padding: 0.75rem 1rem;
-    background-color: rgba(255, 255, 255, 0.04);
-    border-radius: var(--radius-lg, 10px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    min-height: 52px;
+  .stitch-sidebar.mobile-nav-open .user-profile-card {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.75rem 1rem !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border-radius: var(--radius-lg, 12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    gap: 0.75rem !important;
   }
 
   .stitch-sidebar.mobile-nav-open .user-avatar {
-    width: 40px;
-    height: 40px;
-    font-size: 0.95rem;
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 0.9rem !important;
+    border-radius: 50% !important;
+    background-color: #10b981 !important;
+    color: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 700 !important;
+    flex-shrink: 0 !important;
   }
 
-  .stitch-sidebar.mobile-nav-open .user-menu {
-    position: static;
-    width: 100%;
-    margin-top: 0.5rem;
-    box-shadow: none;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background-color: rgba(25, 33, 52, 0.95);
-    border-radius: var(--radius-md, 8px);
+  .stitch-sidebar.mobile-nav-open .user-name {
+    margin: 0 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    line-height: 1.2 !important;
   }
 
+  .stitch-sidebar.mobile-nav-open .user-role {
+    margin: 0 !important;
+    font-size: 0.7rem !important;
+    color: var(--on-tertiary-container, #bdc9c0) !important;
+    text-transform: capitalize !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .mobile-logout-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+    padding: 0.5rem 0.85rem !important;
+    border-radius: var(--radius-md, 8px) !important;
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    color: #fca5a5 !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    white-space: nowrap !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .mobile-logout-btn:hover {
+    background-color: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(239, 68, 68, 0.6) !important;
+  }
+
+  /* Lienzo principal: 100% de ancho en responsive */
   .stitch-main-layout {
-    margin-left: 0;
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    flex: 1 !important;
   }
 
   .stitch-content-canvas {
-    padding: 1.25rem 1rem;
+    padding: 1.25rem 1rem 2.5rem 1rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
   }
 
   .header-left,
   .header-right {
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
   }
 }
 
-/* Animación pura hacia abajo (sin desplazamiento horizontal) */
+@media (min-width: 1280px) {
+  .user-profile-card {
+    display: none !important;
+  }
+
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+
+  .active-tab-chip {
+    display: none !important;
+  }
+
+  .mobile-logout-btn {
+    display: none !important;
+  }
+}
+
+/* Animación de deslizamiento vertical estricto hacia abajo (sin desplazamiento horizontal) */
 @keyframes slideDownScreen {
   from {
-    opacity: 0.85;
-    transform: translateY(-10px);
+    opacity: 0.4;
+    transform: translateY(-24px);
   }
   to {
     opacity: 1;
@@ -990,7 +1202,7 @@ async function handleLogout() {
 @keyframes slideDownContent {
   from {
     opacity: 0;
-    transform: translateY(-16px);
+    transform: translateY(-12px);
   }
   to {
     opacity: 1;
