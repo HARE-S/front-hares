@@ -3,13 +3,22 @@ import { ref, computed } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useRouter, useRoute } from 'vue-router';
 import { LayoutDashboard, School, Users, Cloud, LogOut } from 'lucide-vue-next';
-import CourseSelector from '@/components/dashboard/CourseSelector.vue';
 
 const { user, logout } = useAuth();
 const router = useRouter();
 const route = useRoute();
 const showUserMenu = ref(false);
-const selectedCourse = ref('2024-25');
+const isOpen = ref(false);
+const courses = ref([
+  { id: '2024-25', name: 'Curso 2024-25' },
+  { id: '2023-24', name: 'Curso 2023-24' },
+  { id: '2022-23', name: 'Curso 2022-23' },
+  { id: '2021-22', name: 'Curso 2021-22' }
+]);
+
+function selectCourse(courseId) {
+  isOpen.value = false;
+}
 
 const userInitials = computed(() => {
   if (!user.value) return '';
@@ -88,7 +97,36 @@ async function handleLogout() {
 
     <!-- Pie de la barra lateral -->
     <div class="sidebar-bottom">
-      <CourseSelector v-model="selectedCourse" />
+      <button @click="isOpen = !isOpen" class="academic-session-card" :class="{ 'academic-session-card--open': isOpen }">
+        <div class="session-info">
+          <div class="pulse-indicator">
+            <span class="pulse-dot"></span>
+          </div>
+          <div class="session-labels">
+            <span class="session-year">Curso 2024-25</span>
+            <span class="session-status">Sincronizado</span>
+          </div>
+        </div>
+        <Cloud :size="16" class="session-icon" />
+      </button>
+
+      <!-- Dropdown -->
+      <transition name="dropdown">
+        <div v-if="isOpen" class="courses-dropdown">
+          <button
+            v-for="course in courses"
+            :key="course.id"
+            @click="selectCourse(course.id)"
+            class="course-option"
+            :class="{ 'course-option--active': course.id === '2024-25' }"
+          >
+            {{ course.name }}
+            <svg v-if="course.id === '2024-25'" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+            </svg>
+          </button>
+        </div>
+      </transition>
 
       <!-- User Section -->
       <div class="user-section">
@@ -386,6 +424,92 @@ async function handleLogout() {
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
   z-index: 1000;
   animation: slideRight 0.3s ease-out;
+}
+
+/* Dropdown de cursos */
+.academic-session-card {
+  background-color: rgba(46, 54, 75, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.academic-session-card:hover {
+  border-color: rgba(111, 251, 190, 0.3);
+  background-color: rgba(46, 54, 75, 0.9);
+}
+
+.academic-session-card--open {
+  border-color: rgba(111, 251, 190, 0.5);
+  background-color: rgba(46, 54, 75, 0.95);
+}
+
+.courses-dropdown {
+  position: fixed;
+  background: white;
+  border: 1px solid rgba(200, 200, 200, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  min-width: 220px;
+  bottom: auto;
+  top: auto;
+}
+
+.course-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(200, 200, 200, 0.1);
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  text-align: left;
+  transition: background-color 0.15s ease;
+  font-weight: 500;
+}
+
+.course-option:last-child {
+  border-bottom: none;
+}
+
+.course-option:hover {
+  background-color: rgba(200, 200, 200, 0.1);
+}
+
+.course-option--active {
+  background-color: rgba(111, 251, 190, 0.1);
+  color: #006c49;
+  font-weight: 600;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dropdown-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
 }
 
 @keyframes slideRight {
