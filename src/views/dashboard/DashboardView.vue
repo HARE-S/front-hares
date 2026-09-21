@@ -5,7 +5,7 @@
       <div class="header-titles">
         <div class="title-badge-row">
           <h1 class="page-title">Panel de Rendimiento Lector</h1>
-          <span class="badge-baremo">Baremo Oficial 2024</span>
+          <span class="badge-baremo">{{ selectedCourse === '2024-25' ? 'Baremo Oficial 2024' : selectedCourse === '2023-24' ? 'Baremo Oficial 2023' : selectedCourse === '2022-23' ? 'Baremo Oficial 2022' : 'Baremo Oficial 2021' }}</span>
         </div>
         <p class="page-subtitle">Seguimiento sistemático de fluidez, velocidad (PPM) y comprensión lectora</p>
       </div>
@@ -74,6 +74,7 @@
     <!-- SECTION 2: Key Metric KPI Overview Cards -->
     <KpiOverview
       ref="kpiOverviewRef"
+      :course="selectedCourse"
       @view-reinforcement="handleViewReinforcement"
       @view-report="(student) => { selectedReportStudent = student; showStudentReport = true; }"
     />
@@ -82,17 +83,18 @@
     <section aria-label="Análisis de Rendimiento" class="analytics-split-grid">
       <!-- Main Analytical Chart: Fluidez Lectora PPM (8 cols) -->
       <div class="grid-col-chart">
-        <FluencyChart />
+        <FluencyChart :course="selectedCourse" />
       </div>
 
       <!-- Right Side: Distribución de Niveles (4 cols) -->
       <div class="grid-col-distribution">
-        <LevelsDistribution @open-intervention="handleOpenIntervention" />
+        <LevelsDistribution :course="selectedCourse" @open-intervention="handleOpenIntervention" />
       </div>
     </section>
 
     <!-- SECTION 4: Data Table Section: Últimas Evaluaciones Registradas -->
     <RecentAssessmentsTable
+      :course="selectedCourse"
       @export="handleTableExport"
       @play-audio="handlePlayAudio"
       @view-detail="handleViewDetail"
@@ -128,6 +130,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
+import { useCourse } from '@/composables/useCourse';
 import KpiOverview from '../../components/dashboard/KpiOverview.vue';
 import FluencyChart from '../../components/dashboard/FluencyChart.vue';
 import LevelsDistribution from '../../components/dashboard/LevelsDistribution.vue';
@@ -138,6 +141,7 @@ import StudentReportModal from '../../components/dashboard/StudentReportModal.vu
 
 const router = useRouter();
 const { user } = useAuth();
+const { selectedCourse } = useCourse();
 const emit = defineEmits(['new-assessment', 'assign-book']);
 
 const feedbackMessage = ref(null);

@@ -23,6 +23,7 @@ const isDropdownOpen = ref(false);
 function selectCourse(courseId) {
   selectedCourse.value = courseId;
   isDropdownOpen.value = false;
+  console.log('✅ Curso seleccionado:', courseId, 'Valor actual:', selectedCourse.value);
 }
 
 import {
@@ -38,7 +39,9 @@ import {
   School
 } from 'lucide-vue-next';
 
-const currentTab = ref('statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
+// Cargar tab guardado
+const savedTab = typeof localStorage !== 'undefined' ? localStorage.getItem('activeTab') : null;
+const currentTab = ref(savedTab || 'statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
 const activeSectionId = ref('sec-1');
 const testListRef = ref(null);
 const testsCatalogRef = ref(null);
@@ -46,6 +49,15 @@ const testToEdit = ref(null);
 const userRole = ref('coordinator'); // 'coordinator' | 'tutor'
 const toastNotification = ref(null);
 const showRegisterResultModal = ref(false);
+
+// Guardar tab cuando cambia
+import { watch as vueWatch } from 'vue';
+vueWatch(currentTab, (newTab) => {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('activeTab', newTab);
+    console.log('💾 Tab guardado:', newTab);
+  }
+});
 
 function handleViewSectionHistory(sectionId) {
   if (sectionId) activeSectionId.value = sectionId;

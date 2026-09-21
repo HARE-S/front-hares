@@ -68,7 +68,7 @@
         </thead>
         <tbody>
           <tr 
-            v-for="assessment in filteredAssessments" 
+            v-for="assessment in paginatedAssessments" 
             :key="assessment.id"
             :class="['table-row', { 'row-alert': assessment.level === 'Requiere apoyo' }]"
           >
@@ -170,18 +170,39 @@
     <!-- Table Pagination & Record Counter -->
     <div class="pagination-footer">
       <span>
-        Mostrando <strong>{{ filteredAssessments.length }}</strong> de <strong>{{ allAssessments.length }}</strong> evaluaciones registradas en el Corte A
+        Mostrando <strong>{{ paginatedAssessments.length }}</strong> de <strong>{{ filteredAssessments.length }}</strong> evaluaciones registradas en el Corte A
       </span>
       <div class="pagination-nav">
-        <button type="button" class="btn-page-nav" disabled aria-label="Página anterior">
+        <button
+          type="button"
+          class="btn-page-nav"
+          :disabled="currentPage === 1"
+          @click="prevPage"
+          aria-label="Página anterior"
+        >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
             <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
           </svg>
         </button>
-        <button type="button" class="btn-page-num active">1</button>
-        <button type="button" class="btn-page-num">2</button>
-        <button type="button" class="btn-page-num">3</button>
-        <button type="button" class="btn-page-nav" aria-label="Página siguiente">
+
+        <button
+          v-for="page in pageNumbers"
+          :key="page"
+          type="button"
+          class="btn-page-num"
+          :class="{ active: currentPage === page }"
+          @click="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          type="button"
+          class="btn-page-nav"
+          :disabled="currentPage === totalPages"
+          @click="nextPage"
+          aria-label="Página siguiente"
+        >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
             <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
           </svg>
@@ -192,7 +213,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
   course: {
@@ -203,93 +224,52 @@ const props = defineProps({
 
 const emit = defineEmits(['export', 'play-audio', 'view-detail']);
 
+const currentCourse = ref(props.course);
+
+watch(() => props.course, (newCourse) => {
+  currentCourse.value = newCourse;
+  console.log('📋 RecentAssessmentsTable: Curso cambió a', newCourse);
+});
+
 const searchQuery = ref('');
 const selectedType = ref('');
+const currentPage = ref(1);
+const itemsPerPage = 4;
 
-const allAssessments = ref([
-  {
-    id: 1,
-    studentName: 'Lucas Méndez Ruiz',
-    initials: 'LM',
-    testCode: '3AF',
-    testTitle: 'El bosque animado',
-    testType: 'Texto Continuo',
-    date: '24 Ene 2025',
-    speed: 128,
-    accuracy: 98.5,
-    comprehension: '4/4',
-    level: 'Avanzado'
-  },
-  {
-    id: 2,
-    studentName: 'Sofía Navarro Ortiz',
-    initials: 'SN',
-    testCode: '3AF',
-    testTitle: 'El bosque animado',
-    testType: 'Texto Continuo',
-    date: '24 Ene 2025',
-    speed: 118,
-    accuracy: 96.0,
-    comprehension: '4/4',
-    level: 'En nivel'
-  },
-  {
-    id: 3,
-    studentName: 'Mateo Barrenechea',
-    initials: 'MB',
-    testCode: '3BL',
-    testTitle: 'Aventuras en el mar',
-    testType: 'Lectura de Palabras',
-    date: '23 Ene 2025',
-    speed: 82,
-    accuracy: 88.0,
-    comprehension: '2/4',
-    level: 'Requiere apoyo'
-  },
-  {
-    id: 4,
-    studentName: 'Aitana Zubizarreta',
-    initials: 'AZ',
-    testCode: '3AF',
-    testTitle: 'El bosque animado',
-    testType: 'Texto Continuo',
-    date: '23 Ene 2025',
-    speed: 122,
-    accuracy: 97.2,
-    comprehension: '4/4',
-    level: 'En nivel'
-  },
-  {
-    id: 5,
-    studentName: 'Iker Goikoetxea',
-    initials: 'IG',
-    testCode: '3CF',
-    testTitle: 'Misterio en el museo',
-    testType: 'Pseudopalabras',
-    date: '22 Ene 2025',
-    speed: 78,
-    accuracy: 85.5,
-    comprehension: '1/4',
-    level: 'Requiere apoyo'
-  },
-  {
-    id: 6,
-    studentName: 'Emma Larrañaga',
-    initials: 'EL',
-    testCode: '3AF',
-    testTitle: 'El bosque animado',
-    testType: 'Texto Continuo',
-    date: '21 Ene 2025',
-    speed: 134,
-    accuracy: 99.1,
-    comprehension: '4/4',
-    level: 'Avanzado'
-  }
-]);
+const assessmentsByCourse = {
+  '2024-25': [
+    { id: 1, studentName: 'Lucas Méndez Ruiz', initials: 'LM', testCode: '3AF', testTitle: 'El bosque animado', testType: 'Texto Continuo', date: '24 Ene 2025', speed: 128, accuracy: 98.5, comprehension: '4/4', level: 'Avanzado' },
+    { id: 2, studentName: 'Sofía Navarro Ortiz', initials: 'SN', testCode: '3AF', testTitle: 'El bosque animado', testType: 'Texto Continuo', date: '24 Ene 2025', speed: 118, accuracy: 96.0, comprehension: '4/4', level: 'En nivel' },
+    { id: 3, studentName: 'Mateo Barrenechea', initials: 'MB', testCode: '3BL', testTitle: 'Aventuras en el mar', testType: 'Lectura de Palabras', date: '23 Ene 2025', speed: 82, accuracy: 88.0, comprehension: '2/4', level: 'Requiere apoyo' },
+    { id: 4, studentName: 'Aitana Zubizarreta', initials: 'AZ', testCode: '3AF', testTitle: 'El bosque animado', testType: 'Texto Continuo', date: '23 Ene 2025', speed: 122, accuracy: 97.2, comprehension: '4/4', level: 'En nivel' },
+    { id: 5, studentName: 'Iker Goikoetxea', initials: 'IG', testCode: '3CF', testTitle: 'Misterio en el museo', testType: 'Pseudopalabras', date: '22 Ene 2025', speed: 78, accuracy: 85.5, comprehension: '1/4', level: 'Requiere apoyo' },
+    { id: 6, studentName: 'Emma Larrañaga', initials: 'EL', testCode: '3AF', testTitle: 'El bosque animado', testType: 'Texto Continuo', date: '21 Ene 2025', speed: 134, accuracy: 99.1, comprehension: '4/4', level: 'Avanzado' }
+  ],
+  '2023-24': [
+    { id: 7, studentName: 'Carlos Mendoza', initials: 'CM', testCode: '2AF', testTitle: 'La casa', testType: 'Texto Continuo', date: '20 Ene 2025', speed: 105, accuracy: 92.0, comprehension: '3/4', level: 'En nivel' },
+    { id: 8, studentName: 'Isabel García', initials: 'IG', testCode: '2BL', testTitle: 'Viaje al futuro', testType: 'Lectura de Palabras', date: '19 Ene 2025', speed: 115, accuracy: 95.5, comprehension: '4/4', level: 'En nivel' },
+    { id: 9, studentName: 'Francisco Pérez', initials: 'FP', testCode: '2CF', testTitle: 'El misterio', testType: 'Pseudopalabras', date: '18 Ene 2025', speed: 88, accuracy: 90.0, comprehension: '2/4', level: 'Requiere apoyo' },
+    { id: 10, studentName: 'Ángela López', initials: 'AL', testCode: '2AF', testTitle: 'La casa', testType: 'Texto Continuo', date: '17 Ene 2025', speed: 120, accuracy: 99.0, comprehension: '4/4', level: 'Avanzado' }
+  ],
+  '2022-23': [
+    { id: 11, studentName: 'Fernando Ruiz', initials: 'FR', testCode: '1AF', testTitle: 'El pueblo', testType: 'Texto Continuo', date: '16 Ene 2025', speed: 95, accuracy: 85.0, comprehension: '2/4', level: 'Requiere apoyo' },
+    { id: 12, studentName: 'Alejandra López', initials: 'AL', testCode: '1BL', testTitle: 'Historias', testType: 'Lectura de Palabras', date: '15 Ene 2025', speed: 108, accuracy: 93.0, comprehension: '3/4', level: 'En nivel' },
+    { id: 13, studentName: 'David García', initials: 'DG', testCode: '1CF', testTitle: 'Palabras nuevas', testType: 'Pseudopalabras', date: '14 Ene 2025', speed: 98, accuracy: 89.0, comprehension: '3/4', level: 'En nivel' },
+    { id: 14, studentName: 'Mónica Sánchez', initials: 'MS', testCode: '1AF', testTitle: 'El pueblo', testType: 'Texto Continuo', date: '13 Ene 2025', speed: 118, accuracy: 96.0, comprehension: '4/4', level: 'En nivel' }
+  ],
+  '2021-22': [
+    { id: 15, studentName: 'Antonio López', initials: 'AL', testCode: '0AF', testTitle: 'Inicio', testType: 'Texto Continuo', date: '12 Ene 2025', speed: 85, accuracy: 80.0, comprehension: '1/4', level: 'Requiere apoyo' },
+    { id: 16, studentName: 'Beatriz García', initials: 'BG', testCode: '0BL', testTitle: 'Principios', testType: 'Lectura de Palabras', date: '11 Ene 2025', speed: 102, accuracy: 91.0, comprehension: '3/4', level: 'En nivel' },
+    { id: 17, studentName: 'Enrique Pérez', initials: 'EP', testCode: '0CF', testTitle: 'Letras', testType: 'Pseudopalabras', date: '10 Ene 2025', speed: 78, accuracy: 82.0, comprehension: '1/4', level: 'Requiere apoyo' },
+    { id: 18, studentName: 'Silvia Ruiz', initials: 'SR', testCode: '0AF', testTitle: 'Inicio', testType: 'Texto Continuo', date: '09 Ene 2025', speed: 112, accuracy: 94.0, comprehension: '3/4', level: 'En nivel' }
+  ]
+};
+
+const allAssessments = computed(() => assessmentsByCourse[currentCourse.value] || assessmentsByCourse['2024-25']);
 
 const filteredAssessments = computed(() => {
   return allAssessments.value.filter(item => {
-    const matchesSearch = searchQuery.value === '' || 
+    const matchesSearch = searchQuery.value === '' ||
       item.studentName.toLowerCase().includes(searchQuery.value.trim().toLowerCase()) ||
       item.testCode.toLowerCase().includes(searchQuery.value.trim().toLowerCase()) ||
       item.testTitle.toLowerCase().includes(searchQuery.value.trim().toLowerCase());
@@ -299,6 +279,40 @@ const filteredAssessments = computed(() => {
     return matchesSearch && matchesType;
   });
 });
+
+const totalPages = computed(() => Math.ceil(filteredAssessments.value.length / itemsPerPage));
+
+const paginatedAssessments = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredAssessments.value.slice(start, end);
+});
+
+const pageNumbers = computed(() => {
+  const pages = [];
+  for (let i = 1; i <= totalPages.value; i++) {
+    pages.push(i);
+  }
+  return pages;
+});
+
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+}
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+}
+
+function prevPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+}
 
 function avatarClass(level) {
   if (level === 'Requiere apoyo') return 'avatar--error';
@@ -705,25 +719,38 @@ function viewDetail(assessment) {
 
 /* Pagination Footer */
 .pagination-footer {
-  padding: 0.9rem 1.25rem;
+  padding: 1rem 1.25rem;
   border-top: 1px solid rgba(189, 201, 192, 0.3);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  flex-direction: column;
   background-color: var(--color-surface-container-lowest, #ffffff);
   font-size: 0.8125rem;
   color: var(--color-on-surface-variant, #3f4943);
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .pagination-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+  }
 }
 
 .pagination-nav {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
 }
 
 .btn-page-nav {
-  padding: 0.35rem 0.5rem;
-  border-radius: 0.25rem;
+  padding: 0;
+  border-radius: 0.35rem;
   border: 1px solid rgba(189, 201, 192, 0.5);
   background: none;
   color: var(--color-on-surface-variant, #3f4943);
@@ -731,6 +758,15 @@ function viewDetail(assessment) {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.btn-page-nav:hover:not(:disabled) {
+  background-color: var(--color-surface-container-low, #f2f5f2);
+  border-color: rgba(189, 201, 192, 0.8);
 }
 
 .btn-page-nav:disabled {
@@ -738,23 +774,89 @@ function viewDetail(assessment) {
   cursor: not-allowed;
 }
 
+.btn-page-nav svg {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
 .btn-page-num {
-  padding: 0.25rem 0.65rem;
-  border-radius: 0.25rem;
-  border: none;
+  padding: 0;
+  border-radius: 0.35rem;
+  border: 1px solid transparent;
   background: none;
-  font-size: 0.8125rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--color-on-surface, #191c1b);
   cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  line-height: 1;
 }
 
 .btn-page-num.active {
   background-color: var(--color-primary-container, #0f3e2e);
   color: var(--color-secondary-fixed, #6ffbbe);
   font-weight: 700;
+  border-color: rgba(111, 251, 190, 0.3);
 }
 
 .btn-page-num:not(.active):hover {
   background-color: var(--color-surface-container-low, #f2f5f2);
+  border-color: rgba(189, 201, 192, 0.5);
+}
+
+@media (max-width: 1024px) {
+  .pagination-footer {
+    padding: 0.85rem 1rem;
+    font-size: 0.75rem;
+  }
+
+  .pagination-nav {
+    gap: 0.25rem;
+  }
+
+  .btn-page-nav,
+  .btn-page-num {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-page-nav svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .btn-page-num {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .pagination-footer {
+    padding: 0.75rem 0.85rem;
+    gap: 0.5rem;
+  }
+
+  .pagination-nav {
+    gap: 0.2rem;
+  }
+
+  .btn-page-nav,
+  .btn-page-num {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+
+  .btn-page-nav svg {
+    width: 11px;
+    height: 11px;
+  }
 }
 </style>

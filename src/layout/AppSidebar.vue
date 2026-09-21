@@ -2,7 +2,7 @@
 import { ref, computed, nextTick, onMounted } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useRouter, useRoute } from 'vue-router';
-import { LayoutDashboard, School, Users, Cloud, LogOut } from 'lucide-vue-next';
+import { LayoutDashboard, School, Users, Cloud, LogOut, Plus, PieChart, Users as UsersIcon, BookOpen, FileText, BarChart3 } from 'lucide-vue-next';
 
 const { user, logout } = useAuth();
 const router = useRouter();
@@ -126,6 +126,38 @@ async function handleLogout() {
           <span class="flex-1">Usuarios</span>
         </router-link>
       </nav>
+
+      <!-- Navegación secundaria (cuando estás en Centros) -->
+      <nav v-if="isCentersActive" class="sidebar-nav secondary-nav">
+        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
+          <Plus :size="16" />
+          <span class="flex-1">Nueva Prueba</span>
+        </button>
+        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
+          <BarChart3 :size="16" />
+          <span class="flex-1">Estadísticas</span>
+        </button>
+        <button class="nav-item secondary-item" @click="router.push('/centers')">
+          <UsersIcon :size="16" />
+          <span class="flex-1">Alumnado</span>
+        </button>
+        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
+          <BookOpen :size="16" />
+          <span class="flex-1">Catálogo de Pruebas</span>
+        </button>
+        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
+          <FileText :size="16" />
+          <span class="flex-1">Registro en Aula</span>
+        </button>
+        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
+          <BookOpen :size="16" />
+          <span class="flex-1">Biblioteca de Libros</span>
+        </button>
+        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
+          <BarChart3 :size="16" />
+          <span class="flex-1">Informes y Exportación</span>
+        </button>
+      </nav>
     </div>
 
     <!-- Pie de la barra lateral -->
@@ -135,9 +167,12 @@ async function handleLogout() {
         @click="toggleDropdown"
         class="academic-session-card"
         :class="{ 'academic-session-card--open': isOpen }"
-        style="background-color: green; padding: 2rem; font-size: 1.5rem;"
       >
-        SELECTOR CURSO - TEST-CURSO
+        <div class="pulse-indicator">
+          <span class="pulse-dot"></span>
+        </div>
+        <span class="course-name-text">{{ currentCourseName }}</span>
+        <Cloud :size="16" class="session-icon" />
       </button>
 
       <!-- Dropdown -->
@@ -315,6 +350,27 @@ async function handleLogout() {
   flex: 1;
 }
 
+.secondary-nav {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 0.35rem;
+}
+
+.secondary-item {
+  /* Heredar exactamente los estilos de .nav-item */
+}
+
+.secondary-item.current-section {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.secondary-item.current-section:hover {
+  background-color: transparent;
+}
+
 /* Pie de la barra */
 .academic-session-card {
   background-color: rgba(46, 54, 75, 0.7);
@@ -349,18 +405,15 @@ async function handleLogout() {
   background-color: var(--secondary-fixed);
 }
 
-.session-year {
-  font-size: 1.2rem !important;
-  font-weight: 700 !important;
-  color: red !important;
-  line-height: 1.4;
-  white-space: normal;
+.course-name-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6ffbbe;
   flex: 1;
-  min-width: auto !important;
-  word-break: break-word;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .session-icon {

@@ -20,6 +20,7 @@ const selectedStudent = ref(null);
 
 const courseDataMap = {
   '2024-25': {
+    baremo: 'Baremo Oficial 2024',
     speed: {
       current: 115,
       unit: 'PPM',
@@ -41,11 +42,13 @@ const courseDataMap = {
       averagePerStudent: 2.6
     },
     alerts: {
+      count: 4,
       label: 'Requieren Apoyo',
       criteria: 'PPM < 85 o > 5% errores'
     }
   },
   '2023-24': {
+    baremo: 'Baremo Oficial 2023',
     speed: {
       current: 108,
       unit: 'PPM',
@@ -67,11 +70,13 @@ const courseDataMap = {
       averagePerStudent: 2.4
     },
     alerts: {
+      count: 3,
       label: 'Requieren Apoyo',
       criteria: 'PPM < 85 o > 5% errores'
     }
   },
   '2022-23': {
+    baremo: 'Baremo Oficial 2022',
     speed: {
       current: 102,
       unit: 'PPM',
@@ -93,11 +98,13 @@ const courseDataMap = {
       averagePerStudent: 2.5
     },
     alerts: {
+      count: 5,
       label: 'Requieren Apoyo',
       criteria: 'PPM < 85 o > 5% errores'
     }
   },
   '2021-22': {
+    baremo: 'Baremo Oficial 2021',
     speed: {
       current: 98,
       unit: 'PPM',
@@ -119,26 +126,66 @@ const courseDataMap = {
       averagePerStudent: 2.3
     },
     alerts: {
+      count: 6,
       label: 'Requieren Apoyo',
       criteria: 'PPM < 85 o > 5% errores'
     }
   }
 };
 
-const kpiData = computed(() => courseDataMap[props.course] || courseDataMap['2024-25']);
+const currentCourse = ref(props.course);
 
-const allStudents = ref([
-  { id: 1, center: 'Botusbaru', section: '1CARMED1', expediente: '64019', name: 'Mateo Barrenechea', ppm: 82, errors: '8%', status: 'support' },
-  { id: 2, center: 'Botusbaru', section: '1CARMED1', expediente: '56542', name: 'Paula Rodríguez López', ppm: 98, errors: '6.5%', status: 'support' },
-  { id: 3, center: 'Botusbaru', section: '1CARMED1', expediente: '63934', name: 'Juan Carlos Pérez', ppm: 75, errors: '9%', status: 'support' },
-  { id: 4, center: 'Botusbaru', section: '1CARMED1', expediente: '62145', name: 'Lucas Méndez Ruiz', ppm: 128, errors: '1.5%', status: 'advanced' },
-  { id: 5, center: 'Botusbaru', section: '1CARMED1', expediente: '58923', name: 'Sofía Navarro Ortiz', ppm: 118, errors: '2%', status: 'normal' },
-  { id: 6, center: 'Botusbaru', section: '1CARMED2', expediente: '64567', name: 'Aitana Zubizarreta', ppm: 115, errors: '3%', status: 'normal' },
-  { id: 7, center: 'Botusbaru', section: '1CARMED2', expediente: '65234', name: 'Alejandro López', ppm: 105, errors: '4%', status: 'normal' },
-  { id: 8, center: 'Centro 2', section: '2CARMED1', expediente: '63891', name: 'Marina González', ppm: 92, errors: '5%', status: 'normal' },
-  { id: 9, center: 'Centro 2', section: '2CARMED1', expediente: '64789', name: 'Diego Martínez', ppm: 110, errors: '2.5%', status: 'normal' },
-  { id: 10, center: 'Centro 2', section: '2CARMED1', expediente: '61234', name: 'Elena Ruiz', ppm: 80, errors: '10%', status: 'support' }
-]);
+watch(() => props.course, (newCourse) => {
+  currentCourse.value = newCourse;
+  console.log('📊 KpiOverview: Curso cambió a', newCourse);
+});
+
+const kpiData = computed(() => courseDataMap[currentCourse.value] || courseDataMap['2024-25']);
+
+const studentsByeCourse = {
+  '2024-25': [
+    { id: 1, center: 'Botusbaru', section: '1CARMED1', expediente: '64019', name: 'Mateo Barrenechea', ppm: 82, errors: '8%', status: 'support' },
+    { id: 2, center: 'Botusbaru', section: '1CARMED1', expediente: '56542', name: 'Paula Rodríguez López', ppm: 98, errors: '6.5%', status: 'support' },
+    { id: 3, center: 'Botusbaru', section: '1CARMED1', expediente: '63934', name: 'Juan Carlos Pérez', ppm: 75, errors: '9%', status: 'support' },
+    { id: 4, center: 'Botusbaru', section: '1CARMED1', expediente: '62145', name: 'Lucas Méndez Ruiz', ppm: 128, errors: '1.5%', status: 'advanced' },
+    { id: 5, center: 'Botusbaru', section: '1CARMED1', expediente: '58923', name: 'Sofía Navarro Ortiz', ppm: 118, errors: '2%', status: 'normal' },
+    { id: 6, center: 'Botusbaru', section: '1CARMED2', expediente: '64567', name: 'Aitana Zubizarreta', ppm: 115, errors: '3%', status: 'normal' },
+    { id: 7, center: 'Botusbaru', section: '1CARMED2', expediente: '65234', name: 'Alejandro López', ppm: 105, errors: '4%', status: 'normal' },
+    { id: 8, center: 'Centro 2', section: '2CARMED1', expediente: '63891', name: 'Marina González', ppm: 92, errors: '5%', status: 'normal' },
+    { id: 9, center: 'Centro 2', section: '2CARMED1', expediente: '64789', name: 'Diego Martínez', ppm: 110, errors: '2.5%', status: 'normal' },
+    { id: 10, center: 'Centro 2', section: '2CARMED1', expediente: '61234', name: 'Elena Ruiz', ppm: 80, errors: '10%', status: 'support' }
+  ],
+  '2023-24': [
+    { id: 11, center: 'Botusbaru', section: '2CARMED1', expediente: '64020', name: 'Carlos Mendoza', ppm: 95, errors: '7%', status: 'support' },
+    { id: 12, center: 'Botusbaru', section: '2CARMED1', expediente: '56543', name: 'Isabel García López', ppm: 108, errors: '4.5%', status: 'normal' },
+    { id: 13, center: 'Botusbaru', section: '2CARMED1', expediente: '63935', name: 'Francisco Pérez', ppm: 85, errors: '8%', status: 'support' },
+    { id: 14, center: 'Centro 2', section: '2CARMED2', expediente: '62146', name: 'Ángela López Ruiz', ppm: 120, errors: '1.8%', status: 'advanced' },
+    { id: 15, center: 'Centro 2', section: '2CARMED2', expediente: '58924', name: 'Roberto Sánchez', ppm: 105, errors: '3%', status: 'normal' },
+    { id: 16, center: 'Centro 2', section: '2CARMED2', expediente: '64568', name: 'Laura Martínez', ppm: 112, errors: '2.5%', status: 'normal' },
+    { id: 17, center: 'Centro 3', section: '3CARMED1', expediente: '65235', name: 'Miguel Ángel Díaz', ppm: 100, errors: '5%', status: 'normal' },
+    { id: 18, center: 'Centro 3', section: '3CARMED1', expediente: '63892', name: 'Valentina González', ppm: 88, errors: '6%', status: 'support' },
+    { id: 19, center: 'Centro 3', section: '3CARMED1', expediente: '64790', name: 'Adrián Torres', ppm: 125, errors: '1%', status: 'advanced' }
+  ],
+  '2022-23': [
+    { id: 20, center: 'Botusbaru', section: '3CARMED1', expediente: '64021', name: 'Fernando Ruiz', ppm: 78, errors: '10%', status: 'support' },
+    { id: 21, center: 'Botusbaru', section: '3CARMED1', expediente: '56544', name: 'Alejandra López', ppm: 102, errors: '5%', status: 'normal' },
+    { id: 22, center: 'Centro 2', section: '3CARMED2', expediente: '63936', name: 'David García', ppm: 95, errors: '7%', status: 'support' },
+    { id: 23, center: 'Centro 2', section: '3CARMED2', expediente: '62147', name: 'Mónica Sánchez', ppm: 115, errors: '2%', status: 'normal' },
+    { id: 24, center: 'Centro 3', section: '3CARMED2', expediente: '58925', name: 'Javier Martínez', ppm: 92, errors: '6%', status: 'normal' },
+    { id: 25, center: 'Centro 3', section: '3CARMED2', expediente: '64569', name: 'Cristina Díaz', ppm: 118, errors: '2.5%', status: 'normal' }
+  ],
+  '2021-22': [
+    { id: 26, center: 'Centro 2', section: '4CARMED1', expediente: '64022', name: 'Antonio López', ppm: 88, errors: '9%', status: 'support' },
+    { id: 27, center: 'Centro 2', section: '4CARMED1', expediente: '56545', name: 'Beatriz García', ppm: 105, errors: '4%', status: 'normal' },
+    { id: 28, center: 'Centro 3', section: '4CARMED1', expediente: '63937', name: 'Enrique Pérez', ppm: 82, errors: '11%', status: 'support' },
+    { id: 29, center: 'Centro 3', section: '4CARMED1', expediente: '62148', name: 'Silvia Ruiz', ppm: 110, errors: '3%', status: 'normal' },
+    { id: 30, center: 'Centro 3', section: '4CARMED2', expediente: '58926', name: 'Raúl Sánchez', ppm: 75, errors: '12%', status: 'support' },
+    { id: 31, center: 'Centro 3', section: '4CARMED2', expediente: '64570', name: 'Natalia Martínez', ppm: 120, errors: '2%', status: 'advanced' },
+    { id: 32, center: 'Centro 4', section: '4CARMED2', expediente: '65236', name: 'Pablo Díaz', ppm: 92, errors: '7%', status: 'support' }
+  ]
+};
+
+const allStudents = computed(() => studentsByeCourse[currentCourse.value] || studentsByeCourse['2024-25']);
 
 const studentsNeedingSupport = ref([
   { id: 1, center: 'Botusbaru', section: '1CARMED1', expediente: '64019', name: 'Mateo Barrenechea', ppm: 82, errors: '8%' },
@@ -375,20 +422,27 @@ function addBooksToStudent(studentId, books) {
 }
 
 const avgSpeedPPM = computed(() => {
-  const totalPPM = allStudents.value.reduce((sum, student) => sum + student.ppm, 0);
-  return Math.round(totalPPM / allStudents.value.length);
+  // Usar datos del curso en lugar de calcular
+  return kpiData.value.speed.current;
 });
 
 const totalBooksRead = computed(() => {
-  return Object.values(studentBooksRead.value).reduce((sum, data) => sum + data.booksCount, 0);
+  // Usar datos del curso
+  return kpiData.value.books.count;
 });
 
-const evaluatedStudents = computed(() => allStudents.value.length);
-const totalStudents = computed(() => allStudents.value.length + 2); // 2 pendientes
+const evaluatedStudents = computed(() => {
+  // Usar datos del curso
+  return kpiData.value.students.evaluated;
+});
+
+const totalStudents = computed(() => {
+  // Usar datos del curso
+  return kpiData.value.students.total;
+});
 
 const speedPercentage = computed(() => {
-  const target = 125;
-  return Math.round((avgSpeedPPM.value / target) * 100);
+  return kpiData.value.speed.percentage;
 });
 
 const completionPercentage = computed(() => {
@@ -397,6 +451,10 @@ const completionPercentage = computed(() => {
 
 const avgBooksPerStudent = computed(() => {
   return (totalBooksRead.value / evaluatedStudents.value).toFixed(1);
+});
+
+const alertsCount = computed(() => {
+  return kpiData.value.alerts.count;
 });
 
 function getAllBooksFromStudents() {
@@ -513,7 +571,7 @@ defineExpose({
         </div>
       </div>
       <div class="kpi-content">
-        <div class="alert-value">{{ studentsNeedingSupport.length }}</div>
+        <div class="alert-value">{{ alertsCount }}</div>
         <div class="alert-info">
           <span class="criteria">{{ kpiData.alerts.criteria }}</span>
           <button class="alert-btn support-btn" @click="handleViewSupport">

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Sparkles } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -10,6 +10,12 @@ const props = defineProps({
 });
 
 const periodMode = ref('trimestral'); // 'trimestral' | 'anual'
+const currentCourse = ref(props.course);
+
+watch(() => props.course, (newCourse) => {
+  currentCourse.value = newCourse;
+  console.log('📈 FluencyChart: Curso cambió a', newCourse);
+});
 
 const courseDataMap = {
   '2024-25': { current: 115, badge: '115 PPM ★', diagnostic: '88%' },
@@ -18,7 +24,7 @@ const courseDataMap = {
   '2021-22': { current: 98, badge: '98 PPM ★', diagnostic: '80%' }
 };
 
-const currentData = computed(() => courseDataMap[props.course] || courseDataMap['2024-25']);
+const currentData = computed(() => courseDataMap[currentCourse.value] || courseDataMap['2024-25']);
 </script>
 
 <template>

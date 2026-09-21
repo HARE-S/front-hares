@@ -99,7 +99,7 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, watch, ref } from 'vue';
 
 const props = defineProps({
   course: {
@@ -110,15 +110,25 @@ const props = defineProps({
 
 defineEmits(['open-intervention']);
 
-const levels = reactive({
-  avanzado: { count: 7, pct: 27 },
-  optimo: { count: 14, pct: 54 },
-  desarrollo: { count: 2, pct: 8 },
-  intervencion: { count: 3, pct: 11 }
+const courseDataMap = {
+  '2024-25': { avanzado: { count: 7, pct: 27 }, optimo: { count: 14, pct: 54 }, desarrollo: { count: 2, pct: 8 }, intervencion: { count: 3, pct: 11 } },
+  '2023-24': { avanzado: { count: 6, pct: 22 }, optimo: { count: 15, pct: 56 }, desarrollo: { count: 4, pct: 15 }, intervencion: { count: 2, pct: 7 } },
+  '2022-23': { avanzado: { count: 5, pct: 20 }, optimo: { count: 13, pct: 52 }, desarrollo: { count: 5, pct: 20 }, intervencion: { count: 2, pct: 8 } },
+  '2021-22': { avanzado: { count: 4, pct: 17 }, optimo: { count: 12, pct: 50 }, desarrollo: { count: 6, pct: 25 }, intervencion: { count: 2, pct: 8 } }
+};
+
+const currentCourse = ref(props.course);
+
+watch(() => props.course, (newCourse) => {
+  currentCourse.value = newCourse;
+  console.log('📊 LevelsDistribution: Curso cambió a', newCourse);
 });
 
+const levels = computed(() => courseDataMap[currentCourse.value] || courseDataMap['2024-25']);
+
 const totalStudents = computed(() => {
-  return levels.avanzado.count + levels.optimo.count + levels.desarrollo.count + levels.intervencion.count;
+  const l = levels.value;
+  return l.avanzado.count + l.optimo.count + l.desarrollo.count + l.intervencion.count;
 });
 </script>
 

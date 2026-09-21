@@ -39,10 +39,20 @@ import AppSidebar from './AppSidebar.vue';
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .content-container {
   width: 100%;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .stitch-footer {
