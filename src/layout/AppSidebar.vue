@@ -300,7 +300,8 @@ async function handleLogout() {
 .session-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  flex: 1;
 }
 
 .pulse-indicator {
@@ -323,14 +324,16 @@ async function handleLogout() {
 }
 
 .session-year {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--surface-container-lowest);
+  color: var(--secondary-fixed);
+  line-height: 1.2;
 }
 
 .session-status {
   font-size: 0.7rem;
   color: var(--on-tertiary-container);
+  line-height: 1.2;
 }
 
 .session-icon {
@@ -431,17 +434,20 @@ async function handleLogout() {
   background-color: rgba(46, 54, 75, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
-  padding: 0.65rem 0.85rem;
+  padding: 0.75rem 0.85rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   margin-bottom: 0.85rem;
   width: 100%;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: inherit;
-  font-size: inherit;
+  color: var(--surface-container-lowest);
+  font-size: 0.85rem;
   font-family: inherit;
+  position: relative;
+  z-index: 50;
 }
 
 .academic-session-card:hover {
