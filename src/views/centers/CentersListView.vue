@@ -109,9 +109,18 @@ onMounted(loadCenters);
 <template>
   <div class="students-view">
     <header class="view-header">
-      <div class="header-content">
-        <h1>Alumnado</h1>
-        <p class="header-subtitle">Consulta el alumnado de cada centro y sección</p>
+      <div class="header-row">
+        <div class="header-content">
+          <h1>Alumnado</h1>
+          <p class="header-subtitle">Consulta el alumnado de cada centro y sección</p>
+        </div>
+        <router-link
+          :to="{ name: 'comparison' }"
+          class="comparison-entry"
+          data-testid="comparison-entry"
+        >
+          Comparativa por grupos
+        </router-link>
       </div>
     </header>
 
@@ -258,13 +267,20 @@ onMounted(loadCenters);
   border-bottom: 1px solid var(--outline-variant);
 }
 
+.header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
 .header-content {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
 }
 
 .view-header h1 {
@@ -278,6 +294,27 @@ onMounted(loadCenters);
   margin: 0;
   font-size: 0.95rem;
   color: var(--on-surface-variant);
+}
+
+.comparison-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background-color: var(--secondary);
+  color: var(--on-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.comparison-entry:hover {
+  background-color: var(--secondary-container);
+  color: var(--on-secondary-container);
 }
 
 /* Filtros */
