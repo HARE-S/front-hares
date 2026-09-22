@@ -484,9 +484,9 @@ defineExpose({
 </script>
 
 <template>
-  <section aria-label="Métricas Principales" class="kpi-grid">
+  <section aria-label="Métricas Principales" class="kpi-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
     <!-- Card 1: Velocidad Media del Aula -->
-    <div class="kpi-card flat-card">
+    <div class="kpi-card flat-card bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/40 shadow-sm flex flex-col justify-between">
       <div class="kpi-header">
         <span class="kpi-label">Velocidad Media del Aula</span>
         <div class="kpi-icon-box">
@@ -515,7 +515,7 @@ defineExpose({
     </div>
 
     <!-- Card 2: Alumnos Evaluados -->
-    <div class="kpi-card flat-card">
+    <div class="kpi-card flat-card bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/40 shadow-sm flex flex-col justify-between">
       <div class="kpi-header">
         <span class="kpi-label">Alumnos Evaluados</span>
         <div class="kpi-icon-box">
@@ -539,7 +539,7 @@ defineExpose({
     </div>
 
     <!-- Card 3: Libros Leídos en Año -->
-    <div class="kpi-card flat-card">
+    <div class="kpi-card flat-card bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/40 shadow-sm flex flex-col justify-between">
       <div class="kpi-header">
         <span class="kpi-label">Libros Leídos en Año</span>
         <div class="kpi-icon-box">
@@ -563,7 +563,7 @@ defineExpose({
     </div>
 
     <!-- Card 4: Alerta Pedagógica -->
-    <div class="kpi-card flat-card alert-card">
+    <div class="kpi-card flat-card alert-card bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/40 shadow-sm flex flex-col justify-between">
       <div class="kpi-header">
         <span class="kpi-label alert-label">{{ kpiData.alerts.label }}</span>
         <div class="kpi-icon-box alert-icon-box">
