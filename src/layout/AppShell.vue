@@ -68,9 +68,25 @@ import AppSidebar from './AppSidebar.vue';
   margin: 0;
 }
 
-@media (max-width: 1024px) {
+/* Rail de iconos en tableta (< 1280px - FE-13 Escenario 1) */
+@media (max-width: 1279px) {
   .stitch-main-layout {
     margin-left: 72px;
+  }
+
+  .stitch-content-canvas {
+    padding: 1.5rem 1rem;
+  }
+}
+
+/* Modo móvil (< 768px - FE-13 Escenario 5) */
+@media (max-width: 767px) {
+  .stitch-main-layout {
+    margin-left: 0;
+  }
+
+  .stitch-content-canvas {
+    padding: 1rem 0.75rem;
   }
 }
 </style>

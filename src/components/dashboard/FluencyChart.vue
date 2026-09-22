@@ -155,7 +155,7 @@ const currentData = computed(() => courseDataMap[currentCourse.value] || courseD
     </div>
 
     <!-- Caja de Diagnóstico Pedagógico Contextual -->
-    <div class="diagnostic-callout">
+    <div class="diagnostic-callout insight-callout">
       <Sparkles :size="20" class="text-secondary flex-shrink-0" />
       <p class="diagnostic-text">
         <strong>Diagnóstico pedagógico:</strong> El <span class="highlight-val">{{ currentData.diagnostic }} del alumnado</span> ha mejorado su ritmo de decodificación y prosodia, situándose 13 PPM por encima del baremo autonómico de corte de invierno.

@@ -235,6 +235,8 @@ function close() {
                 id="quantity"
                 v-model="newBookForm.quantity"
                 type="number"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 class="form-control"
                 placeholder="Ej: 5"
                 min="0"

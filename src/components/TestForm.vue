@@ -244,6 +244,8 @@ async function handleSubmit() {
             id="test-words"
             v-model="form.words"
             type="number"
+            inputmode="numeric"
+            pattern="[0-9]*"
             class="form-input"
             :disabled="!canManage"
             placeholder="Ej: 269"

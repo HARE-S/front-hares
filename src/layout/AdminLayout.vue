@@ -187,6 +187,7 @@ async function handleLogout() {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 0.75rem;
+  min-height: var(--touch-target-min, 44px);
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.7);
@@ -235,6 +236,7 @@ async function handleLogout() {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
+  min-height: var(--touch-target-min, 44px);
   background: none;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
@@ -314,6 +316,7 @@ async function handleLogout() {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem;
+  min-height: var(--touch-target-min, 44px);
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.8);
@@ -365,7 +368,37 @@ async function handleLogout() {
   letter-spacing: 0.01em;
 }
 
-@media (max-width: 768px) {
+/* Rail de iconos en tableta (< 1280px - FE-13 Escenario 1) */
+@media (max-width: 1279px) and (min-width: 768px) {
+  .stitch-sidebar {
+    width: 72px;
+    padding: 1rem 0.5rem;
+  }
+  .brand-text,
+  .nav-item span:not(.nav-active-dot),
+  .user-info {
+    display: none;
+  }
+  .brand-header {
+    padding: 0.5rem;
+    justify-content: center;
+  }
+  .nav-item {
+    justify-content: center;
+  }
+  .user-avatar-wrapper {
+    justify-content: center;
+    padding: 0.35rem;
+  }
+  .stitch-main-layout {
+    margin-left: 72px;
+  }
+  .stitch-footer {
+    margin-left: 72px;
+  }
+}
+
+@media (max-width: 767px) {
   .stitch-sidebar {
     width: 100%;
     position: relative;
