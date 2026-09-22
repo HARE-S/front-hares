@@ -1,15 +1,17 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { getStudentRecord } from '@/services/studentService';
+import { getStudentResults, _getInMemoryResults } from '@/services/resultsService';
 import StateBlock from '@/components/ui/StateBlock.vue';
 import MetricCard from '@/components/domain/MetricCard.vue';
 import EvolutionChart from '@/components/charts/EvolutionChart.vue';
 import RegisterResultModal from '@/components/results/RegisterResultModal.vue';
-import { PlusCircle } from 'lucide-vue-next';
+import { PlusCircle, ArrowLeft } from 'lucide-vue-next';
 import { classifyVefBand, VEF_BAND_LABELS, vefBandClass } from '@/utils/bands';
 
 const route = useRoute();
+const router = useRouter();
 
 const studentId = computed(() => route.params.studentId);
 const loading = ref(false);
@@ -21,7 +23,16 @@ const studentData = ref(null);
 
 const currentSections = computed(() => studentData.value?.current_sections || []);
 const historicalSections = computed(() => studentData.value?.historical_sections || []);
-const results = computed(() => studentData.value?.results || []);
+const results = computed(() => {
+  const allResults = studentData.value?.results || [];
+  // Filtrar resultados inválidos (sin fecha, sin nombre, sin PPM o VEF)
+  return allResults.filter(r =>
+    r.testDate && String(r.testDate).trim() !== '' &&
+    r.testName && String(r.testName).trim() !== '' &&
+    r.ppm !== undefined && Number(r.ppm) > 0 &&
+    r.vef !== undefined && Number(r.vef) > 0
+  );
+});
 const readings = computed(() => studentData.value?.readings || []);
 
 const currentSectionNames = computed(() => currentSections.value.map(section => section.name));
@@ -39,6 +50,9 @@ const averageVEF = computed(() => {
   const total = results.value.reduce((sum, result) => sum + (Number(result.vef) || 0), 0);
   return Math.round(total / results.value.length);
 });
+
+const totalTests = computed(() => results.value.length);
+const totalReadings = computed(() => readings.value.length);
 
 const evolutionData = computed(() =>
   results.value.map(result => ({
@@ -58,12 +72,31 @@ async function loadStudentRecord() {
   forbidden.value = false;
 
   try {
-    studentData.value = await getStudentRecord(studentId.value);
+    const data = await getStudentRecord(studentId.value);
+
+    if (!data) {
+      error.value = new Error('No se pudieron cargar los datos del estudiante');
+      return;
+    }
+
+    studentData.value = data;
+
+    // Si el API no retorna resultados, cargarlos desde el servicio de resultados
+    if (!studentData.value.results || studentData.value.results.length === 0) {
+      try {
+        const apiResults = await getStudentResults(studentId.value);
+        if (apiResults && apiResults.length > 0) {
+          studentData.value.results = apiResults;
+        }
+      } catch (err) {
+        // Fallback a datos mock
+      }
+    }
   } catch (err) {
-    if (err.status === 403) {
+    if (err?.status === 403) {
       forbidden.value = true;
     } else {
-      error.value = err;
+      error.value = err || new Error('Error al cargar la ficha del estudiante');
     }
   } finally {
     loading.value = false;
@@ -75,7 +108,13 @@ function handleResultSaved() {
   loadStudentRecord();
 }
 
+function goBack() {
+  router.back();
+}
+
 onMounted(() => {
+  // Limpiar automáticamente datos corruptos en memoria
+  _getInMemoryResults();
   loadStudentRecord();
 });
 </script>
@@ -105,6 +144,14 @@ onMounted(() => {
     />
 
     <template v-else-if="studentData">
+      <!-- Botón de volver -->
+      <div class="back-button-container">
+        <button type="button" class="btn-back" @click="goBack" title="Volver atrás">
+          <ArrowLeft :size="20" />
+          <span>Volver</span>
+        </button>
+      </div>
+
       <!-- Cabecera con datos personales y resumen -->
       <div class="student-header">
         <div class="header-info">
@@ -131,8 +178,8 @@ onMounted(() => {
         <div class="header-stats">
           <MetricCard title="PPM media" :value="averagePPM" subtext="Velocidad espontánea" />
           <MetricCard title="VEF media" :value="averageVEF" subtext="Velocidad eficaz" />
-          <MetricCard title="Pruebas" :value="studentData.total_results ?? results.length" />
-          <MetricCard title="Lecturas" :value="studentData.total_readings ?? readings.length" />
+          <MetricCard title="Pruebas" :value="totalTests" />
+          <MetricCard title="Lecturas" :value="totalReadings" />
         </div>
       </div>
 
@@ -179,6 +226,7 @@ onMounted(() => {
         </div>
         <EvolutionChart
           v-if="results.length"
+          :key="`${studentData.id}-${results.length}`"
           :student-name="studentData.name"
           :data="evolutionData"
           data-testid="evolution-chart"
@@ -284,6 +332,34 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.back-button-container {
+  margin-bottom: 1.5rem;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--surface-container-low);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background-color: var(--surface-container);
+  border-color: var(--outline);
+}
+
+.btn-back:active {
+  transform: scale(0.98);
+}
+
 .student-detail {
   max-width: 1200px;
   margin: 0 auto;

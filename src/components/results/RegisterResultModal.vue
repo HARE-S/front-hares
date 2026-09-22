@@ -20,7 +20,7 @@ import {
   formatPPM,
   formatVef
 } from '@/utils/format';
-import { registerSingleResult } from '@/services/resultsService';
+import { registerSingleResult, _getInMemoryResults } from '@/services/resultsService';
 import { getTests } from '@/services/testsService';
 
 const props = defineProps({
@@ -93,6 +93,25 @@ const currentStudentName = computed(() => {
   return s ? s.name : 'Alumno no seleccionado';
 });
 
+const completedTestIds = computed(() => {
+  const existingResults = _getInMemoryResults();
+  const studentIdToCheck = selectedStudentId.value || props.studentId;
+  const completed = new Set();
+
+  existingResults
+    .filter(r => String(r.studentId) === String(studentIdToCheck))
+    .forEach(r => {
+      // Agregar tanto testId como code para mayor cobertura
+      if (r.testId) completed.add(String(r.testId).trim());
+      if (r.testCode) completed.add(String(r.testCode).trim());
+      if (r.code) completed.add(String(r.code).trim());
+    });
+
+  const completedArray = Array.from(completed);
+  console.log('[completedTestIds] Student:', studentIdToCheck, 'Completed:', completedArray, 'Total results:', existingResults.length);
+  return completedArray;
+});
+
 const currentTest = computed(() => {
   return tests.value.find(t => t.id === selectedTestId.value || t.code === selectedTestId.value) || tests.value[0];
 });
@@ -123,6 +142,17 @@ const previewBand = computed(() => {
   return getReadingBand(previewVef.value);
 });
 
+const isFormValid = computed(() => {
+  return selectedStudentId.value &&
+         selectedTestId.value &&
+         testDate.value &&
+         testDate.value.trim() !== '' &&
+         time.value &&
+         Number(time.value) > 0 &&
+         currentTest.value &&
+         currentTest.value.name;
+});
+
 // Detección de tiempo sospechoso (FE-18 Escenario 6)
 // Por ejemplo: ritmo > 350 PPM, o texto > 150 palabras con tiempo < 20s, o tiempo < 10s
 const isSuspiciousTime = computed(() => {
@@ -137,10 +167,10 @@ const isSuspiciousTime = computed(() => {
 // Reset del formulario al abrir
 watch(
   () => props.isOpen,
-  (open) => {
+  async (open) => {
     if (open) {
       selectedStudentId.value = props.studentId ? String(props.studentId) : (studentsList.value[0]?.id || '');
-      selectedTestId.value = tests.value[0]?.id || '1IF';
+      console.log('[Modal Abierto] studentId:', selectedStudentId.value, 'props.studentId:', props.studentId);
       testDate.value = new Date().toISOString().split('T')[0];
       time.value = '';
       successes.value = '20';
@@ -150,7 +180,10 @@ watch(
       forbiddenError.value = false;
       confirmedSuspiciousTime.value = false;
       resultSaved.value = null;
-      loadCatalogTests();
+      await loadCatalogTests();
+      // Asignar después de cargar los tests
+      selectedTestId.value = tests.value[0]?.id || '1IF';
+      console.log('[Modal] Tests cargados:', tests.value.length, 'Primer test:', tests.value[0]);
     }
   },
   { immediate: true }
@@ -160,17 +193,22 @@ async function loadCatalogTests() {
   try {
     const res = await getTests({ limit: 50 });
     if (res?.items?.length > 0) {
-      tests.value = res.items;
+      // Normalizar IDs: usar 'code' como ID principal para consistencia
+      tests.value = res.items.map(t => ({
+        ...t,
+        id: t.code || t.id  // Usar code como id si existe
+      }));
       if (!selectedTestId.value) {
-        selectedTestId.value = tests.value[0].id;
+        selectedTestId.value = tests.value[0].id || tests.value[0].code;
       }
     }
   } catch (e) {
-    // Usar catálogo local por defecto
+    console.debug('Error loading tests from API, using local catalog:', e);
   }
 }
 
 async function handleSave() {
+  console.log('[handleSave] INICIADO');
   errorMessage.value = '';
   forbiddenError.value = false;
 
@@ -182,8 +220,22 @@ async function handleSave() {
     errorMessage.value = 'Selecciona una prueba de lectura.';
     return;
   }
-  if (!testDate.value) {
+
+  // Validar que la prueba no ya fue realizada
+  const testIdStr = String(currentTest.value?.code || currentTest.value?.id || '').trim();
+  console.log('[handleSave] testIdStr:', testIdStr, 'completedTestIds.value:', completedTestIds.value, 'studentId:', selectedStudentId.value);
+  if (testIdStr && completedTestIds.value && completedTestIds.value.includes(testIdStr)) {
+    errorMessage.value = `La prueba "${currentTest.value?.name || 'desconocida'}" ya fue realizada por este alumno. No se puede repetir.`;
+    console.log('[handleSave] Prueba bloqueada por duplicado');
+    return;
+  }
+
+  if (!testDate.value || testDate.value.trim() === '') {
     errorMessage.value = 'Indica la fecha de la prueba.';
+    return;
+  }
+  if (!currentTest.value || !currentTest.value.name) {
+    errorMessage.value = 'La prueba seleccionada no es válida.';
     return;
   }
 
@@ -217,19 +269,46 @@ async function handleSave() {
 
   isSubmitting.value = true;
   try {
-    const saved = await registerSingleResult({
+    // Validar que currentTest sea válido
+    if (!currentTest.value || !currentTest.value.name || !currentTest.value.code) {
+      errorMessage.value = 'Error: la prueba no tiene datos válidos. Actualiza la página.';
+      isSubmitting.value = false;
+      return;
+    }
+
+    // Validar que testDate sea válido y no vacío
+    const finalTestDate = String(testDate.value || '').trim();
+    if (!finalTestDate) {
+      errorMessage.value = 'Error: la fecha de la prueba no es válida';
+      isSubmitting.value = false;
+      return;
+    }
+
+    // Calcular comprehensionPercentage
+    const comprehensionPercentage = Math.round((Math.min(numSuccesses, 20) / 20) * 100);
+
+    // Construir testName correctamente
+    const finalTestName = `${currentTest.value.name} (${currentTest.value.code})`;
+
+    const payload = {
       studentId: selectedStudentId.value,
       studentName: currentStudentName.value,
-      testId: selectedTestId.value,
-      testName: `${currentTest.value.name} (${currentTest.value.code})`,
+      testId: currentTest.value.code,
+      testCode: currentTest.value.code,
+      testName: finalTestName,
       testWords: testWords.value,
       sectionId: props.sectionId,
-      testDate: testDate.value,
+      testDate: finalTestDate,
       time: numTime,
       successes: numSuccesses,
       mistakes: numMistakes,
+      comprehensionPercentage: comprehensionPercentage,
       notes: notes.value
-    });
+    };
+
+    console.log('[RegisterResultModal] Guardando:', payload);
+    const saved = await registerSingleResult(payload);
+    console.log('[RegisterResultModal] ✓ Guardado exitosamente:', saved);
 
     resultSaved.value = saved;
     emit('saved', saved);
@@ -237,6 +316,8 @@ async function handleSave() {
     if (err.status === 403) {
       forbiddenError.value = true;
       errorMessage.value = 'No tienes permiso sobre la sección de este alumno para registrar resultados.';
+    } else if (err.status === 409) {
+      errorMessage.value = `⚠️ ${err.message} No se permite registrar la misma prueba dos veces.`;
     } else {
       errorMessage.value = err.message || 'Error al registrar el resultado.';
     }
@@ -290,10 +371,13 @@ function handleResetAnother() {
           <div class="success-icon-badge">
             <CheckCircle2 :size="32" class="text-green-600" />
           </div>
-          <h3>¡Resultado registrado correctamente!</h3>
+          <h3>¡Resultado registrado y guardado!</h3>
           <p class="success-meta">
-            Alumno: <strong>{{ currentStudentName }}</strong> · Prueba: <strong>{{ currentTest?.name }} ({{ currentTest?.code }})</strong>
+            Alumno: <strong>{{ currentStudentName }}</strong><br>
+            Prueba: <strong>{{ currentTest?.name }} ({{ currentTest?.code }})</strong><br>
+            Fecha: <strong>{{ resultSaved.testDate }}</strong>
           </p>
+          <p class="success-note">✓ Los datos se han guardado correctamente en tu historial de pruebas.</p>
         </div>
 
         <!-- Las tres métricas pedagógicas clave -->
@@ -375,8 +459,9 @@ function handleResetAnother() {
               data-testid="test-select"
               required
             >
-              <option v-for="t in tests" :key="t.id" :value="t.id">
+              <option v-for="t in tests" :key="t.id" :value="t.id" :disabled="completedTestIds.includes(String(t.code)) || completedTestIds.includes(String(t.id))">
                 {{ t.code }} — {{ t.name }} ({{ t.words }} palabras · Curso {{ t.course }})
+                <span v-if="completedTestIds.includes(String(t.code)) || completedTestIds.includes(String(t.id))"> — Ya realizada</span>
               </option>
             </select>
           </div>
@@ -510,7 +595,6 @@ function handleResetAnother() {
             type="submit"
             class="btn btn-primary"
             data-testid="submit-result-btn"
-            :disabled="isSubmitting"
           >
             <span v-if="isSubmitting">Guardando resultado...</span>
             <span v-else>Guardar Resultado</span>
@@ -806,6 +890,18 @@ function handleResetAnother() {
   margin: 0.5rem 0 0 0;
   font-size: 0.875rem;
   color: var(--gray-600, #4b5563);
+  line-height: 1.5;
+}
+
+.success-note {
+  margin: 1rem 0 0 0;
+  padding: 0.75rem 1rem;
+  background-color: #f0fdf4;
+  border-left: 3px solid #22c55e;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  color: #166534;
+  font-weight: 500;
 }
 
 .metrics-summary-grid {

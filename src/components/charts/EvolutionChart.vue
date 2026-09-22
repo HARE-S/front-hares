@@ -40,37 +40,43 @@ const props = defineProps({
   }
 });
 
-const chartData = computed(() => ({
-  labels: props.data.map(d => d.date),
-  datasets: [
-    {
-      label: 'PPM (Palabras por minuto)',
-      data: props.data.map(d => d.ppm),
-      borderColor: 'rgb(34, 197, 94)',
-      backgroundColor: 'rgba(34, 197, 94, 0.1)',
-      borderWidth: 2,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 5,
-      pointBackgroundColor: 'rgb(34, 197, 94)',
-      pointBorderColor: '#fff',
-      pointBorderWidth: 2
-    },
-    {
-      label: 'VEF (Velocidad efectiva de lectura)',
-      data: props.data.map(d => d.vef),
-      borderColor: 'rgb(59, 130, 246)',
-      backgroundColor: 'rgba(59, 130, 246, 0.1)',
-      borderWidth: 2,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 5,
-      pointBackgroundColor: 'rgb(59, 130, 246)',
-      pointBorderColor: '#fff',
-      pointBorderWidth: 2
-    }
-  ]
-}));
+const chartData = computed(() => {
+  const dataPoints = props.data && props.data.length > 0 ? props.data : [
+    { date: 'Sin datos', ppm: 0, vef: 0 }
+  ];
+
+  return {
+    labels: dataPoints.map(d => d.date || 'Sin fecha'),
+    datasets: [
+      {
+        label: 'PPM (Palabras por minuto)',
+        data: dataPoints.map(d => d.ppm || 0),
+        borderColor: 'rgb(34, 197, 94)',
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5,
+        pointBackgroundColor: 'rgb(34, 197, 94)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      },
+      {
+        label: 'VEF (Velocidad efectiva de lectura)',
+        data: dataPoints.map(d => d.vef || 0),
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5,
+        pointBackgroundColor: 'rgb(59, 130, 246)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }
+    ]
+  };
+});
 
 const options = {
   responsive: true,

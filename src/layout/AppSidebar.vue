@@ -2,7 +2,7 @@
 import { ref, computed, nextTick, onMounted } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useRouter, useRoute } from 'vue-router';
-import { LayoutDashboard, School, Users, Cloud, LogOut, Plus, PieChart, Users as UsersIcon, BookOpen, FileText, BarChart3 } from 'lucide-vue-next';
+import { LayoutDashboard, School, Users, Cloud, LogOut, PlusCircle, Layers, Edit3, BarChart3, BookOpen } from 'lucide-vue-next';
 
 const { user, logout } = useAuth();
 const router = useRouter();
@@ -104,7 +104,7 @@ async function handleLogout() {
       </router-link>
 
       <!-- Navegación principal -->
-      <nav class="sidebar-nav">
+      <nav v-if="!isCentersActive" class="sidebar-nav">
         <router-link to="/dashboard" class="nav-item" active-class="active">
           <LayoutDashboard :size="18" />
           <span class="flex-1">Dashboard</span>
@@ -127,34 +127,65 @@ async function handleLogout() {
         </router-link>
       </nav>
 
-      <!-- Navegación secundaria (cuando estás en Centros) -->
-      <nav v-if="isCentersActive" class="sidebar-nav secondary-nav">
-        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
-          <Plus :size="16" />
-          <span class="flex-1">Nueva Prueba</span>
+      <!-- Navegación Alumnado (cuando estás en Centros) -->
+      <nav v-else class="sidebar-nav">
+        <button
+          class="nav-item"
+          :class="{ active: false }"
+          @click="router.push('/dashboard?tab=form')"
+        >
+          <PlusCircle :size="18" />
+          <span>Nueva Prueba</span>
         </button>
-        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
-          <BarChart3 :size="16" />
-          <span class="flex-1">Estadísticas</span>
+
+        <button
+          class="nav-item"
+          :class="{ active: false }"
+          @click="router.push('/dashboard?tab=statistics')"
+        >
+          <LayoutDashboard :size="18" />
+          <span>Estadísticas</span>
         </button>
-        <button class="nav-item secondary-item" @click="router.push('/centers')">
-          <UsersIcon :size="16" />
+
+        <button class="nav-item active">
+          <School :size="18" />
           <span class="flex-1">Alumnado</span>
+          <span class="nav-active-dot"></span>
         </button>
-        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
-          <BookOpen :size="16" />
+
+        <button
+          class="nav-item"
+          :class="{ active: false }"
+          @click="router.push('/dashboard?tab=catalog')"
+        >
+          <Layers :size="18" />
           <span class="flex-1">Catálogo de Pruebas</span>
         </button>
-        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
-          <FileText :size="16" />
+
+        <button
+          class="nav-item"
+          :class="{ active: false }"
+          @click="router.push('/dashboard?tab=bulk-entry')"
+        >
+          <Edit3 :size="18" />
           <span class="flex-1">Registro en Aula</span>
         </button>
-        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
-          <BookOpen :size="16" />
+
+        <button
+          class="nav-item"
+          :class="{ active: false }"
+          @click="router.push('/dashboard?tab=books')"
+        >
+          <BookOpen :size="18" />
           <span class="flex-1">Biblioteca de Libros</span>
         </button>
-        <button class="nav-item secondary-item" @click="router.push('/dashboard')">
-          <BarChart3 :size="16" />
+
+        <button
+          class="nav-item"
+          :class="{ active: false }"
+          @click="router.push('/dashboard?tab=reports')"
+        >
+          <BarChart3 :size="18" />
           <span class="flex-1">Informes y Exportación</span>
         </button>
       </nav>
@@ -243,7 +274,7 @@ async function handleLogout() {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 0.5rem 1.25rem 0.5rem;
+  padding: 0.5rem 0.5rem 1.5rem 0.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   text-decoration: none;
 }
@@ -307,6 +338,7 @@ async function handleLogout() {
   flex-direction: column;
   gap: 0.35rem;
   padding-top: 1rem;
+  transition: all 0.3s ease-in-out;
 }
 
 .nav-item {
@@ -321,13 +353,13 @@ async function handleLogout() {
   background: transparent;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: all 0.3s ease-in-out;
   text-align: left;
   width: 100%;
   text-decoration: none;
 }
 
-.nav-item:hover {
+.nav-item:hover:not(.disabled) {
   background-color: var(--tertiary-container);
   color: var(--surface-container-lowest);
 }
@@ -338,6 +370,12 @@ async function handleLogout() {
   border-color: rgba(111, 251, 190, 0.25);
   font-weight: 600;
 }
+
+.nav-item.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 
 .nav-active-dot {
   width: 6px;
@@ -350,26 +388,6 @@ async function handleLogout() {
   flex: 1;
 }
 
-.secondary-nav {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  gap: 0.35rem;
-}
-
-.secondary-item {
-  /* Heredar exactamente los estilos de .nav-item */
-}
-
-.secondary-item.current-section {
-  opacity: 0.6;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.secondary-item.current-section:hover {
-  background-color: transparent;
-}
 
 /* Pie de la barra */
 .academic-session-card {
@@ -446,14 +464,14 @@ async function handleLogout() {
 }
 
 .user-avatar {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background-color: var(--secondary);
   color: var(--surface-container-lowest);
   border: 2px solid rgba(111, 251, 190, 0.3);
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -653,7 +671,7 @@ async function handleLogout() {
   }
 
   .brand-header {
-    padding: 0.5rem;
+    padding: 0.5rem 0.5rem 1.5rem 0.5rem;
     justify-content: center;
   }
 

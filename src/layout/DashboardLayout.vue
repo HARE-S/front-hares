@@ -39,9 +39,10 @@ import {
   School
 } from 'lucide-vue-next';
 
-// Cargar tab guardado
+// Cargar tab guardado o desde query
+const queryTab = route.query.tab;
 const savedTab = typeof localStorage !== 'undefined' ? localStorage.getItem('activeTab') : null;
-const currentTab = ref(savedTab || 'statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
+const currentTab = ref(queryTab || savedTab || 'statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
 const activeSectionId = ref('sec-1');
 const testListRef = ref(null);
 const testsCatalogRef = ref(null);

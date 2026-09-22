@@ -28,6 +28,49 @@ import { calculatePPM, calculateVef, getReadingBand } from '../utils/format';
  * @property {boolean} [absent] - True si el alumno no realizó la prueba
  */
 
+// Función para persistir cambios
+function persistResults() {
+  try {
+    const json = JSON.stringify(inMemoryResults);
+    localStorage.setItem('HARES_inMemoryResults', json);
+    console.log('[persistResults] ✓ Guardados', inMemoryResults.length, 'resultados en localStorage');
+  } catch (e) {
+    console.error('[persistResults] ✗ Error:', e.message);
+    console.error('[persistResults] Datos a guardar:', inMemoryResults);
+  }
+}
+
+// Función para limpiar datos corruptos
+function validateResults(arr) {
+  return arr.filter(r =>
+    r.testDate && String(r.testDate).trim() !== '' &&
+    r.testName && String(r.testName).trim() !== '' &&
+    r.ppm !== undefined && Number(r.ppm) > 0 &&
+    r.vef !== undefined && Number(r.vef) > 0 &&
+    r.studentId && String(r.studentId).trim() !== ''
+  );
+}
+
+// Cargar datos previos desde localStorage y limpiar inválidos
+function loadPersistedResults() {
+  try {
+    const stored = localStorage.getItem('HARES_inMemoryResults');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        const validated = validateResults(parsed);
+        console.log('[loadPersistedResults] ✓ Cargados', validated.length, 'resultados válidos desde localStorage');
+        return validated;
+      }
+    } else {
+      console.log('[loadPersistedResults] localStorage vacío');
+    }
+  } catch (e) {
+    console.warn('[loadPersistedResults] Error:', e.message);
+  }
+  return [];
+}
+
 // Fallback en memoria para desarrollo y pruebas offline
 let inMemoryResults = [
   {
@@ -112,6 +155,19 @@ let inMemoryResults = [
   }
 ];
 
+// Cargar datos persistidos al iniciar
+try {
+  const persisted = loadPersistedResults();
+  if (persisted.length > 0) {
+    inMemoryResults = [...persisted];
+  } else {
+    console.log('[resultsService] Usando datos por defecto (localStorage vacío)');
+  }
+  console.log('[resultsService] INICIALIZADO con', inMemoryResults.length, 'resultados totales');
+} catch (e) {
+  console.warn('[resultsService] Error loading persisted results:', e);
+}
+
 /**
  * Reinicia la memoria local (útil para tests).
  */
@@ -123,7 +179,16 @@ export function _resetInMemoryResults(initialData = null) {
  * Obtiene todos los resultados almacenados en memoria.
  */
 export function _getInMemoryResults() {
-  return [...inMemoryResults];
+  // Validar y limpiar resultados inválidos
+  const validResults = validateResults(inMemoryResults);
+
+  // Si había inválidos, actualizar el array y persistir
+  if (validResults.length !== inMemoryResults.length) {
+    inMemoryResults = validResults;
+    persistResults();
+  }
+
+  return [...validResults];
 }
 
 /**
@@ -151,6 +216,7 @@ export async function registerSingleResult({
   studentId,
   studentName = 'Alumno',
   testId,
+  testCode,
   testName = 'Prueba',
   testWords = 108,
   sectionId = 'sec-1',
@@ -158,8 +224,13 @@ export async function registerSingleResult({
   time,
   successes,
   mistakes,
+  comprehensionPercentage,
   notes = ''
 }) {
+  console.log('[registerSingleResult] RECIBIDO:', {
+    studentId, testId, testCode, testName, testDate, time, successes, mistakes, comprehensionPercentage
+  });
+
   if (!studentId) throw new Error('El alumno es obligatorio.');
   if (!testId) throw new Error('La prueba es obligatoria.');
   if (!testDate) throw new Error('La fecha es obligatoria.');
@@ -185,7 +256,11 @@ export async function registerSingleResult({
   const ppm = calculatePPM(words, numTime);
   const vef = calculateVef(ppm, numSuccesses, 20);
   const band = getReadingBand(vef);
-  const comprehensionPercentage = Math.round((numSuccesses / 20) * 100);
+
+  // Si no se pasó comprehensionPercentage, calcularlo
+  const finalComprehensionPercentage = comprehensionPercentage !== undefined
+    ? comprehensionPercentage
+    : Math.round((numSuccesses / 20) * 100);
 
   const payload = {
     student_id: String(studentId),
@@ -199,7 +274,7 @@ export async function registerSingleResult({
     ppm,
     vef,
     band,
-    comprehension_percentage: comprehensionPercentage,
+    comprehension_percentage: finalComprehensionPercentage,
     notes
   };
 
@@ -220,7 +295,8 @@ export async function registerSingleResult({
       forbiddenErr.status = 403;
       throw forbiddenErr;
     }
-    if (err.status === 0 || err.message?.includes('No se pudo conectar')) {
+    // Fallback a datos locales si el API no está disponible (404, conexión fallida, etc.)
+    if (err.status === 0 || err.status === 404 || err.message?.includes('No se pudo conectar')) {
       const duplicate = inMemoryResults.find(
         r => String(r.studentId) === String(studentId) &&
              String(r.testId) === String(testId) &&
@@ -232,25 +308,48 @@ export async function registerSingleResult({
         throw conflictErr;
       }
 
+      // Validar que los datos sean válidos antes de guardar
+      if (!testName || !testDate || !ppm || !vef) {
+        const validationErr = new Error('Datos inválidos: faltan campos requeridos para guardar la prueba');
+        validationErr.status = 400;
+        throw validationErr;
+      }
+
+      // Verificar que no sea un duplicado
+      const testIdNorm = String(testId || testCode || '').trim().toUpperCase();
+      const hasDuplicate = inMemoryResults.some(r =>
+        String(r.studentId) === String(studentId) &&
+        String(r.testId || r.testCode || '').trim().toUpperCase() === testIdNorm
+      );
+      if (hasDuplicate) {
+        const duplicateErr = new Error(`La prueba ${testName} ya fue registrada para este alumno`);
+        duplicateErr.status = 409;
+        throw duplicateErr;
+      }
+
       const created = {
         id: `res-${Date.now()}`,
         studentId: String(studentId),
-        studentName,
+        studentName: studentName || 'Alumno desconocido',
         testId: String(testId),
-        testName,
+        testCode: String(testCode || testId),
+        testName: String(testName),
         sectionId: String(sectionId),
-        testDate,
+        testDate: String(testDate),
         time: numTime,
         successes: numSuccesses,
         mistakes: numMistakes,
-        ppm,
-        vef,
+        ppm: Number(ppm),
+        vef: Number(vef),
         band,
-        comprehensionPercentage,
+        comprehensionPercentage: Number(finalComprehensionPercentage || 0),
         notes,
         createdAt: new Date().toISOString()
       };
+
+      console.log('[registerSingleResult] GUARDANDO EN MEMORIA:', created);
       inMemoryResults.unshift(created);
+      persistResults();
       return created;
     }
     throw err;
@@ -358,6 +457,8 @@ export async function registerBatchResults({
     inMemoryResults.unshift(newResult);
     savedResults.push(newResult);
   }
+
+  persistResults();
 
   return {
     registered: savedResults.length,
