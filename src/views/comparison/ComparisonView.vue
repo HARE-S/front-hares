@@ -232,7 +232,7 @@ onMounted(loadCenters);
   <div class="comparison-view">
     <header class="header">
       <nav class="breadcrumb" aria-label="Migas de pan">
-        <span>Alumnado</span>
+        <router-link :to="{ name: 'centers' }" class="crumb">Centros</router-link>
         <span class="sep">/</span>
         <span class="crumb current">Comparativa por grupos</span>
       </nav>

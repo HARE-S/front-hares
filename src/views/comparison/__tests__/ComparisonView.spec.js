@@ -80,7 +80,7 @@ const GROUPS = [
 
 function mountView() {
   return mount(ComparisonView, {
-    global: { stubs: { GroupComparisonChart: true } }
+    global: { stubs: { GroupComparisonChart: true, RouterLink: true } }
   });
 }
 

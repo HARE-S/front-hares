@@ -74,6 +74,7 @@ const formattedRole = computed(() => {
 
 const isAdmin = computed(() => ['admin', 'superadmin'].includes(user.value?.role));
 const isCentersActive = computed(() => route.path.startsWith('/centers'));
+const isAlumnadoActive = computed(() => route.path.startsWith('/alumnado'));
 const currentCourseName = computed(() => {
   const course = courses.value.find(c => c.id === selectedCourse.value);
   return course?.name || 'Seleccionar curso';
@@ -104,7 +105,7 @@ async function handleLogout() {
       </router-link>
 
       <!-- Navegación principal -->
-      <nav v-if="!isCentersActive" class="sidebar-nav">
+      <nav v-if="!isAlumnadoActive" class="sidebar-nav">
         <router-link to="/dashboard" class="nav-item" active-class="active">
           <LayoutDashboard :size="18" />
           <span class="flex-1">Dashboard</span>
@@ -114,6 +115,12 @@ async function handleLogout() {
           <School :size="18" />
           <span class="flex-1">Centros</span>
           <span v-if="isCentersActive" class="nav-active-dot"></span>
+        </router-link>
+
+        <router-link to="/alumnado" class="nav-item" active-class="active">
+          <Users :size="18" />
+          <span class="flex-1">Alumnado</span>
+          <span v-if="isAlumnadoActive" class="nav-active-dot"></span>
         </router-link>
 
         <router-link
@@ -127,7 +134,7 @@ async function handleLogout() {
         </router-link>
       </nav>
 
-      <!-- Navegación Alumnado (cuando estás en Centros) -->
+      <!-- Navegación Alumnado (cuando estás en Alumnado) -->
       <nav v-else class="sidebar-nav">
         <button
           class="nav-item"
@@ -145,12 +152,6 @@ async function handleLogout() {
         >
           <LayoutDashboard :size="18" />
           <span>Estadísticas</span>
-        </button>
-
-        <button class="nav-item active">
-          <School :size="18" />
-          <span class="flex-1">Alumnado</span>
-          <span class="nav-active-dot"></span>
         </button>
 
         <button

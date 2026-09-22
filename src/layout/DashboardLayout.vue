@@ -36,7 +36,8 @@ import {
   CheckCircle2,
   Cloud,
   LayoutDashboard,
-  School
+  School,
+  Building2
 } from 'lucide-vue-next';
 
 // Cargar tab guardado o desde query
@@ -165,9 +166,19 @@ async function handleLogout() {
             :class="{ active: route.path.startsWith('/centers') }"
             @click="router.push('/centers')"
           >
+            <Building2 :size="18" />
+            <span class="flex-1">Centros</span>
+            <span v-if="route.path.startsWith('/centers')" class="nav-active-dot"></span>
+          </button>
+
+          <button
+            class="nav-item"
+            :class="{ active: route.path.startsWith('/alumnado') }"
+            @click="router.push('/alumnado')"
+          >
             <School :size="18" />
             <span class="flex-1">Alumnado</span>
-            <span v-if="route.path.startsWith('/centers')" class="nav-active-dot"></span>
+            <span v-if="route.path.startsWith('/alumnado')" class="nav-active-dot"></span>
           </button>
 
           <button

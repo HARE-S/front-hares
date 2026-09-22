@@ -87,6 +87,26 @@ export const routes = [
       }
     ]
   },
+  /**
+   * FE-25 (Marlen, 22/09/2026): vista "Alumnado" con URL propia.
+   *
+   * POR QUÉ SE AÑADIÓ: la pantalla principal de la sección es el listado de
+   * Centros (ruta `/centers`); el código de consulta del alumnado por
+   * centro/sección pasa a vivir en su propia URL sin el segmento "centers",
+   * igual que el resto de historias del equipo.
+   */
+  {
+    path: '/alumnado',
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'alumnado',
+        component: () => import('@/views/alumnado/AlumnadoListView.vue')
+      }
+    ]
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
