@@ -213,7 +213,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
+import { _getInMemoryResults } from '@/services/resultsService';
+import { getReadingBand } from '@/utils/format';
 
 const props = defineProps({
   course: {
@@ -225,10 +227,73 @@ const props = defineProps({
 const emit = defineEmits(['export', 'play-audio', 'view-detail']);
 
 const currentCourse = ref(props.course);
+const assessmentData = ref([]);
+
+function initials(name) {
+  return name?.split(' ')?.map(n => n[0])?.join('').toUpperCase().slice(0, 2) || 'NN';
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+}
+
+function getTestType(testCode) {
+  if (!testCode) return 'Desconocido';
+  const lastChar = testCode.slice(-1).toUpperCase();
+  if (lastChar === 'F') return 'Texto Continuo';
+  if (lastChar === 'L') return 'Lectura de Palabras';
+  if (lastChar === 'P') return 'Pseudopalabras';
+  return 'Desconocido';
+}
+
+function extractTestName(testName) {
+  if (!testName) return 'Prueba desconocida';
+  const match = testName.match(/^(.*?)\s*\(/);
+  return match ? match[1] : testName;
+}
+
+function loadRealAssessments() {
+  try {
+    const results = _getInMemoryResults();
+    console.log('[RecentAssessmentsTable] Cargados', results.length, 'resultados del servicio');
+
+    const formatted = results
+      .filter(r => r.testDate && r.testName && r.ppm !== undefined && r.vef !== undefined)
+      .sort((a, b) => new Date(b.testDate) - new Date(a.testDate))
+      .map((result, idx) => ({
+        id: result.id || `temp-${idx}`,
+        studentName: result.studentName || 'Alumno desconocido',
+        initials: initials(result.studentName),
+        testCode: result.testCode || result.testId || 'N/A',
+        testTitle: extractTestName(result.testName),
+        testType: getTestType(result.testCode || result.testId),
+        date: formatDate(result.testDate),
+        speed: Math.round(result.ppm) || 0,
+        accuracy: Math.round((result.successes / 20) * 100) || 0,
+        comprehension: result.comprehension || Math.round((result.successes / 20) * 100) || 0,
+        level: result.band || getReadingBand(result.vef) || 'En nivel'
+      }));
+
+    assessmentData.value = formatted;
+    console.log('[RecentAssessmentsTable] Formateados', formatted.length, 'resultados para tabla');
+  } catch (err) {
+    console.error('[RecentAssessmentsTable] Error cargando resultados:', err);
+  }
+}
 
 watch(() => props.course, (newCourse) => {
   currentCourse.value = newCourse;
   console.log('📋 RecentAssessmentsTable: Curso cambió a', newCourse);
+});
+
+onMounted(() => {
+  loadRealAssessments();
 });
 
 const searchQuery = ref('');
@@ -236,36 +301,7 @@ const selectedType = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 4;
 
-const assessmentsByCourse = {
-  '2024-25': [
-    { id: 1, studentName: 'Lucas Méndez Ruiz', initials: 'LM', testCode: '3AF', testTitle: 'El bosque animado', testType: 'Texto Continuo', date: '24 Ene 2025', speed: 128, accuracy: 98.5, comprehension: '4/4', level: 'Avanzado' },
-    { id: 2, studentName: 'Sofía Navarro Ortiz', initials: 'SN', testCode: '3AF', testTitle: 'El bosque animado', testType: 'Texto Continuo', date: '24 Ene 2025', speed: 118, accuracy: 96.0, comprehension: '4/4', level: 'En nivel' },
-    { id: 3, studentName: 'Mateo Barrenechea', initials: 'MB', testCode: '3BL', testTitle: 'Aventuras en el mar', testType: 'Lectura de Palabras', date: '23 Ene 2025', speed: 82, accuracy: 88.0, comprehension: '2/4', level: 'Requiere apoyo' },
-    { id: 4, studentName: 'Aitana Zubizarreta', initials: 'AZ', testCode: '3AF', testTitle: 'El bosque animado', testType: 'Texto Continuo', date: '23 Ene 2025', speed: 122, accuracy: 97.2, comprehension: '4/4', level: 'En nivel' },
-    { id: 5, studentName: 'Iker Goikoetxea', initials: 'IG', testCode: '3CF', testTitle: 'Misterio en el museo', testType: 'Pseudopalabras', date: '22 Ene 2025', speed: 78, accuracy: 85.5, comprehension: '1/4', level: 'Requiere apoyo' },
-    { id: 6, studentName: 'Emma Larrañaga', initials: 'EL', testCode: '3AF', testTitle: 'El bosque animado', testType: 'Texto Continuo', date: '21 Ene 2025', speed: 134, accuracy: 99.1, comprehension: '4/4', level: 'Avanzado' }
-  ],
-  '2023-24': [
-    { id: 7, studentName: 'Carlos Mendoza', initials: 'CM', testCode: '2AF', testTitle: 'La casa', testType: 'Texto Continuo', date: '20 Ene 2025', speed: 105, accuracy: 92.0, comprehension: '3/4', level: 'En nivel' },
-    { id: 8, studentName: 'Isabel García', initials: 'IG', testCode: '2BL', testTitle: 'Viaje al futuro', testType: 'Lectura de Palabras', date: '19 Ene 2025', speed: 115, accuracy: 95.5, comprehension: '4/4', level: 'En nivel' },
-    { id: 9, studentName: 'Francisco Pérez', initials: 'FP', testCode: '2CF', testTitle: 'El misterio', testType: 'Pseudopalabras', date: '18 Ene 2025', speed: 88, accuracy: 90.0, comprehension: '2/4', level: 'Requiere apoyo' },
-    { id: 10, studentName: 'Ángela López', initials: 'AL', testCode: '2AF', testTitle: 'La casa', testType: 'Texto Continuo', date: '17 Ene 2025', speed: 120, accuracy: 99.0, comprehension: '4/4', level: 'Avanzado' }
-  ],
-  '2022-23': [
-    { id: 11, studentName: 'Fernando Ruiz', initials: 'FR', testCode: '1AF', testTitle: 'El pueblo', testType: 'Texto Continuo', date: '16 Ene 2025', speed: 95, accuracy: 85.0, comprehension: '2/4', level: 'Requiere apoyo' },
-    { id: 12, studentName: 'Alejandra López', initials: 'AL', testCode: '1BL', testTitle: 'Historias', testType: 'Lectura de Palabras', date: '15 Ene 2025', speed: 108, accuracy: 93.0, comprehension: '3/4', level: 'En nivel' },
-    { id: 13, studentName: 'David García', initials: 'DG', testCode: '1CF', testTitle: 'Palabras nuevas', testType: 'Pseudopalabras', date: '14 Ene 2025', speed: 98, accuracy: 89.0, comprehension: '3/4', level: 'En nivel' },
-    { id: 14, studentName: 'Mónica Sánchez', initials: 'MS', testCode: '1AF', testTitle: 'El pueblo', testType: 'Texto Continuo', date: '13 Ene 2025', speed: 118, accuracy: 96.0, comprehension: '4/4', level: 'En nivel' }
-  ],
-  '2021-22': [
-    { id: 15, studentName: 'Antonio López', initials: 'AL', testCode: '0AF', testTitle: 'Inicio', testType: 'Texto Continuo', date: '12 Ene 2025', speed: 85, accuracy: 80.0, comprehension: '1/4', level: 'Requiere apoyo' },
-    { id: 16, studentName: 'Beatriz García', initials: 'BG', testCode: '0BL', testTitle: 'Principios', testType: 'Lectura de Palabras', date: '11 Ene 2025', speed: 102, accuracy: 91.0, comprehension: '3/4', level: 'En nivel' },
-    { id: 17, studentName: 'Enrique Pérez', initials: 'EP', testCode: '0CF', testTitle: 'Letras', testType: 'Pseudopalabras', date: '10 Ene 2025', speed: 78, accuracy: 82.0, comprehension: '1/4', level: 'Requiere apoyo' },
-    { id: 18, studentName: 'Silvia Ruiz', initials: 'SR', testCode: '0AF', testTitle: 'Inicio', testType: 'Texto Continuo', date: '09 Ene 2025', speed: 112, accuracy: 94.0, comprehension: '3/4', level: 'En nivel' }
-  ]
-};
-
-const allAssessments = computed(() => assessmentsByCourse[currentCourse.value] || assessmentsByCourse['2024-25']);
+const allAssessments = computed(() => assessmentData.value);
 
 const filteredAssessments = computed(() => {
   return allAssessments.value.filter(item => {

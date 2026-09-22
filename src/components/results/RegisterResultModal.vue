@@ -390,7 +390,7 @@ function handleResetAnother() {
 
           <div class="metric-card">
             <span class="metric-label">Comprensión</span>
-            <span class="metric-number" data-testid="saved-comp">{{ resultSaved.comprehensionPercentage }}%</span>
+            <span class="metric-number" data-testid="saved-comp">{{ resultSaved.comprehension }}%</span>
             <span class="metric-unit">{{ resultSaved.successes }}/20 aciertos</span>
           </div>
 

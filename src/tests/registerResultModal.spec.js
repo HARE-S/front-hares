@@ -21,7 +21,7 @@ describe('RegisterResultModal.vue (Registro de Prueba Individual — FE-18)', ()
       ppm: 100,
       vef: 90,
       band: 'En nivel',
-      comprehensionPercentage: 90
+      comprehension: 90
     };
 
     vi.spyOn(resultsService, 'registerSingleResult').mockResolvedValue(mockSaved);
@@ -141,7 +141,7 @@ describe('RegisterResultModal.vue (Registro de Prueba Individual — FE-18)', ()
       ppm: 400,
       vef: 400,
       band: 'Avanzado',
-      comprehensionPercentage: 100
+      comprehension: 100
     };
     vi.spyOn(resultsService, 'registerSingleResult').mockResolvedValue(mockSaved);
 

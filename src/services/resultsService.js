@@ -87,6 +87,7 @@ let inMemoryResults = [
     ppm: 125,
     vef: 113,
     band: 'Avanzado',
+    comprehension: 90,
     createdAt: '2026-09-15T09:30:00Z'
   },
   {
@@ -103,6 +104,7 @@ let inMemoryResults = [
     ppm: 95,
     vef: 71,
     band: 'Requiere apoyo',
+    comprehension: 75,
     createdAt: '2026-09-15T09:32:00Z'
   },
   {
@@ -119,6 +121,7 @@ let inMemoryResults = [
     ppm: 108,
     vef: 92,
     band: 'En nivel',
+    comprehension: 85,
     createdAt: '2026-09-15T09:34:00Z'
   },
   {
@@ -135,6 +138,7 @@ let inMemoryResults = [
     ppm: 118,
     vef: 112,
     band: 'Avanzado',
+    comprehension: 95,
     createdAt: '2026-09-15T09:36:00Z'
   },
   {
@@ -151,6 +155,7 @@ let inMemoryResults = [
     ppm: 100,
     vef: 80,
     band: 'Requiere apoyo',
+    comprehension: 80,
     createdAt: '2026-09-15T09:38:00Z'
   }
 ];
@@ -342,7 +347,7 @@ export async function registerSingleResult({
         ppm: Number(ppm),
         vef: Number(vef),
         band,
-        comprehensionPercentage: Number(finalComprehensionPercentage || 0),
+        comprehension: Number(finalComprehensionPercentage || 0),
         notes,
         createdAt: new Date().toISOString()
       };

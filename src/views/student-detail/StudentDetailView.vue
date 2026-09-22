@@ -26,12 +26,14 @@ const historicalSections = computed(() => studentData.value?.historical_sections
 const results = computed(() => {
   const allResults = studentData.value?.results || [];
   // Filtrar resultados inválidos (sin fecha, sin nombre, sin PPM o VEF)
-  return allResults.filter(r =>
-    r.testDate && String(r.testDate).trim() !== '' &&
-    r.testName && String(r.testName).trim() !== '' &&
-    r.ppm !== undefined && Number(r.ppm) > 0 &&
-    r.vef !== undefined && Number(r.vef) > 0
-  );
+  return allResults.filter(r => {
+    const date = r.testDate || r.test_date;
+    const name = r.testName || r.test_name;
+    return date && String(date).trim() !== '' &&
+           name && String(name).trim() !== '' &&
+           r.ppm !== undefined && Number(r.ppm) > 0 &&
+           r.vef !== undefined && Number(r.vef) > 0;
+  });
 });
 const readings = computed(() => studentData.value?.readings || []);
 
@@ -56,7 +58,7 @@ const totalReadings = computed(() => readings.value.length);
 
 const evolutionData = computed(() =>
   results.value.map(result => ({
-    date: result.test_date || '',
+    date: result.testDate || result.test_date || '',
     ppm: result.ppm,
     vef: result.vef
   }))
@@ -64,6 +66,17 @@ const evolutionData = computed(() =>
 
 function bandOf(result) {
   return classifyVefBand(result?.vef);
+}
+
+function comprehensionOf(result) {
+  if (result.comprehension !== undefined && result.comprehension !== null) {
+    return result.comprehension;
+  }
+  // Calcular basado en successes si existe
+  if (result.successes !== undefined) {
+    return Math.round((result.successes / 20) * 100);
+  }
+  return null;
 }
 
 async function loadStudentRecord() {
@@ -254,10 +267,10 @@ onMounted(() => {
             </thead>
             <tbody>
               <tr v-for="result in results" :key="result.id" data-testid="result-row">
-                <td>{{ result.test_date }}</td>
-                <td>{{ result.test_name }}</td>
+                <td>{{ result.testDate || result.test_date }}</td>
+                <td>{{ result.testName || result.test_name }}</td>
                 <td>{{ result.ppm != null ? result.ppm : '—' }}</td>
-                <td>{{ result.comprehension != null ? `${result.comprehension}%` : '—' }}</td>
+                <td>{{ comprehensionOf(result) != null ? `${comprehensionOf(result)}%` : '—' }}</td>
                 <td>{{ result.vef != null ? result.vef : '—' }}</td>
                 <td>
                   <span class="badge" :class="vefBandClass(bandOf(result))">
