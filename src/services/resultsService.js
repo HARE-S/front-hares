@@ -87,6 +87,7 @@ let inMemoryResults = [
     ppm: 125,
     vef: 113,
     band: 'Avanzado',
+    comprehension: 90,
     createdAt: '2026-09-15T09:30:00Z'
   },
   {
@@ -103,6 +104,7 @@ let inMemoryResults = [
     ppm: 95,
     vef: 71,
     band: 'Requiere apoyo',
+    comprehension: 75,
     createdAt: '2026-09-15T09:32:00Z'
   },
   {
@@ -119,6 +121,7 @@ let inMemoryResults = [
     ppm: 108,
     vef: 92,
     band: 'En nivel',
+    comprehension: 85,
     createdAt: '2026-09-15T09:34:00Z'
   },
   {
@@ -135,6 +138,7 @@ let inMemoryResults = [
     ppm: 118,
     vef: 112,
     band: 'Avanzado',
+    comprehension: 95,
     createdAt: '2026-09-15T09:36:00Z'
   },
   {
@@ -151,6 +155,7 @@ let inMemoryResults = [
     ppm: 100,
     vef: 80,
     band: 'Requiere apoyo',
+    comprehension: 80,
     createdAt: '2026-09-15T09:38:00Z'
   }
 ];
@@ -283,6 +288,30 @@ export async function registerSingleResult({
       method: 'POST',
       body: JSON.stringify(payload)
     });
+    // Guardar en memoria también cuando el API responde
+    if (res && res.id) {
+      const formatted = {
+        id: res.id,
+        studentId: res.student_id || payload.student_id,
+        studentName: payload.student_name,
+        testId: res.test_id || payload.test_id,
+        testCode: res.test_code || payload.test_id,
+        testName: res.test_name,
+        sectionId: res.section_id || payload.section_id,
+        testDate: res.test_date || payload.test_date,
+        time: res.time || payload.time,
+        successes: res.successes || payload.successes,
+        mistakes: res.mistakes || payload.mistakes,
+        ppm: res.ppm,
+        vef: res.vef,
+        band: res.band,
+        comprehension: res.comprehension_percentage || payload.comprehension_percentage,
+        notes: res.notes || payload.notes,
+        createdAt: res.created_at || new Date().toISOString()
+      };
+      inMemoryResults.unshift(formatted);
+      persistResults();
+    }
     return res;
   } catch (err) {
     if (err.status === 409) {
@@ -342,7 +371,7 @@ export async function registerSingleResult({
         ppm: Number(ppm),
         vef: Number(vef),
         band,
-        comprehensionPercentage: Number(finalComprehensionPercentage || 0),
+        comprehension: Number(finalComprehensionPercentage || 0),
         notes,
         createdAt: new Date().toISOString()
       };

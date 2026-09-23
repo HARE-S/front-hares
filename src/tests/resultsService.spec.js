@@ -131,7 +131,7 @@ describe('Servicio de Resultados (FE-20, FE-19, FE-29)', () => {
       // 120 palabras en 60s = 120 PPM
       expect(res.ppm).toBe(120);
       // Comprensión 18/20 = 90%
-      expect(res.comprehensionPercentage).toBe(90);
+      expect(res.comprehension).toBe(90);
       // Vef = 120 * (18 / 20) = 108
       expect(res.vef).toBe(108);
       expect(res.band).toBe('En nivel');

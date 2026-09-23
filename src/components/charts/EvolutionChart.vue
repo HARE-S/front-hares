@@ -50,29 +50,34 @@ const chartData = computed(() => {
     datasets: [
       {
         label: 'PPM (Palabras por minuto)',
-        data: dataPoints.map(d => d.ppm || 0),
+        data: dataPoints.map(d => Number(d.ppm) || 0),
         borderColor: 'rgb(34, 197, 94)',
-        backgroundColor: 'rgba(34, 197, 94, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
-        pointRadius: 5,
+        backgroundColor: 'transparent',
+        borderWidth: 3,
+        fill: false,
+        tension: 0,
+        pointRadius: 8,
+        pointHoverRadius: 10,
         pointBackgroundColor: 'rgb(34, 197, 94)',
         pointBorderColor: '#fff',
-        pointBorderWidth: 2
+        pointBorderWidth: 3,
+        yAxisID: 'y'
       },
       {
         label: 'VEF (Velocidad efectiva de lectura)',
-        data: dataPoints.map(d => d.vef || 0),
+        data: dataPoints.map(d => Number(d.vef) || 0),
         borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
-        pointRadius: 5,
+        backgroundColor: 'transparent',
+        borderWidth: 3,
+        borderDash: [8, 4],
+        fill: false,
+        tension: 0,
+        pointRadius: 8,
+        pointHoverRadius: 10,
         pointBackgroundColor: 'rgb(59, 130, 246)',
         pointBorderColor: '#fff',
-        pointBorderWidth: 2
+        pointBorderWidth: 3,
+        yAxisID: 'y1'
       }
     ]
   };
@@ -81,13 +86,18 @@ const chartData = computed(() => {
 const options = {
   responsive: true,
   maintainAspectRatio: true,
+  interaction: {
+    mode: 'index',
+    intersect: false
+  },
   plugins: {
     legend: {
       position: 'top',
       labels: {
         font: { size: 12, weight: 500 },
         padding: 15,
-        usePointStyle: true
+        usePointStyle: true,
+        boxWidth: 12
       }
     },
     title: {
@@ -95,18 +105,61 @@ const options = {
       text: `Evolución de lectura: ${props.studentName}`,
       font: { size: 14, weight: 'bold' },
       padding: { bottom: 20 }
+    },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      padding: 12,
+      titleFont: { size: 13, weight: 'bold' },
+      bodyFont: { size: 12 },
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+      borderWidth: 1,
+      displayColors: true,
+      callbacks: {
+        label: function(context) {
+          return context.dataset.label + ': ' + Math.round(context.parsed.y);
+        }
+      }
     }
   },
   scales: {
     y: {
-      beginAtZero: false,
-      min: 50,
-      max: 200,
+      type: 'linear',
+      display: true,
+      position: 'left',
+      beginAtZero: true,
+      min: 0,
       ticks: {
-        font: { size: 11 }
+        font: { size: 11 },
+        color: 'rgb(34, 197, 94)'
       },
       grid: {
         color: 'rgba(200, 200, 200, 0.1)'
+      },
+      title: {
+        display: true,
+        text: 'PPM',
+        font: { size: 12, weight: 'bold' },
+        color: 'rgb(34, 197, 94)'
+      }
+    },
+    y1: {
+      type: 'linear',
+      display: true,
+      position: 'right',
+      beginAtZero: true,
+      min: 0,
+      grid: {
+        drawOnChartArea: false
+      },
+      ticks: {
+        font: { size: 11 },
+        color: 'rgb(59, 130, 246)'
+      },
+      title: {
+        display: true,
+        text: 'VEF',
+        font: { size: 12, weight: 'bold' },
+        color: 'rgb(59, 130, 246)'
       }
     },
     x: {
