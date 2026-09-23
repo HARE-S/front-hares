@@ -116,6 +116,12 @@ async function handleLogout() {
           <span v-if="isCentersActive" class="nav-active-dot"></span>
         </router-link>
 
+        <router-link to="/students" class="nav-item" active-class="active" title="Alumnado">
+          <School :size="18" />
+          <span class="flex-1">Alumnado</span>
+          <span v-if="route.path.startsWith('/students')" class="nav-active-dot"></span>
+        </router-link>
+
         <router-link
           v-if="isAdmin"
           to="/admin/approval"
@@ -150,11 +156,22 @@ async function handleLogout() {
           <span>Estadísticas</span>
         </button>
 
-        <button class="nav-item active" title="Centros">
+        <button
+          class="nav-item"
+          :class="{ active: true }"
+          title="Centros"
+          @click="router.push('/centers')"
+        >
           <School :size="18" />
-          <span class="flex-1">Alumnado</span>
+          <span class="flex-1">Centros</span>
           <span class="nav-active-dot"></span>
         </button>
+
+        <router-link to="/students" class="nav-item" active-class="active" title="Alumnado">
+          <School :size="18" />
+          <span class="flex-1">Alumnado</span>
+          <span v-if="route.path.startsWith('/students')" class="nav-active-dot"></span>
+        </router-link>
 
         <button
           class="nav-item"

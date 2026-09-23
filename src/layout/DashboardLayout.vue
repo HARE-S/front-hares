@@ -204,8 +204,23 @@ async function handleLogout() {
           <button
             class="nav-item"
             :class="{ active: route?.path?.startsWith('/centers') }"
-            title="Alumnado"
+            title="Centros"
             @click="router.push('/centers'); isMobileNavOpen = false;"
+          >
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <School :size="18" />
+              </div>
+              <span class="nav-label">Centros</span>
+            </div>
+            <span v-if="route?.path?.startsWith('/centers')" class="nav-active-pill">Activo</span>
+          </button>
+
+          <button
+            class="nav-item"
+            :class="{ active: route?.path?.startsWith('/students') }"
+            title="Alumnado"
+            @click="router.push('/students'); isMobileNavOpen = false;"
           >
             <div class="nav-item-left">
               <div class="nav-item-icon">
@@ -213,7 +228,7 @@ async function handleLogout() {
               </div>
               <span class="nav-label">Alumnado</span>
             </div>
-            <span v-if="route?.path?.startsWith('/centers')" class="nav-active-pill">Activo</span>
+            <span v-if="route?.path?.startsWith('/students')" class="nav-active-pill">Activo</span>
           </button>
 
           <button

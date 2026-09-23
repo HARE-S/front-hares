@@ -1,10 +1,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { getCenters, getCenterSections, getSectionStudents } from '@/services/directoryService';
 import { ChevronDown } from 'lucide-vue-next';
 
 const router = useRouter();
+const route = useRoute();
+const isStudentsRoute = computed(() => route.path.startsWith('/students'));
 const centers = ref([]);
 const sectionsMap = ref({});
 const allStudents = ref([]);
@@ -110,8 +112,8 @@ onMounted(loadCenters);
   <div class="students-view">
     <header class="view-header">
       <div class="header-content">
-        <h1>Alumnado</h1>
-        <p class="header-subtitle">Consulta el alumnado de cada centro y sección</p>
+        <h1>{{ isStudentsRoute ? 'Alumnado' : 'Centros' }}</h1>
+        <p class="header-subtitle">{{ isStudentsRoute ? 'Consulta el alumnado de cada centro y sección' : 'Selecciona un centro para ver sus secciones y su alumnado' }}</p>
       </div>
     </header>
 

@@ -75,6 +75,19 @@ export const routes = [
     ]
   },
   {
+    path: '/students',
+    name: 'students',
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'students-list',
+        component: () => import('@/views/centers/CentersListView.vue')
+      }
+    ]
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/views/NotFoundView.vue'),
