@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, watch as vueWatch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { useCourse } from '@/composables/useCourse';
@@ -37,13 +37,29 @@ import {
   Cloud,
   LayoutDashboard,
   School,
-  Building2
+  Menu,
+  X
 } from 'lucide-vue-next';
 
-// Cargar tab guardado o desde query
-const queryTab = route.query.tab;
+// Cargar tab guardado o desde query de forma segura
+const queryTab = route?.query?.tab;
 const savedTab = typeof localStorage !== 'undefined' ? localStorage.getItem('activeTab') : null;
 const currentTab = ref(queryTab || savedTab || 'statistics'); // 'statistics' | 'catalog' | 'books' | 'bulk-entry' | 'section-detail' | 'form'
+const isMobileNavOpen = ref(false);
+
+const currentTabName = computed(() => {
+  if (route?.path?.startsWith('/centers')) return 'Alumnado';
+  switch (currentTab.value) {
+    case 'statistics': return 'Estadísticas';
+    case 'catalog': return 'Catálogo de Pruebas';
+    case 'bulk-entry': return 'Registro en Aula';
+    case 'section-detail': return 'Detalle de Grupo';
+    case 'books': return 'Biblioteca de Libros';
+    case 'reports': return 'Informes';
+    default: return 'Panel Docente';
+  }
+});
+
 const activeSectionId = ref('sec-1');
 const testListRef = ref(null);
 const testsCatalogRef = ref(null);
@@ -53,7 +69,6 @@ const toastNotification = ref(null);
 const showRegisterResultModal = ref(false);
 
 // Guardar tab cuando cambia
-import { watch as vueWatch } from 'vue';
 vueWatch(currentTab, (newTab) => {
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('activeTab', newTab);
@@ -123,24 +138,43 @@ async function handleLogout() {
 <template>
   <div class="stitch-app">
     <!-- BARRA LATERAL PERSISTENTE (Stitch Dark Slate Theme: #192134) -->
-    <aside class="stitch-sidebar">
+    <aside class="stitch-sidebar" :class="{ 'mobile-nav-open': isMobileNavOpen }">
       <div class="sidebar-top">
-        <!-- Logo & Branding -->
+        <!-- Logo & Branding + Botón Toggle Móvil -->
         <div class="brand-header">
-          <div class="brand-icon-box">
-            <img src="/logo-hare.png" alt="HARE-S" class="brand-logo" />
-          </div>
-          <div class="brand-text">
-            <div class="brand-title-row">
-              <span class="brand-name">HARE-S</span>
-              <span class="brand-edu-chip">Edu</span>
+          <div class="brand-left flex items-center gap-3">
+            <div class="brand-icon-box">
+              <img src="/logo-hare.png" alt="HARE-S" class="brand-logo" />
             </div>
-            <span class="brand-org">Fundación Peñascal</span>
+            <div class="brand-text">
+              <div class="brand-title-row">
+                <span class="brand-name">HARE-S</span>
+                <span class="brand-edu-chip hidden sm:inline-block">Edu</span>
+              </div>
+              <span class="brand-org hidden xl:block">Fundación Peñascal</span>
+            </div>
           </div>
+
+          <!-- Indicador de sección activa (oculto para limpieza visual) -->
+          <div class="active-tab-chip hidden">
+            <span>{{ currentTabName }}</span>
+          </div>
+
+          <!-- Botón Toggle Menú Móvil (< 1280px) -->
+          <button 
+            type="button" 
+            class="mobile-menu-toggle"
+            :aria-expanded="isMobileNavOpen"
+            aria-label="Abrir menú de navegación"
+            @click="isMobileNavOpen = !isMobileNavOpen"
+          >
+            <X v-if="isMobileNavOpen" :size="20" />
+            <Menu v-else :size="20" />
+          </button>
         </div>
 
-        <!-- Quick Action CTA -->
-        <div v-if="userRole !== 'tutor'" class="sidebar-cta-wrap">
+        <!-- Quick Action CTA (Solo escritorio >= 1280px, innecesario en tableta y móvil) -->
+        <div v-if="userRole !== 'tutor'" class="sidebar-cta-wrap hidden xl:block">
           <button
             class="sidebar-cta-btn"
             @click="handleOpenCreate"
@@ -150,130 +184,175 @@ async function handleLogout() {
           </button>
         </div>
 
-        <!-- Navegación Principal -->
-        <nav class="sidebar-nav">
+        <!-- Navegación Principal (Colapsable en móvil y tablet, desliza hacia abajo) -->
+        <nav class="sidebar-nav" :class="{ 'is-collapsed-mobile': !isMobileNavOpen }">
           <button
             class="nav-item"
             :class="{ active: currentTab === 'statistics' }"
-            @click="currentTab = 'statistics'"
+            title="Estadísticas"
+            @click="currentTab = 'statistics'; isMobileNavOpen = false;"
           >
-            <LayoutDashboard :size="18" />
-            <span>Estadísticas</span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <LayoutDashboard :size="18" />
+              </div>
+              <span class="nav-label">Estadísticas</span>
+            </div>
+            <span v-if="currentTab === 'statistics'" class="nav-active-pill">Activo</span>
           </button>
 
           <button
             class="nav-item"
-            :class="{ active: route.path.startsWith('/centers') }"
-            @click="router.push('/centers')"
+            :class="{ active: route?.path?.startsWith('/centers') }"
+            title="Alumnado"
+            @click="router.push('/centers'); isMobileNavOpen = false;"
           >
-            <Building2 :size="18" />
-            <span class="flex-1">Centros</span>
-            <span v-if="route.path.startsWith('/centers')" class="nav-active-dot"></span>
-          </button>
-
-          <button
-            class="nav-item"
-            :class="{ active: route.path.startsWith('/alumnado') }"
-            @click="router.push('/alumnado')"
-          >
-            <School :size="18" />
-            <span class="flex-1">Alumnado</span>
-            <span v-if="route.path.startsWith('/alumnado')" class="nav-active-dot"></span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <School :size="18" />
+              </div>
+              <span class="nav-label">Alumnado</span>
+            </div>
+            <span v-if="route?.path?.startsWith('/centers')" class="nav-active-pill">Activo</span>
           </button>
 
           <button
             class="nav-item"
             :class="{ active: currentTab === 'catalog' && !testToEdit }"
-            @click="currentTab = 'catalog'; testToEdit = null;"
+            title="Catálogo de Pruebas"
+            @click="currentTab = 'catalog'; testToEdit = null; isMobileNavOpen = false;"
           >
-            <Layers :size="18" />
-            <span class="flex-1">Catálogo de Pruebas</span>
-            <span v-if="currentTab === 'catalog'" class="nav-active-dot"></span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <Layers :size="18" />
+              </div>
+              <span class="nav-label">Catálogo de Pruebas</span>
+            </div>
+            <span v-if="currentTab === 'catalog'" class="nav-active-pill">Activo</span>
           </button>
 
           <button
             class="nav-item"
             :class="{ active: currentTab === 'bulk-entry' || currentTab === 'section-detail' }"
-            @click="currentTab = 'bulk-entry'; testToEdit = null;"
+            title="Registro en Aula"
+            @click="currentTab = 'bulk-entry'; testToEdit = null; isMobileNavOpen = false;"
           >
-            <Edit3 :size="18" />
-            <span class="flex-1">Registro en Aula</span>
-            <span v-if="currentTab === 'bulk-entry' || currentTab === 'section-detail'" class="nav-active-dot"></span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <Edit3 :size="18" />
+              </div>
+              <span class="nav-label">Registro en Aula</span>
+            </div>
+            <span v-if="currentTab === 'bulk-entry' || currentTab === 'section-detail'" class="nav-active-pill">Activo</span>
           </button>
 
           <button
             class="nav-item"
             :class="{ active: currentTab === 'books' }"
-            @click="currentTab = 'books'; testToEdit = null;"
+            title="Biblioteca de Libros"
+            @click="currentTab = 'books'; testToEdit = null; isMobileNavOpen = false;"
           >
-            <Library :size="18" />
-            <span class="flex-1">Biblioteca de Libros</span>
-            <span v-if="currentTab === 'books'" class="nav-active-dot"></span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <Library :size="18" />
+              </div>
+              <span class="nav-label">Biblioteca de Libros</span>
+            </div>
+            <span v-if="currentTab === 'books'" class="nav-active-pill">Activo</span>
           </button>
 
           <button
             class="nav-item"
             :class="{ active: currentTab === 'reports' }"
-            @click="currentTab = 'reports'; testToEdit = null;"
+            title="Informes y Exportación"
+            @click="currentTab = 'reports'; testToEdit = null; isMobileNavOpen = false;"
           >
-            <BarChart3 :size="18" />
-            <span class="flex-1">Informes y Exportación</span>
-            <span v-if="currentTab === 'reports'" class="nav-active-dot"></span>
+            <div class="nav-item-left">
+              <div class="nav-item-icon">
+                <BarChart3 :size="18" />
+              </div>
+              <span class="nav-label">Informes y Exportación</span>
+            </div>
+            <span v-if="currentTab === 'reports'" class="nav-active-pill">Activo</span>
           </button>
         </nav>
       </div>
 
-      <!-- Pie de la barra lateral con estado académico -->
-      <div class="sidebar-bottom">
+      <!-- Pie de la barra lateral -->
+      <div class="sidebar-bottom" :class="{ 'is-collapsed-mobile': !isMobileNavOpen }">
+        <!-- Tarjeta de sesión académica / Selector de cursos (Oculto en responsive bajo 1280px) -->
         <button
-          class="academic-session-card"
+          type="button"
+          class="academic-session-card hidden xl:flex"
           @click="isDropdownOpen = !isDropdownOpen"
         >
-          <div class="pulse-indicator">
-            <span class="pulse-dot"></span>
+          <div class="session-info">
+            <div class="pulse-indicator">
+              <span class="pulse-dot"></span>
+            </div>
+            <div class="session-labels">
+              <span class="session-year">{{ getCurrentCourseName ? getCurrentCourseName() : 'Curso 2024-25' }}</span>
+              <span class="session-status">Sincronizado</span>
+            </div>
           </div>
-          <span class="course-name-text">{{ getCurrentCourseName() }}</span>
           <Cloud :size="16" class="session-icon" />
         </button>
 
-        <!-- Dropdown de cursos -->
+        <!-- Dropdown de cursos flotante -->
         <div v-if="isDropdownOpen" class="courses-dropdown">
           <button
             v-for="course in courses"
             :key="course.id"
-            @click="selectCourse(course.id)"
+            @click.stop="selectCourse(course.id)"
             class="course-option"
             :class="{ 'course-option--active': course.id === selectedCourse }"
           >
-            {{ course.name }}
-            <svg v-if="course.id === selectedCourse" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-            </svg>
+            <span>{{ course.name }}</span>
+            <CheckCircle2 v-if="course.id === selectedCourse" :size="16" />
           </button>
         </div>
 
         <!-- User Section -->
         <div class="user-section">
-          <button class="user-avatar-wrapper" @click="showUserMenu = !showUserMenu">
-            <div class="user-avatar">{{ user?.name?.substring(0, 2).toUpperCase() || 'U' }}</div>
-            <div class="user-info">
-              <p class="user-name">{{ user?.name || 'Usuario' }}</p>
-              <p class="user-role">{{ userRole === 'coordinator' ? 'Coordinador' : 'Tutor' }}</p>
+          <!-- Mobile user profile card (visible when mobile nav is open) -->
+          <div class="user-profile-card xl:hidden">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="user-avatar">{{ user?.name?.substring(0, 2).toUpperCase() || 'U' }}</div>
+              <div class="user-info min-w-0">
+                <p class="user-name truncate">{{ user?.name || 'Usuario' }}</p>
+                <p class="user-role truncate">{{ userRole === 'coordinator' ? 'Coordinador' : 'Tutor' }}</p>
+              </div>
             </div>
-          </button>
-
-          <div v-if="showUserMenu" class="user-menu">
-            <div class="menu-header">
-              <p class="user-name">{{ user?.name || 'Usuario' }}</p>
-              <p class="user-role">{{ user?.email || 'Sin email' }}</p>
-            </div>
-
-            <div class="menu-divider"></div>
-
-            <button class="logout-btn" @click="handleLogout">
-              <span>🚪</span>
+            <button class="mobile-logout-btn" @click="handleLogout" title="Cerrar sesión">
               <span>Cerrar sesión</span>
+              <span>🚪</span>
             </button>
+          </div>
+
+          <!-- Desktop user avatar button & dropdown (>= 1280px) -->
+          <div class="desktop-user-menu-wrap hidden xl:block">
+            <button class="user-avatar-wrapper" @click="showUserMenu = !showUserMenu">
+              <div class="user-avatar">{{ user?.name?.substring(0, 2).toUpperCase() || 'U' }}</div>
+              <div class="user-info">
+                <p class="user-name">{{ user?.name || 'Usuario' }}</p>
+                <p class="user-role">{{ userRole === 'coordinator' ? 'Coordinador' : 'Tutor' }}</p>
+              </div>
+            </button>
+
+            <!-- Menú desplegable flotante de usuario -->
+            <div v-if="showUserMenu" class="user-menu">
+              <div class="menu-header">
+                <p class="user-name">{{ user?.name || 'Usuario' }}</p>
+                <p class="user-role">{{ userRole === 'coordinator' ? 'Coordinador Pedagógico' : 'Tutor' }}</p>
+              </div>
+
+              <div class="menu-divider"></div>
+
+              <button class="logout-btn" @click="handleLogout">
+                <span>🚪</span>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -330,14 +409,12 @@ async function handleLogout() {
               v-else-if="currentTab === 'reports'"
               key="reports"
               :user-role="userRole"
-              :course="selectedCourse"
             />
             <TestForm
               v-else-if="currentTab === 'form'"
               key="form"
               :test-to-edit="testToEdit"
               :user-role="userRole"
-              :course="selectedCourse"
               @test-created="handleTestCreated"
               @test-updated="handleTestUpdated"
               @cancel-edit="handleCancelEdit"
@@ -455,6 +532,7 @@ async function handleLogout() {
   font-size: 0.85rem;
   font-weight: 600;
   padding: 0.65rem 0.85rem;
+  min-height: var(--touch-target-min, 44px);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -478,8 +556,9 @@ async function handleLogout() {
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
   padding: 0.65rem 0.85rem;
+  min-height: var(--touch-target-min, 44px);
   border-radius: var(--radius-md);
   font-size: 0.85rem;
   font-weight: 500;
@@ -490,6 +569,33 @@ async function handleLogout() {
   transition: var(--transition-fast);
   text-align: left;
   width: 100%;
+}
+
+.nav-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm, 6px);
+  background-color: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.nav-item:hover:not(.disabled) .nav-item-icon {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active .nav-item-icon {
+  background-color: rgba(111, 251, 190, 0.2);
+  color: var(--secondary-fixed, #6ffbbe);
 }
 
 .nav-item:hover:not(.disabled) {
@@ -525,29 +631,19 @@ async function handleLogout() {
   background-color: rgba(46, 54, 75, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
-  padding: 0.75rem 0.85rem;
+  padding: 0.65rem 0.85rem;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0.75rem;
+  justify-content: space-between;
   margin-bottom: 0.85rem;
   width: 100%;
   cursor: pointer;
   transition: all 0.2s ease;
-  position: relative;
-  z-index: 50;
-  flex-wrap: wrap;
 }
 
 .academic-session-card:hover {
   border-color: rgba(111, 251, 190, 0.3);
   background-color: rgba(46, 54, 75, 0.9);
-}
-
-.academic-session-card:active,
-.academic-session-card.open {
-  border-color: rgba(111, 251, 190, 0.5);
-  background-color: rgba(46, 54, 75, 0.95);
 }
 
 .session-info {
@@ -561,6 +657,7 @@ async function handleLogout() {
   position: relative;
   width: 8px;
   height: 8px;
+  flex-shrink: 0;
 }
 
 .pulse-dot {
@@ -590,282 +687,74 @@ async function handleLogout() {
   color: var(--on-tertiary-container);
 }
 
-.sidebar-secondary-links {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+/* Selector de Cursos Flotante */
+.courses-dropdown {
+  position: fixed;
+  background: white;
+  border: 1px solid rgba(200, 200, 200, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  min-width: 200px;
+  max-width: 280px;
+  top: auto;
+  bottom: 130px;
+  left: 20px;
+  overflow: hidden;
+  animation: slideUp 0.2s ease-out;
 }
 
-.nav-item-sm {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.75rem;
-  color: var(--on-tertiary-container);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  width: 100%;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.nav-item-sm.disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* --- ÁREA PRINCIPAL --- */
-.stitch-main-layout {
+.course-name-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6ffbbe;
   flex: 1;
-  margin-left: 260px;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Header superior */
-.stitch-header {
-  height: 64px;
-  background-color: var(--surface-container-lowest);
-  border-bottom: 1px solid var(--outline-variant);
+.course-option {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1.5rem;
-  position: sticky;
-  top: 0;
-  z-index: 30;
-}
-
-.header-left,
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.context-chip {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  background-color: var(--surface-container-low);
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-md);
-  padding: 0.35rem 0.75rem;
-}
-
-.chip-icon {
-  color: var(--secondary);
-}
-
-.chip-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.chip-label {
-  font-size: 0.6875rem;
-  color: var(--on-surface-variant);
-  line-height: 1;
-}
-
-.chip-value-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.15rem;
-}
-
-.chip-val {
-  font-size: 0.825rem;
-  font-weight: 600;
-  color: var(--secondary);
-}
-
-.chip-tag {
-  font-size: 0.7rem;
-  background-color: var(--surface-container-highest);
-  color: var(--on-surface-variant);
-  padding: 0.1rem 0.35rem;
-  border-radius: var(--radius-xs);
-  font-weight: 500;
-}
-
-.chip-tag-active {
-  font-size: 0.7rem;
-  background-color: var(--primary-container);
-  color: var(--secondary-fixed);
-  padding: 0.1rem 0.35rem;
-  border-radius: var(--radius-xs);
-  font-weight: 600;
-}
-
-.chip-arrow {
-  color: var(--on-surface-variant);
-}
-
-.role-pill-selector {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background-color: var(--surface-container-low);
-  border: 1px solid var(--outline-variant);
-  padding: 0.25rem 0.6rem;
-  border-radius: var(--radius-md);
-}
-
-.role-icon {
-  color: var(--primary-container);
-}
-
-.role-pill-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--on-surface-variant);
-  margin-bottom: 0;
-}
-
-.role-dropdown {
-  background-color: var(--surface-container-lowest);
-  border: 1px solid #cbd5e1;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--primary-container);
-  border-radius: var(--radius-sm);
-  padding: 0.2rem 0.4rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(200, 200, 200, 0.1);
   cursor: pointer;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  text-align: left;
+  font-weight: 500;
+  transition: background-color 0.15s ease;
 }
 
-.teacher-profile {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-md);
+.course-option:last-child {
+  border-bottom: none;
 }
 
-.teacher-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: var(--primary-container);
-  color: var(--secondary-fixed);
-  font-size: 0.75rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.course-option:hover {
+  background-color: rgba(200, 200, 200, 0.1);
 }
 
-.teacher-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.teacher-name {
-  font-size: 0.825rem;
+.course-option--active {
+  background-color: rgba(111, 251, 190, 0.1);
+  color: #006c49;
   font-weight: 600;
-  color: var(--on-surface);
-  line-height: 1.1;
-}
-
-.teacher-role {
-  font-size: 0.7rem;
-  color: var(--on-surface-variant);
-}
-
-/* Canvas de contenido */
-.stitch-content-canvas {
-  flex: 1;
-  padding: 2rem 1.75rem;
-  max-width: 1280px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.content-container {
-  width: 100%;
-}
-
-.toast-banner {
-  margin-bottom: 1.5rem;
-}
-
-.stitch-footer {
-  border-top: 1px solid var(--outline-variant);
-  background-color: var(--surface-container-lowest);
-  padding: 1rem 1.5rem;
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--on-surface-variant);
-}
-
-@media (max-width: 1024px) {
-  .stitch-sidebar {
-    width: 72px;
-    padding: 1rem 0.5rem;
-  }
-  .brand-text,
-  .sidebar-cta-btn span,
-  .nav-item span,
-  .sidebar-secondary-links {
-    display: none;
-  }
-  .sidebar-cta-btn {
-    padding: 0.5rem;
-    border-radius: 50%;
-  }
-  .stitch-main-layout {
-    margin-left: 72px;
-  }
-  .hidden-sm {
-    display: none;
-  }
-
-  /* Selector de curso responsive en tablet */
-  .academic-session-card {
-    padding: 0.5rem 0.4rem;
-    width: 100%;
-    justify-content: center;
-    gap: 0;
-  }
-
-  .academic-session-card span {
-    display: none;
-  }
-
-  .session-icon {
-    color: var(--on-tertiary-container);
-  }
-
-  /* En tablet: ocultar nombre y rol, solo mostrar avatar */
-  .user-info {
-    display: none;
-  }
-
-  .user-avatar-wrapper {
-    justify-content: center;
-    padding: 0.35rem;
-  }
-
-  .user-avatar {
-    width: 48px;
-    height: 48px;
-    font-size: 1.1rem;
-  }
-
-  .user-menu {
-    left: 75px;
-    width: 280px;
-    bottom: 75px;
-  }
-
-  .courses-dropdown {
-    left: 10px !important;
-    right: 10px;
-    width: auto;
-  }
 }
 
 /* User Section Styles */
@@ -879,6 +768,7 @@ async function handleLogout() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-height: var(--touch-target-min, 44px);
   background: none;
   border: none;
   cursor: pointer;
@@ -979,14 +869,14 @@ async function handleLogout() {
   border-bottom: 1px solid rgba(75, 85, 99, 0.3);
 }
 
-.user-name {
+.menu-header .user-name {
   margin: 0 0 0.25rem;
   font-size: 0.95rem;
   font-weight: 700;
   color: white;
 }
 
-.user-role {
+.menu-header .user-role {
   margin: 0;
   font-size: 0.8rem;
   color: #9ca3af;
@@ -1003,6 +893,7 @@ async function handleLogout() {
 .logout-btn {
   width: 100%;
   padding: 0.75rem 1rem;
+  min-height: var(--touch-target-min, 44px);
   background-color: transparent;
   color: #fca5a5;
   border: none;
@@ -1020,26 +911,390 @@ async function handleLogout() {
   background-color: rgba(220, 38, 38, 0.15);
 }
 
-.courses-dropdown {
-  position: fixed;
-  background: white;
-  border: 1px solid rgba(200, 200, 200, 0.3);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  z-index: 1001;
-  min-width: 200px;
-  max-width: 280px;
-  top: auto;
-  bottom: 130px;
-  left: 20px;
-  overflow: hidden;
-  animation: slideUp 0.2s ease-out;
+/* --- ÁREA PRINCIPAL --- */
+.stitch-main-layout {
+  flex: 1;
+  margin-left: 260px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-@keyframes slideUp {
+/* Canvas de contenido */
+.stitch-content-canvas {
+  flex: 1;
+  padding: 2rem 1.75rem;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.content-container {
+  width: 100%;
+}
+
+.toast-banner {
+  margin-bottom: 1.5rem;
+}
+
+.stitch-footer {
+  border-top: 1px solid var(--outline-variant);
+  background-color: var(--surface-container-lowest);
+  padding: 1rem 1.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+}
+
+/* Botón de alternancia de menú en móvil */
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md, 8px);
+  color: var(--surface-container-lowest, #ffffff);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background-color: var(--tertiary-container, #283149);
+}
+
+/* =========================================================================
+   DISEÑO RESPONSIVO: DESPLIEGUE VERTICAL HACIA ABAJO (< 1280px)
+   ========================================================================= */
+@media (max-width: 1279px) {
+  /* Contenedor raíz: flujo 100% vertical en móvil y tableta */
+  .stitch-app {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+    background-color: var(--background) !important;
+  }
+
+  /* Header sticky compacto (60px) cuando el menú está colapsado */
+  .stitch-sidebar {
+    width: 100% !important;
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: auto !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    padding: 0 1rem !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--tertiary, #192134) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+    z-index: 50 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .brand-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    border-bottom: none !important;
+  }
+
+  .brand-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    white-space: nowrap !important;
+  }
+
+  .brand-icon-box {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 3px !important;
+    border-radius: var(--radius-md, 8px) !important;
+  }
+
+  .brand-title-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    white-space: nowrap !important;
+  }
+
+  .brand-name {
+    font-size: 1.15rem !important;
+    white-space: nowrap !important;
+  }
+
+  .brand-edu-chip {
+    font-size: 0.6rem !important;
+    padding: 0.05rem 0.35rem !important;
+  }
+
+  .brand-org,
+  .active-tab-chip {
+    display: none !important;
+  }
+
+  .mobile-menu-toggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: var(--radius-md, 8px) !important;
+    color: var(--surface-container-lowest, #ffffff) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .mobile-menu-toggle:hover {
+    background-color: var(--tertiary-container, #283149) !important;
+    border-color: var(--secondary-fixed, #6ffbbe) !important;
+  }
+
+  /* Elementos eliminados en responsive (< 1280px) */
+  .academic-session-card,
+  .desktop-user-menu-wrap,
+  .sidebar-cta-wrap {
+    display: none !important;
+  }
+
+  /* Estado colapsado: Todo el menú oculto */
+  .sidebar-nav.is-collapsed-mobile,
+  .sidebar-bottom.is-collapsed-mobile {
+    display: none !important;
+  }
+
+  /* Estado desplegado: La pantalla completa se desliza suavemente HACIA ABAJO */
+  .stitch-sidebar.mobile-nav-open {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    min-height: 100vh !important;
+    z-index: 100 !important;
+    padding: 0 1.25rem 1.75rem 1.25rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background-color: var(--tertiary, #192134) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65) !important;
+    animation: slideDownScreen 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .brand-header {
+    height: 60px !important;
+    min-height: 60px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    flex-shrink: 0 !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .sidebar-top {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .sidebar-nav {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.6rem !important;
+    padding: 1.25rem 0 !important;
+    width: 100% !important;
+    animation: slideDownContent 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .nav-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.85rem 1.15rem !important;
+    border-radius: var(--radius-lg, 12px) !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    min-height: 52px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    transition: all 0.18s ease !important;
+    cursor: pointer !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .nav-item:hover {
+    background-color: var(--tertiary-container, #283149) !important;
+    border-color: rgba(111, 251, 190, 0.35) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .nav-item.active {
+    background-color: var(--primary-container, #0f3e2e) !important;
+    color: var(--secondary-fixed, #6ffbbe) !important;
+    border-color: rgba(111, 251, 190, 0.5) !important;
+    box-shadow: 0 4px 14px rgba(15, 62, 46, 0.4) !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .nav-item span {
+    display: inline-block !important;
+  }
+
+  .nav-active-pill {
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    padding: 0.15rem 0.55rem !important;
+    border-radius: 9999px !important;
+    background-color: rgba(111, 251, 190, 0.2) !important;
+    color: var(--secondary-fixed, #6ffbbe) !important;
+    border: 1px solid rgba(111, 251, 190, 0.4) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .sidebar-bottom {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    margin-top: auto !important;
+    padding-top: 1.25rem !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+    width: 100% !important;
+    flex-shrink: 0 !important;
+    animation: slideDownContent 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .user-section {
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .user-profile-card {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.75rem 1rem !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border-radius: var(--radius-lg, 12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    gap: 0.75rem !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .user-avatar {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 0.9rem !important;
+    border-radius: 50% !important;
+    background-color: #10b981 !important;
+    color: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 700 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .user-name {
+    margin: 0 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    line-height: 1.2 !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .user-role {
+    margin: 0 !important;
+    font-size: 0.7rem !important;
+    color: var(--on-tertiary-container, #bdc9c0) !important;
+    text-transform: capitalize !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .mobile-logout-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+    padding: 0.5rem 0.85rem !important;
+    border-radius: var(--radius-md, 8px) !important;
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    color: #fca5a5 !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    white-space: nowrap !important;
+  }
+
+  .stitch-sidebar.mobile-nav-open .mobile-logout-btn:hover {
+    background-color: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(239, 68, 68, 0.6) !important;
+  }
+
+  /* Lienzo principal: 100% de ancho en responsive */
+  .stitch-main-layout {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  .stitch-content-canvas {
+    padding: 1.25rem 1rem 2.5rem 1rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .header-left,
+  .header-right {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .user-profile-card {
+    display: none !important;
+  }
+
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+
+  .active-tab-chip {
+    display: none !important;
+  }
+
+  .mobile-logout-btn {
+    display: none !important;
+  }
+}
+
+/* Animación de deslizamiento vertical estricto hacia abajo (sin desplazamiento horizontal) */
+@keyframes slideDownScreen {
   from {
-    opacity: 0;
-    transform: translateY(10px);
+    opacity: 0.4;
+    transform: translateY(-24px);
   }
   to {
     opacity: 1;
@@ -1047,45 +1302,14 @@ async function handleLogout() {
   }
 }
 
-.course-name-text {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #6ffbbe;
-  flex: 1;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.course-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(200, 200, 200, 0.1);
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: #1a1a1a;
-  text-align: left;
-  font-weight: 500;
-  transition: background-color 0.15s ease;
-}
-
-.course-option:last-child {
-  border-bottom: none;
-}
-
-.course-option:hover {
-  background-color: rgba(200, 200, 200, 0.1);
-}
-
-.course-option--active {
-  background-color: rgba(111, 251, 190, 0.1);
-  color: #006c49;
-  font-weight: 600;
+@keyframes slideDownContent {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

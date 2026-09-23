@@ -105,13 +105,13 @@ async function handleLogout() {
       </router-link>
 
       <!-- Navegación principal -->
-      <nav v-if="!isAlumnadoActive" class="sidebar-nav">
-        <router-link to="/dashboard" class="nav-item" active-class="active">
+      <nav v-if="!isCentersActive" class="sidebar-nav">
+        <router-link to="/dashboard" class="nav-item" active-class="active" title="Dashboard">
           <LayoutDashboard :size="18" />
           <span class="flex-1">Dashboard</span>
         </router-link>
 
-        <router-link to="/centers" class="nav-item" active-class="active">
+        <router-link to="/centers" class="nav-item" active-class="active" title="Centros">
           <School :size="18" />
           <span class="flex-1">Centros</span>
           <span v-if="isCentersActive" class="nav-active-dot"></span>
@@ -128,6 +128,7 @@ async function handleLogout() {
           to="/admin/approval"
           class="nav-item"
           active-class="active"
+          title="Gestión de Usuarios"
         >
           <Users :size="18" />
           <span class="flex-1">Usuarios</span>
@@ -139,6 +140,7 @@ async function handleLogout() {
         <button
           class="nav-item"
           :class="{ active: false }"
+          title="Nueva Prueba"
           @click="router.push('/dashboard?tab=form')"
         >
           <PlusCircle :size="18" />
@@ -148,15 +150,23 @@ async function handleLogout() {
         <button
           class="nav-item"
           :class="{ active: false }"
+          title="Estadísticas"
           @click="router.push('/dashboard?tab=statistics')"
         >
           <LayoutDashboard :size="18" />
           <span>Estadísticas</span>
         </button>
 
+        <button class="nav-item active" title="Centros">
+          <School :size="18" />
+          <span class="flex-1">Alumnado</span>
+          <span class="nav-active-dot"></span>
+        </button>
+
         <button
           class="nav-item"
           :class="{ active: false }"
+          title="Catálogo de Pruebas"
           @click="router.push('/dashboard?tab=catalog')"
         >
           <Layers :size="18" />
@@ -166,6 +176,7 @@ async function handleLogout() {
         <button
           class="nav-item"
           :class="{ active: false }"
+          title="Registro en Aula"
           @click="router.push('/dashboard?tab=bulk-entry')"
         >
           <Edit3 :size="18" />
@@ -175,6 +186,7 @@ async function handleLogout() {
         <button
           class="nav-item"
           :class="{ active: false }"
+          title="Biblioteca de Libros"
           @click="router.push('/dashboard?tab=books')"
         >
           <BookOpen :size="18" />
@@ -184,6 +196,7 @@ async function handleLogout() {
         <button
           class="nav-item"
           :class="{ active: false }"
+          title="Informes y Exportación"
           @click="router.push('/dashboard?tab=reports')"
         >
           <BarChart3 :size="18" />
@@ -347,6 +360,7 @@ async function handleLogout() {
   align-items: center;
   gap: 0.75rem;
   padding: 0.65rem 0.85rem;
+  min-height: var(--touch-target-min, 44px);
   border-radius: var(--radius-md);
   font-size: 0.85rem;
   font-weight: 500;
@@ -450,6 +464,7 @@ async function handleLogout() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-height: var(--touch-target-min, 44px);
   background: none;
   border: none;
   cursor: pointer;
@@ -638,6 +653,7 @@ async function handleLogout() {
 .logout-btn {
   width: 100%;
   padding: 0.75rem 1rem;
+  min-height: var(--touch-target-min, 44px);
   background-color: transparent;
   color: var(--surface-container-lowest);
   border: none;
@@ -659,7 +675,8 @@ async function handleLogout() {
   background-color: rgba(220, 38, 38, 0.2);
 }
 
-@media (max-width: 1024px) {
+/* Rail de iconos en tableta (< 1280px - FE-13 Escenario 1) */
+@media (max-width: 1279px) {
   .stitch-sidebar {
     width: 72px;
     padding: 1rem 0.5rem;
@@ -699,6 +716,46 @@ async function handleLogout() {
     left: 75px;
     width: 280px;
     bottom: 75px;
+  }
+}
+
+/* Modo móvil (< 768px - FE-13 Escenario 5) */
+@media (max-width: 767px) {
+  .stitch-sidebar {
+    width: 100%;
+    position: relative;
+    padding: 0.75rem 1rem;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .sidebar-top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand-header {
+    border-bottom: none;
+    padding: 0;
+  }
+
+  .brand-text {
+    display: flex;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    padding-top: 0;
+    gap: 0.5rem;
+  }
+
+  .nav-item span {
+    display: inline;
+  }
+
+  .sidebar-bottom {
+    display: none;
   }
 }
 </style>

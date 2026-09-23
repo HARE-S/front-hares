@@ -80,14 +80,14 @@
     />
 
     <!-- SECTION 3: Analytics Section (8/4 Split Grid) -->
-    <section aria-label="Análisis de Rendimiento" class="analytics-split-grid">
+    <section aria-label="Análisis de Rendimiento" class="analytics-split-grid grid grid-cols-1 lg:grid-cols-12 gap-6">
       <!-- Main Analytical Chart: Fluidez Lectora PPM (8 cols) -->
-      <div class="grid-col-chart">
+      <div class="grid-col-chart lg:col-span-8">
         <FluencyChart :course="selectedCourse" />
       </div>
 
       <!-- Right Side: Distribución de Niveles (4 cols) -->
-      <div class="grid-col-distribution">
+      <div class="grid-col-distribution lg:col-span-4">
         <LevelsDistribution :course="selectedCourse" @open-intervention="handleOpenIntervention" />
       </div>
     </section>
