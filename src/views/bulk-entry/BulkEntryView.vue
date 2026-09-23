@@ -17,6 +17,7 @@ import {
 } from 'lucide-vue-next';
 import { getTests } from '../../services/testsService';
 import { registerBatchResults } from '../../services/resultsService';
+import { getCenters, getCenterSections, getSectionStudents } from '../../services/directoryService';
 import {
   calculatePPM,
   calculateVef,
@@ -34,15 +35,14 @@ const props = defineProps({
 
 const emit = defineEmits(['view-history']);
 
-// Lista de secciones disponibles
-const availableSections = ref([
+// Fallback para pruebas unitarias / entorno offline
+const fallbackSections = [
   { id: 'sec-1', name: '1º Primaria - Aula A (Tutoría)', grade: '1º Primaria' },
   { id: 'sec-2', name: '1º Primaria - Aula B', grade: '1º Primaria' },
   { id: 'sec-3', name: '2º Primaria - Aula A', grade: '2º Primaria' }
-]);
+];
 
-// Lista de alumnos de la sección seleccionada
-const studentsBySection = {
+const fallbackStudentsBySection = {
   'sec-1': [
     { id: '1', name: 'Lucas Méndez Ruiz', initialBand: 'Avanzado' },
     { id: '2', name: 'Sofía Navarro Ortiz', initialBand: 'Requiere apoyo' },
@@ -66,6 +66,9 @@ const studentsBySection = {
   ]
 };
 
+// Lista de secciones disponibles
+const availableSections = ref([...fallbackSections]);
+
 // Estado del formulario de sesión
 const selectedSectionId = ref('sec-1');
 const selectedTestId = ref('');
@@ -74,6 +77,10 @@ const testDate = ref(new Date().toISOString().split('T')[0]);
 // Catálogo de pruebas
 const testsList = ref([]);
 const isLoadingTests = ref(false);
+const isLoadingStudents = ref(false);
+
+// Alumnos activos según la sección elegida
+const currentStudents = ref([...fallbackStudentsBySection['sec-1']]);
 
 function createInitialGridData(students) {
   const initial = {};
@@ -91,7 +98,7 @@ function createInitialGridData(students) {
 
 // Rejilla de alumnos: Map de datos por id de alumno
 // { [studentId]: { time: '', successes: '', mistakes: '', absent: false, error: '' } }
-const gridData = ref(createInitialGridData(studentsBySection['sec-1']));
+const gridData = ref(createInitialGridData(currentStudents.value));
 
 // Feedback y estados
 const feedbackSummary = ref(null);
@@ -102,9 +109,14 @@ const isSaving = ref(false);
 async function loadTestsCatalog() {
   isLoadingTests.value = true;
   try {
-    const list = await getTests();
-    if (Array.isArray(list) && list.length > 0) {
-      testsList.value = list;
+    const res = await getTests({ limit: 100 });
+    const list = res?.items || (Array.isArray(res) ? res : []);
+    if (list.length > 0) {
+      testsList.value = list.map(t => ({
+        ...t,
+        title: t.name || t.title,
+        totalWords: t.words || t.totalWords || 108
+      }));
     } else {
       testsList.value = [
         { id: '1IF', code: '1IF', title: 'La Vaca', totalWords: 108, course: 1, type: 'Informativo' },
@@ -128,17 +140,77 @@ async function loadTestsCatalog() {
   }
 }
 
-// Alumnos activos según la sección elegida
-const currentStudents = computed(() => {
-  return studentsBySection[selectedSectionId.value] || [];
-});
+// Cargar secciones desde backend
+async function loadSections() {
+  try {
+    const centers = await getCenters();
+    if (Array.isArray(centers) && centers.length > 0) {
+      const allSections = [];
+      for (const center of centers) {
+        try {
+          const sections = await getCenterSections(center.id);
+          if (Array.isArray(sections)) {
+            for (const sec of sections) {
+              allSections.push({
+                ...sec,
+                centerName: center.name,
+                displayName: centers.length > 1 ? `${center.name} - ${sec.name}` : sec.name
+              });
+            }
+          }
+        } catch (e) {
+          console.warn(`Error al cargar secciones del centro ${center.id}:`, e);
+        }
+      }
+      if (allSections.length > 0) {
+        availableSections.value = allSections;
+        selectedSectionId.value = allSections[0].id;
+        await loadStudentsForSection(allSections[0].id);
+      }
+    }
+  } catch (err) {
+    console.warn('Usando secciones por defecto debido a error al conectar con backend:', err);
+  }
+}
+
+// Cargar alumnos de una sección
+async function loadStudentsForSection(sectionId) {
+  if (!sectionId) return;
+  isLoadingStudents.value = true;
+  try {
+    if (String(sectionId).startsWith('sec-') && fallbackStudentsBySection[sectionId]) {
+      currentStudents.value = fallbackStudentsBySection[sectionId];
+      initGrid();
+      return;
+    }
+    const students = await getSectionStudents(sectionId);
+    if (Array.isArray(students) && students.length > 0) {
+      currentStudents.value = students;
+    } else if (fallbackStudentsBySection[sectionId]) {
+      currentStudents.value = fallbackStudentsBySection[sectionId];
+    } else {
+      currentStudents.value = [];
+    }
+    initGrid();
+  } catch (err) {
+    console.warn(`Error al cargar alumnos para sección ${sectionId}:`, err);
+    if (fallbackStudentsBySection[sectionId]) {
+      currentStudents.value = fallbackStudentsBySection[sectionId];
+    } else {
+      currentStudents.value = [];
+    }
+    initGrid();
+  } finally {
+    isLoadingStudents.value = false;
+  }
+}
 
 // Prueba seleccionada actualmente
 const currentTest = computed(() => {
   return testsList.value.find(t => String(t.id) === String(selectedTestId.value)) || null;
 });
 
-const testWords = computed(() => currentTest.value?.totalWords || 108);
+const testWords = computed(() => currentTest.value?.totalWords || currentTest.value?.words || 108);
 
 // Inicializar la rejilla cuando cambia de sección
 function initGrid() {
@@ -169,12 +241,15 @@ function focusFirstInput() {
   }
 }
 
-watch(selectedSectionId, () => {
-  initGrid();
+watch(selectedSectionId, (newSecId) => {
+  loadStudentsForSection(newSecId);
 });
 
 onMounted(async () => {
-  await loadTestsCatalog();
+  await Promise.all([
+    loadTestsCatalog(),
+    loadSections()
+  ]);
   initGrid();
 });
 
@@ -431,7 +506,7 @@ async function handleSaveBatch() {
           </label>
           <select id="section-select" v-model="selectedSectionId" class="select-input">
             <option v-for="sec in availableSections" :key="sec.id" :value="sec.id">
-              {{ sec.name }}
+              {{ sec.displayName || sec.name }}
             </option>
           </select>
         </div>

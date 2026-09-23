@@ -6,6 +6,18 @@ const props = defineProps({
   course: {
     type: String,
     default: '2024-25'
+  },
+  realKpi: {
+    type: Object,
+    default: null
+  },
+  realStudents: {
+    type: Array,
+    default: null
+  },
+  realSupportStudents: {
+    type: Array,
+    default: null
   }
 });
 
@@ -22,21 +34,21 @@ const courseDataMap = {
   '2024-25': {
     baremo: 'Baremo Oficial 2024',
     speed: {
-      current: 115,
+      current: 100,
       unit: 'PPM',
       delta: '+8% vs. Corte Inicial',
       target: 125,
       percentage: 92
     },
     students: {
-      evaluated: 24,
-      total: 26,
+      evaluated: 10,
+      total: 12,
       percentage: 92,
       pendingCount: 2,
       pendingPeriod: 'Corte A'
     },
     books: {
-      count: 68,
+      count: 94,
       unit: 'títulos',
       delta: '+14 este mes',
       averagePerStudent: 2.6
@@ -140,7 +152,16 @@ watch(() => props.course, (newCourse) => {
   console.log('📊 KpiOverview: Curso cambió a', newCourse);
 });
 
-const kpiData = computed(() => courseDataMap[currentCourse.value] || courseDataMap['2024-25']);
+const kpiData = computed(() => {
+  if (props.realKpi) {
+    return {
+      baremo: courseDataMap[currentCourse.value]?.baremo || 'Baremo Oficial 2024',
+      ...courseDataMap[currentCourse.value],
+      ...props.realKpi
+    };
+  }
+  return courseDataMap[currentCourse.value] || courseDataMap['2024-25'];
+});
 
 const studentsByeCourse = {
   '2024-25': [
@@ -185,14 +206,24 @@ const studentsByeCourse = {
   ]
 };
 
-const allStudents = computed(() => studentsByeCourse[currentCourse.value] || studentsByeCourse['2024-25']);
+const allStudents = computed(() => {
+  if (props.realStudents && props.realStudents.length > 0) {
+    return props.realStudents;
+  }
+  return studentsByeCourse[currentCourse.value] || studentsByeCourse['2024-25'];
+});
 
-const studentsNeedingSupport = ref([
-  { id: 1, center: 'Botusbaru', section: '1CARMED1', expediente: '64019', name: 'Mateo Barrenechea', ppm: 82, errors: '8%' },
-  { id: 2, center: 'Botusbaru', section: '1CARMED1', expediente: '56542', name: 'Paula Rodríguez López', ppm: 98, errors: '6.5%' },
-  { id: 3, center: 'Botusbaru', section: '1CARMED1', expediente: '63934', name: 'Juan Carlos Pérez', ppm: 75, errors: '9%' },
-  { id: 10, center: 'Centro 2', section: '2CARMED1', expediente: '61234', name: 'Elena Ruiz', ppm: 80, errors: '10%' }
-]);
+const studentsNeedingSupport = computed(() => {
+  if (props.realSupportStudents && props.realSupportStudents.length > 0) {
+    return props.realSupportStudents;
+  }
+  return [
+    { id: 1, center: 'Botusbaru', section: '1CARMED1', expediente: '64019', name: 'Mateo Barrenechea', ppm: 82, errors: '8%' },
+    { id: 2, center: 'Botusbaru', section: '1CARMED1', expediente: '56542', name: 'Paula Rodríguez López', ppm: 98, errors: '6.5%' },
+    { id: 3, center: 'Botusbaru', section: '1CARMED1', expediente: '63934', name: 'Juan Carlos Pérez', ppm: 75, errors: '9%' },
+    { id: 10, center: 'Centro 2', section: '2CARMED1', expediente: '61234', name: 'Elena Ruiz', ppm: 80, errors: '10%' }
+  ];
+});
 
 const studentTests = {
   1: [

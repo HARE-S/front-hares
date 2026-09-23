@@ -389,14 +389,17 @@ export async function getReadings(params = {}) {
   try {
     const res = await request(`/readings${queryString}`, { method: 'GET' });
     if (res && res.items) return res;
+    if (Array.isArray(res)) return { items: res, total: res.length };
   } catch (err) {
-    // Fallback local
+    if (err.status !== 0) {
+      console.warn('Error al consultar lecturas del backend:', err);
+    }
   }
 
   let items = [...inMemoryReadings];
 
   if (params.student_id) {
-    items = items.filter(r => r.student_id === Number(params.student_id));
+    items = items.filter(r => String(r.student_id) === String(params.student_id));
   }
 
   if (params.status) {
@@ -410,7 +413,7 @@ export async function getReadings(params = {}) {
 }
 
 /**
- * Asigna un libro a un alumno (FE-21).
+ * Asigna un libro a un alumno (FE-21 / BE-23).
  */
 export async function assignBook(readingData) {
   if (!readingData.student_id) {
@@ -438,37 +441,44 @@ export async function assignBook(readingData) {
     throw err;
   }
 
+  const payload = {
+    book_id: String(readingData.book_id),
+    start_date: readingData.start_date,
+    end_date: readingData.end_date || null
+  };
+
   try {
-    return await request('/readings', {
+    return await request(`/students/${readingData.student_id}/books`, {
       method: 'POST',
-      body: JSON.stringify(readingData)
+      body: JSON.stringify(payload)
     });
   } catch (error) {
-    if (error.status === 422) {
-      const err = new Error(error.data?.error || 'La fecha de fin no puede ser anterior a la de inicio.');
-      err.status = 422;
-      throw err;
+    if (error.status === 422 || error.status === 409 || error.status === 400 || error.status === 403 || error.status === 404) {
+      throw error;
     }
-    // Fallback local
-    const book = inMemoryBooks.find(b => b.id === Number(readingData.book_id));
-    const newReading = {
-      id: nextReadingId++,
-      student_id: Number(readingData.student_id),
-      student_name: readingData.student_name || 'Alumno',
-      book_id: Number(readingData.book_id),
-      book_title: book ? book.title : 'Libro',
-      book_level: book ? book.level : '0',
-      start_date: readingData.start_date,
-      end_date: readingData.end_date || null,
-      status: readingData.end_date ? 'finalizada' : 'en_curso'
-    };
-    inMemoryReadings.unshift(newReading);
-    return newReading;
+    // Fallback local solo en modo offline / pruebas unitarias sin backend (status 0)
+    if (error.status === 0) {
+      const book = inMemoryBooks.find(b => String(b.id) === String(readingData.book_id));
+      const newReading = {
+        id: nextReadingId++,
+        student_id: Number(readingData.student_id),
+        student_name: readingData.student_name || 'Alumno',
+        book_id: Number(readingData.book_id),
+        book_title: book ? book.title : 'Libro',
+        book_level: book ? book.level : '0',
+        start_date: readingData.start_date,
+        end_date: readingData.end_date || null,
+        status: readingData.end_date ? 'finalizada' : 'en_curso'
+      };
+      inMemoryReadings.unshift(newReading);
+      return newReading;
+    }
+    throw error;
   }
 }
 
 /**
- * Cierra una lectura asignando la fecha de fin (FE-22).
+ * Cierra una lectura asignando la fecha de fin (FE-22 / BE-24).
  */
 export async function closeReading(readingId, { end_date }) {
   if (!end_date) {
@@ -478,57 +488,65 @@ export async function closeReading(readingId, { end_date }) {
   }
 
   try {
-    return await request(`/readings/${readingId}/close`, {
-      method: 'PUT',
+    return await request(`/readings/${readingId}`, {
+      method: 'PATCH',
       body: JSON.stringify({ end_date })
     });
   } catch (error) {
-    if (error.status === 422) {
-      const err = new Error(error.data?.error || 'La fecha de fin no puede ser anterior a la de inicio.');
-      err.status = 422;
-      throw err;
+    if (error.status === 422 || error.status === 404 || error.status === 403) {
+      throw error;
     }
 
-    // Fallback local con validación de coherencia (Escenario 3)
-    const index = inMemoryReadings.findIndex(r => r.id === Number(readingId));
-    if (index === -1) {
-      const notFound = new Error('Lectura no encontrada.');
-      notFound.status = 404;
-      throw notFound;
-    }
+    if (error.status === 0) {
+      const index = inMemoryReadings.findIndex(r => String(r.id) === String(readingId));
+      if (index === -1) {
+        const notFound = new Error('Lectura no encontrada.');
+        notFound.status = 404;
+        throw notFound;
+      }
 
-    const reading = inMemoryReadings[index];
-    if (end_date < reading.start_date) {
-      const err = new Error('La fecha de fin no puede ser anterior a la de inicio.');
-      err.status = 422;
-      throw err;
-    }
+      const reading = inMemoryReadings[index];
+      if (end_date < reading.start_date) {
+        const err = new Error('La fecha de fin no puede ser anterior a la de inicio.');
+        err.status = 422;
+        throw err;
+      }
 
-    inMemoryReadings[index] = {
-      ...reading,
-      end_date,
-      status: 'finalizada'
-    };
-    return inMemoryReadings[index];
+      inMemoryReadings[index] = {
+        ...reading,
+        end_date,
+        status: 'finalizada'
+      };
+      return inMemoryReadings[index];
+    }
+    throw error;
   }
 }
 
 /**
- * Reabre una lectura finalizada retirando la fecha de fin (FE-22 - Escenario 4).
+ * Reabre una lectura finalizada retirando la fecha de fin (FE-22 / BE-24).
  */
 export async function reopenReading(readingId) {
   try {
-    return await request(`/readings/${readingId}/reopen`, { method: 'PUT' });
+    return await request(`/readings/${readingId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ end_date: null })
+    });
   } catch (error) {
-    const index = inMemoryReadings.findIndex(r => r.id === Number(readingId));
-    if (index !== -1) {
-      inMemoryReadings[index] = {
-        ...inMemoryReadings[index],
-        end_date: null,
-        status: 'en_curso'
-      };
-      return inMemoryReadings[index];
+    if (error.status === 404 || error.status === 403) {
+      throw error;
     }
-    return null;
+    if (error.status === 0) {
+      const index = inMemoryReadings.findIndex(r => String(r.id) === String(readingId));
+      if (index !== -1) {
+        inMemoryReadings[index] = {
+          ...inMemoryReadings[index],
+          end_date: null,
+          status: 'en_curso'
+        };
+        return inMemoryReadings[index];
+      }
+    }
+    throw error;
   }
 }

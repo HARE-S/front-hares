@@ -4,8 +4,8 @@ import router from './router';
 import './assets/main.css';
 
 async function startApp() {
-  // Esperar a que MSW esté listo en desarrollo
-  if (import.meta.env.DEV) {
+  // Solo activar MSW en desarrollo si se solicita explícitamente vía VITE_USE_MOCKS=true
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS === 'true') {
     const { mswReady } = await import('./tests/mswSetup');
     await mswReady;
   }

@@ -45,8 +45,8 @@ function validateResults(arr) {
   return arr.filter(r =>
     r.testDate && String(r.testDate).trim() !== '' &&
     r.testName && String(r.testName).trim() !== '' &&
-    r.ppm !== undefined && Number(r.ppm) > 0 &&
-    r.vef !== undefined && Number(r.vef) > 0 &&
+    r.ppm !== undefined && Number(r.ppm) >= 0 &&
+    r.vef !== undefined && Number(r.vef) >= 0 &&
     r.studentId && String(r.studentId).trim() !== ''
   );
 }
@@ -263,40 +263,61 @@ export async function registerSingleResult({
     : Math.round((numSuccesses / 20) * 100);
 
   const payload = {
-    student_id: String(studentId),
     test_id: String(testId),
-    section_id: sectionId ? String(sectionId) : undefined,
+    section_id: String(sectionId),
     test_date: testDate,
     time: numTime,
     successes: numSuccesses,
-    mistakes: numMistakes,
-    test_words: words,
-    ppm,
-    vef,
-    band,
-    comprehension_percentage: finalComprehensionPercentage,
-    notes
+    mistakes: numMistakes
   };
 
   try {
-    const res = await request('/results', {
+    const res = await request(`/students/${studentId}/results`, {
       method: 'POST',
       body: JSON.stringify(payload)
     });
+
+    // Normalizar respuesta del backend
+    if (res) {
+      return {
+        ...res,
+        id: res.id,
+        studentId: res.student_id || studentId,
+        studentName: studentName,
+        testId: res.test_id || testId,
+        testName: testName,
+        sectionId: res.section_id || sectionId,
+        testDate: res.test_date || testDate,
+        time: res.time != null ? res.time : numTime,
+        successes: res.successes != null ? res.successes : numSuccesses,
+        mistakes: res.mistakes != null ? res.mistakes : numMistakes,
+        ppm: res.ppm != null ? res.ppm : ppm,
+        vef: res.vef != null ? res.vef : vef,
+        band: res.band || band,
+        comprehensionPercentage: res.comprehension != null ? res.comprehension : finalComprehensionPercentage
+      };
+    }
     return res;
   } catch (err) {
     if (err.status === 409) {
-      const conflictErr = new Error('Ya existe un registro para este alumno con la misma prueba y fecha.');
+      const conflictErr = new Error(err.data?.message || err.message || 'Ya existe un registro para este alumno con la misma prueba y fecha.');
       conflictErr.status = 409;
       throw conflictErr;
     }
     if (err.status === 403) {
-      const forbiddenErr = new Error('No tienes permiso sobre la sección de este alumno para registrar resultados.');
+      const forbiddenErr = new Error(err.data?.message || err.message || 'No tienes permiso sobre la sección de este alumno para registrar resultados.');
       forbiddenErr.status = 403;
       throw forbiddenErr;
     }
-    // Fallback a datos locales si el API no está disponible (404, conexión fallida, etc.)
-    if (err.status === 0 || err.status === 404 || err.message?.includes('No se pudo conectar')) {
+    if (err.status === 400 || err.status === 422) {
+      const valMsg = err.data?.message || err.data?.error || err.message || 'Error de validación en los datos de la prueba.';
+      const validationErr = new Error(valMsg);
+      validationErr.status = err.status;
+      throw validationErr;
+    }
+
+    // Solo fallback local en entorno offline / test unitario sin backend (status 0)
+    if (err.status === 0) {
       const duplicate = inMemoryResults.find(
         r => String(r.studentId) === String(studentId) &&
              String(r.testId) === String(testId) &&
@@ -306,25 +327,6 @@ export async function registerSingleResult({
         const conflictErr = new Error('Ya existe un registro para este alumno con la misma prueba y fecha.');
         conflictErr.status = 409;
         throw conflictErr;
-      }
-
-      // Validar que los datos sean válidos antes de guardar
-      if (!testName || !testDate || !ppm || !vef) {
-        const validationErr = new Error('Datos inválidos: faltan campos requeridos para guardar la prueba');
-        validationErr.status = 400;
-        throw validationErr;
-      }
-
-      // Verificar que no sea un duplicado
-      const testIdNorm = String(testId || testCode || '').trim().toUpperCase();
-      const hasDuplicate = inMemoryResults.some(r =>
-        String(r.studentId) === String(studentId) &&
-        String(r.testId || r.testCode || '').trim().toUpperCase() === testIdNorm
-      );
-      if (hasDuplicate) {
-        const duplicateErr = new Error(`La prueba ${testName} ya fue registrada para este alumno`);
-        duplicateErr.status = 409;
-        throw duplicateErr;
       }
 
       const created = {
@@ -347,7 +349,7 @@ export async function registerSingleResult({
         createdAt: new Date().toISOString()
       };
 
-      console.log('[registerSingleResult] GUARDANDO EN MEMORIA:', created);
+      console.log('[registerSingleResult] Fallback en memoria (modo offline):', created);
       inMemoryResults.unshift(created);
       persistResults();
       return created;
@@ -426,8 +428,13 @@ export async function registerBatchResults({
       return res;
     }
   } catch (err) {
-    // Si falla la red o el backend devuelve error de conexión, usamos fallback local pedagógico
-    console.warn('Backend /results/batch no disponible o error, usando fallback local pedagógico:', err);
+    if (err.status !== 0) {
+      const msg = err.data?.message || err.data?.error || err.message || 'Error al registrar resultados en lote';
+      const errorToThrow = new Error(msg);
+      errorToThrow.status = err.status;
+      throw errorToThrow;
+    }
+    console.warn('Backend /results/batch no disponible (modo offline), usando fallback local:', err);
   }
 
   // Fallback pedagógico local

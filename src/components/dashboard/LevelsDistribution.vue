@@ -105,6 +105,10 @@ const props = defineProps({
   course: {
     type: String,
     default: '2024-25'
+  },
+  realLevels: {
+    type: Object,
+    default: null
   }
 });
 
@@ -124,7 +128,7 @@ watch(() => props.course, (newCourse) => {
   console.log('📊 LevelsDistribution: Curso cambió a', newCourse);
 });
 
-const levels = computed(() => courseDataMap[currentCourse.value] || courseDataMap['2024-25']);
+const levels = computed(() => props.realLevels || courseDataMap[currentCourse.value] || courseDataMap['2024-25']);
 
 const totalStudents = computed(() => {
   const l = levels.value;

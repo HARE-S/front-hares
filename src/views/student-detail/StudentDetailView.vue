@@ -25,15 +25,31 @@ const currentSections = computed(() => studentData.value?.current_sections || []
 const historicalSections = computed(() => studentData.value?.historical_sections || []);
 const results = computed(() => {
   const allResults = studentData.value?.results || [];
-  // Filtrar resultados inválidos (sin fecha, sin nombre, sin PPM o VEF)
-  return allResults.filter(r =>
-    r.testDate && String(r.testDate).trim() !== '' &&
-    r.testName && String(r.testName).trim() !== '' &&
-    r.ppm !== undefined && Number(r.ppm) > 0 &&
-    r.vef !== undefined && Number(r.vef) > 0
-  );
+  return allResults
+    .map(r => ({
+      ...r,
+      test_date: r.test_date || r.testDate || '',
+      test_name: r.test_name || r.testName || (r.test_code ? `Prueba ${r.test_code}` : (r.testCode ? `Prueba ${r.testCode}` : 'Prueba')),
+      ppm: r.ppm != null ? Number(r.ppm) : null,
+      vef: r.vef != null ? Number(r.vef) : null,
+      comprehension: r.comprehension != null ? Number(r.comprehension) : (r.comprehensionPercentage != null ? Number(r.comprehensionPercentage) : null)
+    }))
+    .filter(r =>
+      r.test_date && String(r.test_date).trim() !== '' &&
+      r.ppm !== null && r.ppm > 0
+    );
 });
-const readings = computed(() => studentData.value?.readings || []);
+const readings = computed(() => {
+  const allReadings = studentData.value?.readings || [];
+  return allReadings.map(r => ({
+    ...r,
+    book_title: r.book_title || r.title || 'Libro',
+    level: r.level || r.book_level || '—',
+    start_date: r.start_date || r.startDate || '',
+    end_date: r.end_date || r.endDate || null,
+    status: r.status || (r.end_date ? 'finalizada' : 'en_curso')
+  }));
+});
 
 const currentSectionNames = computed(() => currentSections.value.map(section => section.name));
 const firstSectionId = computed(() => currentSections.value[0]?.id || null);

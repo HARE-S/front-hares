@@ -25,15 +25,111 @@ export const routes = [
   },
   {
     path: '/dashboard',
-    name: 'dashboard',
-    component: () => import('@/layout/DashboardLayout.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'dashboard',
+        component: () => import('@/views/dashboard/DashboardView.vue'),
+        beforeEnter: (to) => {
+          if (to.query.tab === 'bulk-entry') return { path: '/classroom' };
+          if (to.query.tab === 'catalog') return { path: '/resources', query: { tab: 'tests' } };
+          if (to.query.tab === 'books') return { path: '/resources', query: { tab: 'books' } };
+          if (to.query.tab === 'reports') return { path: '/reports' };
+          if (to.query.tab === 'import') return { path: '/import' };
+          if (to.query.tab === 'section-detail') return { path: '/sections/sec-1' };
+        }
+      }
+    ]
+  },
+  {
+    path: '/classroom',
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'classroom',
+        alias: ['/bulk-entry'],
+        component: () => import('@/views/bulk-entry/BulkEntryView.vue')
+      }
+    ]
+  },
+  {
+    path: '/resources',
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'resources',
+        alias: ['/tests-catalog', '/books'],
+        component: () => import('@/views/resources/ResourcesView.vue')
+      }
+    ]
+  },
+  {
+    path: '/sections',
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: ':sectionId',
+        name: 'section-detail',
+        component: () => import('@/views/section-detail/SectionDetailView.vue'),
+        props: true
+      }
+    ]
+  },
+  {
+    path: '/reports',
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'reports',
+        component: () => import('@/views/reports/ReportsView.vue')
+      }
+    ]
   },
   {
     path: '/admin/approval',
-    name: 'user-approval',
-    component: () => import('@/views/admin/UserApprovalView.vue'),
-    meta: { requiresAuth: true, requiresRole: 'superadmin' }
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true, requiresRole: ['superadmin'] },
+    children: [
+      {
+        path: '',
+        name: 'user-approval',
+        component: () => import('@/views/admin/UserApprovalView.vue')
+      }
+    ]
+  },
+  {
+    path: '/admin/users',
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true, requiresRole: ['admin', 'superadmin'] },
+    children: [
+      {
+        path: '',
+        name: 'users-admin',
+        component: () => import('@/views/users-admin/UsersAdminView.vue')
+      }
+    ]
+  },
+  {
+    path: '/import',
+    component: () => import('@/layout/AppShell.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'import',
+        alias: ['/admin/import'],
+        component: () => import('@/views/import/ImportView.vue')
+      }
+    ]
   },
   /**
    * FE-25 (Marlen, 19/09/2026): rutas de "Alumnado" (centros → secciones →
@@ -52,7 +148,7 @@ export const routes = [
       {
         path: '',
         name: 'centers',
-        component: () => import('@/views/centers/CentersListView.vue')
+        redirect: '/students'
       },
       {
         path: ':centerId',
@@ -132,6 +228,19 @@ async function guard(to) {
   if (auth.isPending.value && to.name !== 'pending') {
     console.log(`⏳ Usuario pendiente de aprobación`);
     return { name: 'pending' };
+  }
+
+  // Comprobar rol requerido (admin / superadmin) para herramientas administrativas
+  if (to.meta.requiresRole) {
+    const userRole = auth.user.value?.role;
+    const allowedRoles = Array.isArray(to.meta.requiresRole)
+      ? to.meta.requiresRole
+      : [to.meta.requiresRole];
+
+    if (!allowedRoles.includes(userRole)) {
+      console.warn(`⛔ Acceso denegado a ${to.path} para el rol ${userRole}`);
+      return { name: 'dashboard' };
+    }
   }
 
   console.log(`✅ Ruta protegida permitida`);

@@ -22,6 +22,8 @@ import {
   getStudentReport,
   getSectionGroupReport
 } from '../../services/reportsService';
+import { getCenters, getCenterSections } from '../../services/directoryService';
+import { getStudents } from '../../services/studentService';
 import { _getInMemoryResults } from '../../services/resultsService';
 import { formatDate, formatPPM, formatVef } from '../../utils/format';
 
@@ -35,22 +37,25 @@ const props = defineProps({
 // Pestaña activa dentro de la vista de Informes: 'group' | 'student' | 'export'
 const activeReportTab = ref('group');
 
-// Listado de secciones disponibles
-const sectionsList = ref([
+// Listado de secciones disponibles (fallback para tests y modo offline)
+const fallbackSections = [
   { id: 'sec-1', name: '1º Primaria - Aula A (Tutoría)', grade: '1º Primaria' },
   { id: 'sec-2', name: '1º Primaria - Aula B', grade: '1º Primaria' },
   { id: 'sec-3', name: '2º Primaria - Aula A', grade: '2º Primaria' },
   { id: 'sec-vacia', name: '3º Primaria - Aula A (Sin datos)', grade: '3º Primaria' }
-]);
+];
 
-// Listado de alumnos disponibles para informe individual
-const studentsList = ref([
+// Listado de alumnos disponibles (fallback)
+const fallbackStudents = [
   { id: '1', name: 'Lucas Méndez Ruiz', sectionId: 'sec-1' },
   { id: '2', name: 'Sofía Navarro Ortiz', sectionId: 'sec-1' },
   { id: '3', name: 'Mateo Barrenechea', sectionId: 'sec-1' },
   { id: '4', name: 'Aitana Zubizarreta', sectionId: 'sec-1' },
   { id: '7', name: 'Alejandro López', sectionId: 'sec-1' }
-]);
+];
+
+const sectionsList = ref([...fallbackSections]);
+const studentsList = ref([...fallbackStudents]);
 
 // --- ESTADO INFORME DE GRUPO (FE-38) ---
 const selectedGroupSectionId = ref('sec-1');
@@ -153,7 +158,50 @@ function handlePrint() {
   }
 }
 
-onMounted(() => {
+async function loadDirectoryData() {
+  try {
+    const centers = await getCenters();
+    if (Array.isArray(centers) && centers.length > 0) {
+      const allSections = [];
+      for (const center of centers) {
+        try {
+          const sections = await getCenterSections(center.id);
+          if (Array.isArray(sections)) {
+            for (const sec of sections) {
+              allSections.push({
+                ...sec,
+                centerName: center.name,
+                displayName: centers.length > 1 ? `${center.name} - ${sec.name}` : sec.name
+              });
+            }
+          }
+        } catch (e) {
+          console.warn(`Error al cargar secciones del centro ${center.id}:`, e);
+        }
+      }
+      if (allSections.length > 0) {
+        sectionsList.value = allSections;
+        selectedGroupSectionId.value = allSections[0].id;
+        exportSectionId.value = allSections[0].id;
+      }
+    }
+  } catch (err) {
+    console.warn('Usando secciones por defecto en ReportsView:', err);
+  }
+
+  try {
+    const students = await getStudents();
+    if (Array.isArray(students) && students.length > 0) {
+      studentsList.value = students;
+      selectedStudentId.value = students[0].id;
+    }
+  } catch (err) {
+    console.warn('Usando alumnos por defecto en ReportsView:', err);
+  }
+}
+
+onMounted(async () => {
+  await loadDirectoryData();
   loadGroupReport();
   loadStudentReport();
 });
@@ -215,7 +263,7 @@ onMounted(() => {
           <label for="group-section-select">Sección / Aula:</label>
           <select id="group-section-select" v-model="selectedGroupSectionId" class="form-select">
             <option v-for="sec in sectionsList" :key="sec.id" :value="sec.id">
-              {{ sec.name }}
+              {{ sec.displayName || sec.name }}
             </option>
           </select>
         </div>
@@ -535,7 +583,7 @@ onMounted(() => {
             <select id="exp-section" v-model="exportSectionId" class="form-select">
               <option value="">Todas las secciones asignadas</option>
               <option v-for="sec in sectionsList" :key="sec.id" :value="sec.id">
-                {{ sec.name }}
+                {{ sec.displayName || sec.name }}
               </option>
             </select>
           </div>

@@ -46,9 +46,16 @@ export async function uploadImport(file) {
   const body = new FormData();
   body.append('file', file);
 
+  const headers = {};
+  try {
+    const token = typeof localStorage !== 'undefined' ? (sessionStorage.getItem('access_token') || localStorage.getItem('access_token')) : null;
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+  } catch {}
+
   const res = await fetch('/api/v1/import/upload', {
     method: 'POST',
     body,
+    headers,
     credentials: 'include',
   });
 
@@ -85,8 +92,15 @@ export async function confirmImport(token) {
  * @returns {Promise<{ text: string, filename: string }>}
  */
 export async function downloadImportReport() {
+  const headers = {};
+  try {
+    const token = typeof localStorage !== 'undefined' ? (sessionStorage.getItem('access_token') || localStorage.getItem('access_token')) : null;
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+  } catch {}
+
   const res = await fetch('/api/v1/import/report', {
     method: 'GET',
+    headers,
     credentials: 'include',
   });
 

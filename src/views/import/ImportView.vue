@@ -43,7 +43,7 @@ const previewColumns = [
 ];
 
 function allowedExtensions() {
-  return preview.value?.allowed_extensions || ['.csv'];
+  return preview.value?.allowed_extensions || ['.csv', '.xlsx', '.xls'];
 }
 
 function maxBytes() {
@@ -58,7 +58,7 @@ const fileExtension = computed(() => {
 
 /* ——— Escenario 4 y 5 (FE-23): validación ANTES de subir ——— */
 function validateFile(file) {
-  if (!file) return 'Selecciona un fichero CSV para importar.';
+  if (!file) return 'Selecciona un fichero Excel o CSV para importar.';
 
   if (!allowedExtensions().includes(fileExtension.value)) {
     return `Extensión no permitida. Extensiones válidas: ${allowedExtensions().join(', ')}.`;
@@ -202,9 +202,9 @@ onMounted(() => {
   <div class="import-view">
     <div class="view-header">
       <div class="view-titles">
-        <h1 class="page-title">Importación del volcado de Alexia</h1>
+        <h1 class="page-title">Importación de Alumnado y Pruebas</h1>
         <p class="page-subtitle">
-          Sube el fichero de alumnado, previsualízalo y confirma. Los datos proceden de Alexia y se mantienen allí.
+          Sube el volcado de Alexia o la Tabla General de Lectura Eficaz (.xlsx / .csv), previsualízalo y confirma.
         </p>
       </div>
     </div>
@@ -247,23 +247,24 @@ onMounted(() => {
             Importación completada: {{ summary.students_created }} creados,
             {{ summary.students_updated }} actualizados,
             {{ summary.errors }} errores.
+            <strong v-if="summary.evaluations_created"> {{ summary.evaluations_created }} evaluaciones de pruebas registradas.</strong>
           </span>
         </div>
 
         <!-- Paso 1: selector de fichero -->
         <section class="flat-card import-step">
           <div class="flat-card-header">
-            <h2 class="step-title">1. Selecciona el fichero CSV</h2>
+            <h2 class="step-title">1. Selecciona el fichero Excel o CSV</h2>
           </div>
           <div class="step-body">
             <label class="file-picker" :class="{ 'file-picker--error': fileError }">
               <Upload :size="22" aria-hidden="true" />
               <span class="file-picker__text">
-                {{ selectedFile ? selectedFile.name : 'Pulsa para elegir el volcado de Alexia (.csv)' }}
+                {{ selectedFile ? selectedFile.name : 'Pulsa para elegir archivo Excel o CSV (Alexia o Tabla General de Pruebas)' }}
               </span>
               <input
                 type="file"
-                accept=".csv"
+                accept=".csv, .xlsx, .xls"
                 :disabled="uploading || confirming"
                 @change="onFileChange"
               />
@@ -291,7 +292,12 @@ onMounted(() => {
         <section v-if="stage === 'preview' || stage === 'confirming'" class="flat-card import-step">
           <div class="flat-card-header">
             <h2 class="step-title">2. Previsualización</h2>
-            <span class="badge">{{ preview?.total_rows }} filas · {{ preview?.errors }} errores</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <span v-if="preview?.meta?.type === 'lectura_eficaz'" class="badge" style="background: var(--primary-container, #e0f2fe); color: var(--primary, #006699);">
+                Tabla Lectura Eficaz ({{ preview.meta.students_count }} alumnos · {{ preview.meta.evaluations_count }} evaluaciones)
+              </span>
+              <span class="badge">{{ preview?.total_rows }} filas · {{ preview?.errors }} errores</span>
+            </div>
           </div>
           <div class="step-body">
             <p class="form-hint">

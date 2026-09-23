@@ -18,25 +18,10 @@ async function handleResendVerification() {
   resendLoading.value = true;
   resendMessage.value = '';
 
-  try {
-    const res = await fetch('/api/v1/auth/resend-verification', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: user.value.email })
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      resendMessage.value = '✅ Correo de verificación reenviado. Revisa tu bandeja.';
-    } else {
-      resendMessage.value = '❌ Error al reenviar. Intenta más tarde.';
-    }
-  } catch (err) {
-    resendMessage.value = '❌ Error de conexión.';
-  } finally {
+  setTimeout(() => {
+    resendMessage.value = 'ℹ️ Las activaciones son gestionadas por los administradores. Contacta con tu centro si requieres acceso urgente.';
     resendLoading.value = false;
-  }
+  }, 400);
 }
 </script>
 

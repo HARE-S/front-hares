@@ -6,6 +6,10 @@ const props = defineProps({
   course: {
     type: String,
     default: '2024-25'
+  },
+  realFluency: {
+    type: Object,
+    default: null
   }
 });
 
@@ -24,7 +28,7 @@ const courseDataMap = {
   '2021-22': { current: 98, badge: '98 PPM ★', diagnostic: '80%' }
 };
 
-const currentData = computed(() => courseDataMap[currentCourse.value] || courseDataMap['2024-25']);
+const currentData = computed(() => props.realFluency || courseDataMap[currentCourse.value] || courseDataMap['2024-25']);
 </script>
 
 <template>

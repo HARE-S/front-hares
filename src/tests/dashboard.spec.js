@@ -180,13 +180,15 @@ describe('Dashboard Docente de Fluidez Lectora (Stitch Design System)', () => {
       expect(wrapper.emitted('new-assessment')).toBeTruthy();
     });
 
-    it('muestra mensajes de feedback reactivos al interactuar con las acciones del dashboard', async () => {
+    it('ofrece el botón principal "+ Nueva Evaluación en Directo" y el acceso rápido a Importar Excel', () => {
       const wrapper = mount(DashboardView);
-      const assignBtn = wrapper.findAll('.btn-dashboard--secondary')[0];
+      const primaryBtn = wrapper.find('.btn-dashboard--primary');
+      expect(primaryBtn.exists()).toBe(true);
+      expect(primaryBtn.text()).toContain('+ Nueva Evaluación en Directo');
 
-      await assignBtn.trigger('click');
-      expect(wrapper.find('.feedback-banner').exists()).toBe(true);
-      expect(wrapper.text()).toContain('Módulo de asignación de libros');
+      const secondaryBtns = wrapper.findAll('.btn-dashboard--secondary');
+      expect(secondaryBtns.length).toBe(1);
+      expect(secondaryBtns[0].text()).toContain('Importar Excel');
     });
   });
 });

@@ -9,9 +9,8 @@ const sessionExpired = ref(false);
 const SESSION_KEY = '__hares_session_dev__';
 const isDev = import.meta.env.DEV;
 
-// Recuperar sesión de sessionStorage en desarrollo
+// Recuperar sesión del almacenamiento
 function getStoredSession() {
-  if (!isDev) return null;
   try {
     const stored = sessionStorage.getItem(SESSION_KEY);
     return stored ? JSON.parse(stored) : null;
@@ -20,20 +19,20 @@ function getStoredSession() {
   }
 }
 
-// Guardar sesión en sessionStorage en desarrollo
+// Guardar sesión en almacenamiento
 function storeSession(userData) {
-  if (!isDev) return;
   try {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(userData));
   } catch {
-    console.warn('No se pudo guardar sesión en sessionStorage');
+    console.warn('No se pudo guardar sesión en almacenamiento');
   }
 }
 
-// Limpiar sesión de sessionStorage
+// Limpiar sesión del almacenamiento
 function clearStoredSession() {
   try {
     sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem('access_token');
   } catch {
     // ignore
   }
@@ -64,20 +63,25 @@ export function useAuth() {
       if (data) {
         user.value = data;
         sessionExpired.value = false;
-        // En desarrollo, guardar también en sessionStorage
         storeSession(data);
         console.log('[useAuth] Usuario autenticado:', data.email);
       } else {
-        user.value = null;
-        console.log('[useAuth] No hay usuario autenticado');
+        const stored = getStoredSession();
+        if (stored) {
+          user.value = stored;
+          sessionExpired.value = false;
+          console.log('[useAuth] ✅ Sesión recuperada del almacenamiento');
+        } else {
+          user.value = null;
+          console.log('[useAuth] No hay usuario autenticado');
+        }
       }
     } catch (err) {
-      // Fallback: intentar recuperar sesión guardada si el backend falla
-      // Esto permite persistencia al recargar la página
       console.log('[useAuth] Error en getCurrentUser():', err.message);
       const stored = getStoredSession();
       if (stored) {
         user.value = stored;
+        sessionExpired.value = false;
         console.log('[useAuth] ✅ Sesión recuperada del almacenamiento');
       } else {
         user.value = null;
@@ -113,9 +117,17 @@ export function useAuth() {
   }
 
   function setUser(userData) {
-    user.value = userData;
+    const actualUser = userData?.user ? userData.user : userData;
+    user.value = actualUser;
     sessionExpired.value = false;
-    storeSession(userData);
+    storeSession(actualUser);
+    if (userData?.access_token) {
+      try {
+        sessionStorage.setItem('access_token', userData.access_token);
+      } catch (e) {
+        // ignore
+      }
+    }
   }
 
   return {

@@ -221,15 +221,6 @@ async function handleSave() {
     return;
   }
 
-  // Validar que la prueba no ya fue realizada
-  const testIdStr = String(currentTest.value?.code || currentTest.value?.id || '').trim();
-  console.log('[handleSave] testIdStr:', testIdStr, 'completedTestIds.value:', completedTestIds.value, 'studentId:', selectedStudentId.value);
-  if (testIdStr && completedTestIds.value && completedTestIds.value.includes(testIdStr)) {
-    errorMessage.value = `La prueba "${currentTest.value?.name || 'desconocida'}" ya fue realizada por este alumno. No se puede repetir.`;
-    console.log('[handleSave] Prueba bloqueada por duplicado');
-    return;
-  }
-
   if (!testDate.value || testDate.value.trim() === '') {
     errorMessage.value = 'Indica la fecha de la prueba.';
     return;
@@ -293,7 +284,7 @@ async function handleSave() {
     const payload = {
       studentId: selectedStudentId.value,
       studentName: currentStudentName.value,
-      testId: currentTest.value.code,
+      testId: currentTest.value.id || currentTest.value.code,
       testCode: currentTest.value.code,
       testName: finalTestName,
       testWords: testWords.value,
@@ -317,7 +308,7 @@ async function handleSave() {
       forbiddenError.value = true;
       errorMessage.value = 'No tienes permiso sobre la sección de este alumno para registrar resultados.';
     } else if (err.status === 409) {
-      errorMessage.value = `⚠️ ${err.message} No se permite registrar la misma prueba dos veces.`;
+      errorMessage.value = err.message || 'Ya existe un registro para este alumno con la misma prueba y fecha';
     } else {
       errorMessage.value = err.message || 'Error al registrar el resultado.';
     }

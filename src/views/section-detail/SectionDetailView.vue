@@ -17,7 +17,8 @@ import {
   BookOpen
 } from 'lucide-vue-next';
 import { getSectionResults, deleteResult } from '../../services/resultsService';
-import { formatDate, formatPPM, formatVef } from '../../utils/format';
+import { getCenters, getCenterSections } from '../../services/directoryService';
+import { formatDate, formatPPM, formatVef, getReadingBand } from '../../utils/format';
 import EditResultModal from '../../components/results/EditResultModal.vue';
 
 const props = defineProps({
@@ -32,11 +33,12 @@ const props = defineProps({
 });
 
 const currentSectionId = ref(props.sectionId || 'sec-1');
-const availableSections = ref([
+const fallbackSections = [
   { id: 'sec-1', name: '1º Primaria - Aula A (Tutoría)', grade: '1º Primaria' },
   { id: 'sec-2', name: '1º Primaria - Aula B', grade: '1º Primaria' },
   { id: 'sec-3', name: '2º Primaria - Aula A', grade: '2º Primaria' }
-]);
+];
+const availableSections = ref([...fallbackSections]);
 
 const resultsList = ref([]);
 const isLoading = ref(false);
@@ -61,6 +63,39 @@ watch(currentSectionId, () => {
   loadResults();
 });
 
+async function loadSections() {
+  try {
+    const centers = await getCenters();
+    if (Array.isArray(centers) && centers.length > 0) {
+      const allSections = [];
+      for (const center of centers) {
+        try {
+          const sections = await getCenterSections(center.id);
+          if (Array.isArray(sections)) {
+            for (const sec of sections) {
+              allSections.push({
+                ...sec,
+                centerName: center.name,
+                displayName: centers.length > 1 ? `${center.name} - ${sec.name}` : sec.name
+              });
+            }
+          }
+        } catch (e) {
+          console.warn(`Error al cargar secciones del centro ${center.id}:`, e);
+        }
+      }
+      if (allSections.length > 0) {
+        availableSections.value = allSections;
+        if (!props.sectionId || props.sectionId === 'sec-1') {
+          currentSectionId.value = allSections[0].id;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Usando secciones por defecto en SectionDetailView:', err);
+  }
+}
+
 async function loadResults() {
   isLoading.value = true;
   try {
@@ -68,7 +103,16 @@ async function loadResults() {
       startDate: filterStartDate.value || undefined,
       endDate: filterEndDate.value || undefined
     });
-    resultsList.value = Array.isArray(list) ? list : [];
+    resultsList.value = (Array.isArray(list) ? list : []).map(r => ({
+      ...r,
+      studentName: r.student_name || r.studentName,
+      testName: r.test_name || r.testName,
+      testDate: r.test_date || r.testDate,
+      studentId: r.student_id || r.studentId,
+      testId: r.test_id || r.testId,
+      testCode: r.test_code || r.testCode,
+      band: r.band || (r.vef !== undefined ? getReadingBand(r.vef) : 'Sin datos')
+    }));
   } catch (err) {
     console.warn('Error al cargar resultados de sección:', err);
     resultsList.value = [];
@@ -77,8 +121,9 @@ async function loadResults() {
   }
 }
 
-onMounted(() => {
-  loadResults();
+onMounted(async () => {
+  await loadSections();
+  await loadResults();
 });
 
 // Filtrado de resultados
@@ -180,7 +225,7 @@ function showFeedback(msg) {
         </label>
         <select id="detail-section-select" v-model="currentSectionId" class="section-select">
           <option v-for="sec in availableSections" :key="sec.id" :value="sec.id">
-            {{ sec.name }}
+            {{ sec.displayName || sec.name }}
           </option>
         </select>
       </div>

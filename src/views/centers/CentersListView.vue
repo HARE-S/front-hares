@@ -2,11 +2,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getCenters, getCenterSections, getSectionStudents } from '@/services/directoryService';
-import { ChevronDown } from 'lucide-vue-next';
+import { ChevronDown, FileSpreadsheet } from 'lucide-vue-next';
 
 const router = useRouter();
 const route = useRoute();
-const isStudentsRoute = computed(() => route.path.startsWith('/students'));
 const centers = ref([]);
 const sectionsMap = ref({});
 const allStudents = ref([]);
@@ -28,20 +27,22 @@ async function loadCenters() {
     for (const center of centers.value) {
       try {
         const sections = await getCenterSections(center.id);
-        sectionsMap.value[center.id] = sections;
+        sectionsMap.value[center.id] = Array.isArray(sections) ? sections : [];
 
-        for (const section of sections) {
-          const students = await getSectionStudents(section.id);
-          if (students && students.length > 0) {
-            const studentsWithInfo = students.map(s => ({
-              ...s,
-              center_id: center.id,
-              center_name: center.name,
-              section_id: section.id,
-              section_name: section.name,
-              academic_year: section.academic_year
-            }));
-            allStudents.value = [...allStudents.value, ...studentsWithInfo];
+        if (Array.isArray(sections)) {
+          for (const section of sections) {
+            const students = await getSectionStudents(section.id);
+            if (students && students.length > 0) {
+              const studentsWithInfo = students.map(s => ({
+                ...s,
+                center_id: center.id,
+                center_name: center.name,
+                section_id: section.id,
+                section_name: section.name,
+                academic_year: section.academic_year
+              }));
+              allStudents.value = [...allStudents.value, ...studentsWithInfo];
+            }
           }
         }
       } catch (err) {
@@ -49,7 +50,7 @@ async function loadCenters() {
       }
     }
   } catch (err) {
-    error.value = 'Error al cargar los centros';
+    error.value = err?.message || 'Error al cargar los centros';
     console.error('Error loading centers:', err);
   } finally {
     loadingCenters.value = false;
@@ -111,11 +112,33 @@ onMounted(loadCenters);
 <template>
   <div class="students-view">
     <header class="view-header">
-      <div class="header-content">
-        <h1>{{ isStudentsRoute ? 'Alumnado' : 'Centros' }}</h1>
-        <p class="header-subtitle">{{ isStudentsRoute ? 'Consulta el alumnado de cada centro y sección' : 'Selecciona un centro para ver sus secciones y su alumnado' }}</p>
+      <div class="header-container">
+        <div class="header-content">
+          <h1>Alumnado</h1>
+          <p class="header-subtitle">Consulta el alumnado de cada centro y sección</p>
+          <p class="source-note">Los datos proceden de Alexia y son de solo lectura.</p>
+        </div>
+        <div class="header-actions">
+          <router-link to="/import" class="btn-import-header" title="Importar datos desde Excel o Alexia">
+            <FileSpreadsheet :size="16" />
+            <span>Importar Excel</span>
+          </router-link>
+        </div>
       </div>
     </header>
+
+    <!-- Resumen de centros activos en el ámbito del docente -->
+    <div v-if="centers && centers.length > 0" class="centers-summary-bar">
+      <div
+        v-for="c in centers"
+        :key="c.id"
+        class="center-pill"
+        data-testid="center-row"
+      >
+        <span class="center-name">{{ c.name }}</span>
+        <span v-if="c.sections_count !== undefined" class="badge-count">{{ c.sections_count }}</span>
+      </div>
+    </div>
 
     <!-- Filtros -->
     <div class="filters-card">
@@ -183,8 +206,9 @@ onMounted(loadCenters);
     </div>
 
     <!-- Errores -->
-    <div v-if="error" class="error-banner">
+    <div v-if="error" class="error-banner" role="alert">
       <span>{{ error }}</span>
+      <button type="button" class="btn-retry" @click="loadCenters">Reintentar</button>
     </div>
 
     <!-- Estados de carga -->
@@ -254,19 +278,29 @@ onMounted(loadCenters);
 /* Header */
 .view-header {
   background-color: var(--surface-container-lowest);
-  padding: 2rem 0;
+  padding: 1.5rem 0;
   border-radius: 0;
   border: none;
   border-bottom: 1px solid var(--outline-variant);
 }
 
-.header-content {
+.header-container {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 1.5rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 0;
 }
 
 .view-header h1 {
@@ -280,6 +314,32 @@ onMounted(loadCenters);
   margin: 0;
   font-size: 0.95rem;
   color: var(--on-surface-variant);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.btn-import-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  background-color: var(--surface-container-lowest);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-import-header:hover {
+  background-color: var(--surface-container-low);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 /* Filtros */
@@ -584,5 +644,55 @@ onMounted(loadCenters);
     padding: 0.4rem 0.8rem;
     font-size: 0.75rem;
   }
+}
+
+.source-note {
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.centers-summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.center-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-full, 9999px);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--on-surface);
+}
+
+.badge-count {
+  background-color: var(--surface-container-high);
+  color: var(--on-surface-variant);
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.btn-retry {
+  margin-left: 1rem;
+  padding: 0.35rem 0.75rem;
+  background-color: white;
+  color: var(--error, #ba1a1a);
+  border: 1px solid var(--error, #ba1a1a);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.btn-retry:hover {
+  background-color: var(--error-container, #ffdad6);
 }
 </style>

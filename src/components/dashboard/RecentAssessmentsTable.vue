@@ -221,6 +221,10 @@ const props = defineProps({
   course: {
     type: String,
     default: '2024-25'
+  },
+  realAssessments: {
+    type: Array,
+    default: null
   }
 });
 
@@ -236,7 +240,7 @@ watch(() => props.course, (newCourse) => {
 const searchQuery = ref('');
 const selectedType = ref('');
 const currentPage = ref(1);
-const itemsPerPage = 4;
+const itemsPerPage = 6;
 
 const assessmentsByCourse = {
   '2024-25': [
@@ -267,7 +271,12 @@ const assessmentsByCourse = {
   ]
 };
 
-const allAssessments = computed(() => assessmentsByCourse[currentCourse.value] || assessmentsByCourse['2024-25']);
+const allAssessments = computed(() => {
+  if (props.realAssessments && props.realAssessments.length > 0) {
+    return props.realAssessments;
+  }
+  return assessmentsByCourse[currentCourse.value] || assessmentsByCourse['2024-25'];
+});
 
 const filteredAssessments = computed(() => {
   return allAssessments.value.filter(item => {

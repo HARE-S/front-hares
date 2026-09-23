@@ -154,6 +154,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { getBooks, assignBook } from '../../services/booksService';
+import { getStudents } from '../../services/studentService';
 import BookLevelBadge from './BookLevelBadge.vue';
 
 const props = defineProps({
@@ -162,11 +163,11 @@ const props = defineProps({
     default: false
   },
   initialStudentId: {
-    type: Number,
+    type: [String, Number],
     default: null
   },
   initialBookId: {
-    type: Number,
+    type: [String, Number],
     default: null
   }
 });
@@ -187,15 +188,23 @@ const formData = ref({
   end_date: ''
 });
 
-// Estudiantes del aula activa 3º Primaria
-const studentsList = ref([
-  { id: 1, name: 'Lucas Méndez Ruiz', section: '3º Primaria - Aula 3A' },
-  { id: 2, name: 'Sofía Navarro Ortiz', section: '3º Primaria - Aula 3A' },
-  { id: 3, name: 'Mateo Barrenechea', section: '3º Primaria - Aula 3A' },
-  { id: 4, name: 'Aitana Zubizarreta', section: '3º Primaria - Aula 3A' },
-  { id: 5, name: 'Iker Goikoetxea', section: '3º Primaria - Aula 3A' },
-  { id: 6, name: 'Emma Larrañaga', section: '3º Primaria - Aula 3A' }
-]);
+// Estudiantes cargados de la base de datos
+const studentsList = ref([]);
+
+async function loadStudents() {
+  try {
+    const res = await getStudents({ limit: 100 });
+    if (res && res.items && res.items.length > 0) {
+      studentsList.value = res.items.map(s => ({
+        id: s.id,
+        name: s.name,
+        section: (s.sections && s.sections.length > 0) ? s.sections.join(', ') : 'Matriculado'
+      }));
+    }
+  } catch (err) {
+    console.warn('Error al cargar lista de alumnos para asignar libro:', err);
+  }
+}
 
 async function loadBooks() {
   try {
@@ -209,13 +218,16 @@ async function loadBooks() {
 
 onMounted(() => {
   loadBooks();
+  loadStudents();
 });
 
 watch(() => props.isOpen, (open) => {
   if (open) {
     loadBooks();
+    loadStudents();
+    const defaultStudentId = props.initialStudentId || (studentsList.value[0]?.id || '');
     formData.value = {
-      student_id: props.initialStudentId || 1,
+      student_id: defaultStudentId,
       book_id: props.initialBookId || null,
       start_date: today,
       end_date: ''

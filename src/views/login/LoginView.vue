@@ -48,11 +48,7 @@ async function handleLogin() {
       // Redirigir según el rol del usuario
       let next = route.query.next;
       if (!next) {
-        if (response.user?.role === 'superadmin') {
-          next = '/admin/approval';
-        } else {
-          next = '/dashboard';
-        }
+        next = '/dashboard';
       }
       router.push(next);
     }

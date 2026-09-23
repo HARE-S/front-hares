@@ -37,8 +37,25 @@ export class UnauthorizedError extends ApiError {
 export async function request(endpoint, options = {}) {
   const url = `${BASE_URL}${endpoint}`;
 
+  let token = null;
+  try {
+    if (typeof localStorage !== 'undefined') {
+      token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+      if (!token) {
+        const stored = sessionStorage.getItem('__hares_session_dev__');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          token = parsed.access_token || parsed.token;
+        }
+      }
+    }
+  } catch {
+    // ignore
+  }
+
   const headers = {
     'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...(options.headers || {})
   };
 

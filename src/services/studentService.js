@@ -182,11 +182,33 @@ const mockHistoricalSectionsByStudent = {
  * @param {string} studentId — UUID del alumno
  * @returns {Promise<StudentRecord>}
  */
+/**
+ * Listado de alumnos con paginación y búsqueda opcional (BE-30).
+ * @param {Object} [params]
+ * @param {number} [params.page=1]
+ * @param {number} [params.limit=50]
+ * @param {string} [params.q]
+ * @returns {Promise<{ items: Object[], total: number, page: number, pages: number, limit: number }>}
+ */
+export async function getStudents({ page = 1, limit = 50, q } = {}) {
+  const params = new URLSearchParams();
+  if (page) params.append('page', String(page));
+  if (limit) params.append('limit', String(limit));
+  if (q) params.append('q', String(q));
+  const queryStr = params.toString() ? `?${params.toString()}` : '';
+  return request(`/students${queryStr}`);
+}
+
+/**
+ * Obtener ficha completa de un alumno.
+ * Incluye datos personales, secciones y lecturas en una sola petición (BE-28).
+ * @param {string} studentId — UUID del alumno
+ * @returns {Promise<StudentRecord>}
+ */
 export async function getStudentRecord(studentId) {
   try {
     const response = await request(`/students/${studentId}`);
 
-    // Si la respuesta es null o no tiene propiedades, crear un objeto base
     if (!response || typeof response !== 'object') {
       return createStudentRecordWithMocks(studentId);
     }
@@ -197,41 +219,22 @@ export async function getStudentRecord(studentId) {
     if (!response.historical_sections) response.historical_sections = [];
     if (!response.current_sections) response.current_sections = [];
 
-    // Completar con datos mock de resultados si están vacíos
-    if (response.results.length === 0) {
-      response.results = mockResultsByStudent[studentId] || [];
-    }
-
-    // Agregar resultados guardados en memoria local (solo los válidos)
-    const inMemoryResults = _getInMemoryResults();
-    const studentMemoryResults = inMemoryResults.filter(r =>
-      String(r.studentId) === String(studentId) &&
-      r.testDate && r.testName && r.ppm && r.vef
-    );
-    if (studentMemoryResults.length > 0) {
-      response.results = [...studentMemoryResults, ...response.results];
-    }
-
-    // Completar con datos mock de lecturas si están vacíos
-    if (response.readings.length === 0) {
-      response.readings = mockReadingsByStudent[studentId] || [];
-    }
-
-    // Completar con datos mock de secciones históricas si están vacías
-    if (response.historical_sections.length === 0) {
-      response.historical_sections = mockHistoricalSectionsByStudent[studentId] || [];
-    }
-
-    // Completar con datos mock de secciones actuales si están vacías
-    if (response.current_sections.length === 0) {
-      response.current_sections = mockCurrentSectionsByStudent[studentId] || [];
+    // Si no tiene secciones actuales pero tiene sections.current
+    if (response.current_sections.length === 0 && response.sections?.current) {
+      response.current_sections = response.sections.current;
     }
 
     return response;
   } catch (err) {
-    // Si hay error al cargar del API, retornar datos mock
-    console.warn('Error loading student record, using mock data:', err);
-    return createStudentRecordWithMocks(studentId);
+    if (err.status === 403 || err.status === 404) {
+      throw err;
+    }
+    // Solo fallback a mock en entorno offline / pruebas unitarias sin backend (status 0)
+    if (err.status === 0) {
+      console.warn('Backend desconectado, usando datos mock para estudiante:', studentId);
+      return createStudentRecordWithMocks(studentId);
+    }
+    throw err;
   }
 }
 
