@@ -288,6 +288,30 @@ export async function registerSingleResult({
       method: 'POST',
       body: JSON.stringify(payload)
     });
+    // Guardar en memoria también cuando el API responde
+    if (res && res.id) {
+      const formatted = {
+        id: res.id,
+        studentId: res.student_id || payload.student_id,
+        studentName: payload.student_name,
+        testId: res.test_id || payload.test_id,
+        testCode: res.test_code || payload.test_id,
+        testName: res.test_name,
+        sectionId: res.section_id || payload.section_id,
+        testDate: res.test_date || payload.test_date,
+        time: res.time || payload.time,
+        successes: res.successes || payload.successes,
+        mistakes: res.mistakes || payload.mistakes,
+        ppm: res.ppm,
+        vef: res.vef,
+        band: res.band,
+        comprehension: res.comprehension_percentage || payload.comprehension_percentage,
+        notes: res.notes || payload.notes,
+        createdAt: res.created_at || new Date().toISOString()
+      };
+      inMemoryResults.unshift(formatted);
+      persistResults();
+    }
     return res;
   } catch (err) {
     if (err.status === 409) {

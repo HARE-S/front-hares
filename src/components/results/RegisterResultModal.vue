@@ -101,10 +101,14 @@ const completedTestIds = computed(() => {
   existingResults
     .filter(r => String(r.studentId) === String(studentIdToCheck))
     .forEach(r => {
-      // Agregar tanto testId como code para mayor cobertura
-      if (r.testId) completed.add(String(r.testId).trim());
-      if (r.testCode) completed.add(String(r.testCode).trim());
-      if (r.code) completed.add(String(r.code).trim());
+      // Normalizar y agregar todos los posibles IDs (testId, testCode, code, test_id, test_code)
+      const ids = [r.testId, r.testCode, r.code, r.test_id, r.test_code];
+      ids.forEach(id => {
+        if (id) {
+          const normalized = String(id).trim().toUpperCase();
+          completed.add(normalized);
+        }
+      });
     });
 
   const completedArray = Array.from(completed);
@@ -222,9 +226,10 @@ async function handleSave() {
   }
 
   // Validar que la prueba no ya fue realizada
-  const testIdStr = String(currentTest.value?.code || currentTest.value?.id || '').trim();
-  console.log('[handleSave] testIdStr:', testIdStr, 'completedTestIds.value:', completedTestIds.value, 'studentId:', selectedStudentId.value);
-  if (testIdStr && completedTestIds.value && completedTestIds.value.includes(testIdStr)) {
+  const testIdStr = String(currentTest.value?.code || currentTest.value?.id || '').trim().toUpperCase();
+  const isDuplicate = testIdStr && completedTestIds.value && completedTestIds.value.includes(testIdStr);
+  console.log('[handleSave] testIdStr:', testIdStr, 'completedTestIds.value:', completedTestIds.value, 'isDuplicate:', isDuplicate, 'studentId:', selectedStudentId.value);
+  if (isDuplicate) {
     errorMessage.value = `La prueba "${currentTest.value?.name || 'desconocida'}" ya fue realizada por este alumno. No se puede repetir.`;
     console.log('[handleSave] Prueba bloqueada por duplicado');
     return;
@@ -459,9 +464,9 @@ function handleResetAnother() {
               data-testid="test-select"
               required
             >
-              <option v-for="t in tests" :key="t.id" :value="t.id" :disabled="completedTestIds.includes(String(t.code)) || completedTestIds.includes(String(t.id))">
+              <option v-for="t in tests" :key="t.id" :value="t.id" :disabled="completedTestIds.includes(String(t.code || t.id).toUpperCase())">
                 {{ t.code }} — {{ t.name }} ({{ t.words }} palabras · Curso {{ t.course }})
-                <span v-if="completedTestIds.includes(String(t.code)) || completedTestIds.includes(String(t.id))"> — Ya realizada</span>
+                <span v-if="completedTestIds.includes(String(t.code || t.id).toUpperCase())"> — Ya realizada</span>
               </option>
             </select>
           </div>
