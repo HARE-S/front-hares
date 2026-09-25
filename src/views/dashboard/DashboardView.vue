@@ -155,6 +155,51 @@ const realLevels = ref(null);
 const realAssessments = ref(null);
 const realFluency = ref(null);
 
+/**
+ * Calcula el delta (cambio porcentual) entre el PPM inicial y actual de una sección
+ * @param {Array} results - Array de resultados de la sección ordenados por fecha
+ * @returns {Object} - { delta: number, initialAvg: number, currentAvg: number, label: string }
+ */
+function calculateDeltaFromResults(results) {
+  if (!Array.isArray(results) || results.length < 2) {
+    return { delta: 0, initialAvg: 0, currentAvg: 0, label: 'Sin historial' };
+  }
+
+  // Ordenar por fecha (de más vieja a más reciente)
+  const sorted = [...results].sort((a, b) => {
+    const dateA = new Date(a.test_date || a.testDate || '');
+    const dateB = new Date(b.test_date || b.testDate || '');
+    return dateA - dateB;
+  });
+
+  // Dividir en dos períodos: inicial (primera mitad) y actual (segunda mitad)
+  const midpoint = Math.ceil(sorted.length / 2);
+  const initialPeriod = sorted.slice(0, midpoint);
+  const currentPeriod = sorted.slice(midpoint);
+
+  // Calcular PPM promedio de cada período (excluyendo valores 0 o undefined)
+  const getAvgPpm = (arr) => {
+    const validPpms = arr
+      .map(r => Number(r.ppm) || 0)
+      .filter(ppm => ppm > 0);
+    if (validPpms.length === 0) return 0;
+    return Math.round(validPpms.reduce((a, b) => a + b, 0) / validPpms.length);
+  };
+
+  const initialAvg = getAvgPpm(initialPeriod);
+  const currentAvg = getAvgPpm(currentPeriod);
+
+  // Calcular delta como porcentaje de cambio
+  let delta = 0;
+  let label = '';
+  if (initialAvg > 0) {
+    delta = Math.round(((currentAvg - initialAvg) / initialAvg) * 100);
+    label = delta >= 0 ? `+${delta}% vs. Corte Inicial` : `${delta}% vs. Corte Inicial`;
+  }
+
+  return { delta, initialAvg, currentAvg, label };
+}
+
 async function loadSectionsAndData() {
   isLoadingData.value = true;
   try {
@@ -268,6 +313,9 @@ async function loadDashboardMetricsForSection(sectionId) {
       return null;
     });
 
+    // Calcular delta dinámicamente desde el histórico
+    const deltaInfo = calculateDeltaFromResults(results);
+
     // Si el reporte no tiene datos, usar fallback con datos crudos
     if (!groupReport || !groupReport.hasData) {
       const totalLevels = (countAvanzado + countOptimo + countDesarrollo + countIntervencion) || 1;
@@ -283,7 +331,7 @@ async function loadDashboardMetricsForSection(sectionId) {
         speed: {
           current: avgPpm,
           unit: 'PPM',
-          delta: '+6% vs. Corte Inicial',
+          delta: deltaInfo.label,
           target: 125,
           percentage: Math.min(100, Math.round((avgPpm / 125) * 100))
         },
@@ -334,7 +382,7 @@ async function loadDashboardMetricsForSection(sectionId) {
         speed: {
           current: reportAvgPpm,
           unit: 'PPM',
-          delta: '+6% vs. Corte Inicial',
+          delta: deltaInfo.label,
           target: 125,
           percentage: Math.min(100, Math.round((reportAvgPpm / 125) * 100))
         },
