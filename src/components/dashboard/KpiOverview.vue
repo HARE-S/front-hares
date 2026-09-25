@@ -668,6 +668,8 @@ defineExpose({
                   <th>Centro</th>
                   <th>Nombre y Apellidos</th>
                   <th>PPM</th>
+                  <th>Errores</th>
+                  <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -676,10 +678,13 @@ defineExpose({
                   <td class="center-cell">{{ student.center }}</td>
                   <td class="name-cell">{{ student.name }}</td>
                   <td class="metric-cell">{{ student.ppm }}</td>
+                  <td class="metric-cell">{{ student.errors }}</td>
                   <td class="action-cell">
                     <span class="status-badge" :class="'status-' + student.status">
                       {{ student.status === 'support' ? 'Requiere apoyo' : student.status === 'advanced' ? 'Avanzado' : 'Normal' }}
                     </span>
+                  </td>
+                  <td class="action-cell">
                     <button type="button" class="report-btn" @click="viewStudentReport(student)" title="Ver informe">
                       <BarChart3 :size="18" />
                     </button>
