@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { Gauge, UserCheck, BookOpen, AlertTriangle, ArrowUp, ArrowRight, X, ChevronRight, BarChart3 } from 'lucide-vue-next';
+import { getStudentBooks } from '@/services/reportsService';
 
 const props = defineProps({
   course: {
@@ -29,6 +30,7 @@ const showStudentsListModal = ref(false);
 const showRankingModal = ref(false);
 const showBooksModal = ref(false);
 const selectedStudent = ref(null);
+const booksLoadingState = ref({});
 
 const courseDataMap = {
   '2024-25': {
@@ -150,7 +152,34 @@ const currentCourse = ref(props.course);
 watch(() => props.course, (newCourse) => {
   currentCourse.value = newCourse;
   console.log('📊 KpiOverview: Curso cambió a', newCourse);
+  loadAllStudentBooks();
 });
+
+async function loadAllStudentBooks() {
+  for (const student of allStudents.value) {
+    if (!studentBooksRead.value[student.id]) {
+      try {
+        const books = await getStudentBooks(student.id);
+        if (books && books.length > 0) {
+          studentBooksRead.value[student.id] = {
+            booksCount: books.length,
+            books: books.map(book => ({
+              title: book.book || book.title || 'Sin título',
+              author: book.author || 'Desconocido',
+              date: book.end_date || book.start_date || new Date().toISOString().split('T')[0],
+              format: book.format || 'Libro físico'
+            }))
+          };
+        } else {
+          studentBooksRead.value[student.id] = { booksCount: 0, books: [] };
+        }
+      } catch (error) {
+        console.warn(`Error cargando libros para ${student.id}:`, error);
+        studentBooksRead.value[student.id] = { booksCount: 0, books: [] };
+      }
+    }
+  }
+}
 
 const kpiData = computed(() => {
   if (props.realKpi) {
@@ -425,10 +454,14 @@ function getLevelColor(level) {
 
 function getRankingList() {
   return allStudents.value
-    .map(student => ({
-      ...student,
-      booksCount: studentBooksRead.value[student.id]?.booksCount || 0
-    }))
+    .map(student => {
+      const books = studentBooksRead.value[student.id];
+      return {
+        ...student,
+        booksCount: books?.booksCount || 0,
+        loadingState: booksLoadingState.value[student.id] || 'not-loaded'
+      };
+    })
     .sort((a, b) => b.booksCount - a.booksCount);
 }
 
@@ -458,8 +491,12 @@ const avgSpeedPPM = computed(() => {
 });
 
 const totalBooksRead = computed(() => {
-  // Usar datos del curso
-  return kpiData.value.books.count;
+  // Calcular dinámicamente desde los libros cargados
+  let total = 0;
+  Object.values(studentBooksRead.value).forEach(student => {
+    total += student.booksCount || 0;
+  });
+  return total > 0 ? total : kpiData.value.books.count;
 });
 
 const evaluatedStudents = computed(() => {

@@ -401,3 +401,18 @@ export async function getSectionGroupReport(sectionId, academicYear = '2024-2025
     progress
   };
 }
+
+/**
+ * Obtiene los libros leídos por un estudiante desde la BD
+ * @param {string} studentId - ID del estudiante
+ * @returns {Promise<Array>} Lista de libros leídos con su información
+ */
+export async function getStudentBooks(studentId) {
+  try {
+    const data = await request.get(`/students/${studentId}/books`);
+    return data || [];
+  } catch (error) {
+    console.warn(`No se pudieron cargar libros para estudiante ${studentId}:`, error);
+    return [];
+  }
+}
