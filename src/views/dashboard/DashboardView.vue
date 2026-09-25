@@ -121,6 +121,7 @@ import { useCourse } from '@/composables/useCourse';
 import { FileSpreadsheet } from 'lucide-vue-next';
 import { getCenters, getCenterSections, getSectionStudents } from '@/services/directoryService';
 import { getSectionResults } from '@/services/resultsService';
+import { getSectionGroupReport } from '@/services/reportsService';
 import { getReadingBand, formatDate } from '@/utils/format';
 import KpiOverview from '../../components/dashboard/KpiOverview.vue';
 import FluencyChart from '../../components/dashboard/FluencyChart.vue';
@@ -261,48 +262,108 @@ async function loadDashboardMetricsForSection(sectionId) {
       };
     });
 
-    const totalLevels = (countAvanzado + countOptimo + countDesarrollo + countIntervencion) || 1;
+    // Obtener reporte agregado desde el backend
+    const groupReport = await getSectionGroupReport(sectionId, selectedCourse.value).catch(err => {
+      console.warn('Error obteniendo reporte de grupo:', err);
+      return null;
+    });
 
-    realLevels.value = {
-      avanzado: { count: countAvanzado, pct: Math.round((countAvanzado / totalLevels) * 100) },
-      optimo: { count: countOptimo, pct: Math.round((countOptimo / totalLevels) * 100) },
-      desarrollo: { count: countDesarrollo, pct: Math.round((countDesarrollo / totalLevels) * 100) },
-      intervencion: { count: countIntervencion, pct: Math.round((countIntervencion / totalLevels) * 100) }
-    };
+    // Si el reporte no tiene datos, usar fallback con datos crudos
+    if (!groupReport || !groupReport.hasData) {
+      const totalLevels = (countAvanzado + countOptimo + countDesarrollo + countIntervencion) || 1;
 
-    realKpi.value = {
-      speed: {
+      realLevels.value = {
+        avanzado: { count: countAvanzado, pct: Math.round((countAvanzado / totalLevels) * 100) },
+        optimo: { count: countOptimo, pct: Math.round((countOptimo / totalLevels) * 100) },
+        desarrollo: { count: countDesarrollo, pct: Math.round((countDesarrollo / totalLevels) * 100) },
+        intervencion: { count: countIntervencion, pct: Math.round((countIntervencion / totalLevels) * 100) }
+      };
+
+      realKpi.value = {
+        speed: {
+          current: avgPpm,
+          unit: 'PPM',
+          delta: '+6% vs. Corte Inicial',
+          target: 125,
+          percentage: Math.min(100, Math.round((avgPpm / 125) * 100))
+        },
+        students: {
+          evaluated: evaluatedStudentIds.size,
+          total: totalStudentsCount,
+          percentage: Math.round((evaluatedStudentIds.size / (totalStudentsCount || 1)) * 100),
+          pendingCount: Math.max(0, totalStudentsCount - evaluatedStudentIds.size),
+          pendingPeriod: 'Corte A'
+        },
+        books: {
+          count: results.length,
+          unit: 'evaluaciones',
+          delta: `+${results.length} en BD`,
+          averagePerStudent: (results.length / (evaluatedStudentIds.size || 1)).toFixed(1)
+        },
+        alerts: {
+          count: countIntervencion,
+          label: 'Requieren Apoyo',
+          criteria: 'PPM < 85 o > 5% errores'
+        }
+      };
+
+      realFluency.value = {
         current: avgPpm,
-        unit: 'PPM',
-        delta: '+6% vs. Corte Inicial',
-        target: 125,
-        percentage: Math.min(100, Math.round((avgPpm / 125) * 100))
-      },
-      students: {
-        evaluated: evaluatedStudentIds.size,
-        total: totalStudentsCount,
-        percentage: Math.round((evaluatedStudentIds.size / (totalStudentsCount || 1)) * 100),
-        pendingCount: Math.max(0, totalStudentsCount - evaluatedStudentIds.size),
-        pendingPeriod: 'Corte A'
-      },
-      books: {
-        count: results.length,
-        unit: 'evaluaciones',
-        delta: `+${results.length} en BD`,
-        averagePerStudent: (results.length / (evaluatedStudentIds.size || 1)).toFixed(1)
-      },
-      alerts: {
-        count: countIntervencion,
-        label: 'Requieren Apoyo',
-        criteria: 'PPM < 85 o > 5% errores'
-      }
-    };
+        badge: `${avgPpm} PPM ★`,
+        diagnostic: `${Math.min(100, Math.round((avgPpm / 125) * 100))}%`
+      };
+    } else {
+      // Usar datos del reporte agregado del backend
+      const reportAvanzado = groupReport.distribution?.advanced?.count || 0;
+      const reportOptimo = groupReport.distribution?.normal?.count || 0;
+      const reportIntervencion = groupReport.distribution?.support?.count || 0;
+      const reportTotalLevels = (reportAvanzado + reportOptimo + reportIntervencion) || 1;
 
-    realFluency.value = {
-      current: avgPpm,
-      badge: `${avgPpm} PPM ★`,
-      diagnostic: `${Math.min(100, Math.round((avgPpm / 125) * 100))}%`
-    };
+      realLevels.value = {
+        avanzado: { count: reportAvanzado, pct: Math.round((reportAvanzado / reportTotalLevels) * 100) },
+        optimo: { count: reportOptimo, pct: Math.round((reportOptimo / reportTotalLevels) * 100) },
+        desarrollo: { count: 0, pct: 0 },
+        intervencion: { count: reportIntervencion, pct: Math.round((reportIntervencion / reportTotalLevels) * 100) }
+      };
+
+      const reportAvgPpm = groupReport.meanPpm || 0;
+      const reportParticipants = groupReport.participantsCount || 0;
+      const reportResultsCount = groupReport.resultsCount || 0;
+
+      realKpi.value = {
+        speed: {
+          current: reportAvgPpm,
+          unit: 'PPM',
+          delta: '+6% vs. Corte Inicial',
+          target: 125,
+          percentage: Math.min(100, Math.round((reportAvgPpm / 125) * 100))
+        },
+        students: {
+          evaluated: reportParticipants,
+          total: totalStudentsCount,
+          percentage: Math.round((reportParticipants / (totalStudentsCount || 1)) * 100),
+          pendingCount: Math.max(0, totalStudentsCount - reportParticipants),
+          pendingPeriod: 'Corte A'
+        },
+        books: {
+          count: reportResultsCount,
+          unit: 'evaluaciones',
+          delta: `+${reportResultsCount} en BD`,
+          averagePerStudent: (reportResultsCount / (reportParticipants || 1)).toFixed(1)
+        },
+        alerts: {
+          count: reportIntervencion,
+          label: 'Requieren Apoyo',
+          criteria: 'PPM < 85 o > 5% errores'
+        }
+      };
+
+      realFluency.value = {
+        current: reportAvgPpm,
+        badge: `${reportAvgPpm} PPM ★`,
+        diagnostic: `${Math.min(100, Math.round((reportAvgPpm / 125) * 100))}%`
+      };
+    }
 
     realAssessments.value = mappedAssessments;
     realSupportStudents.value = supportStudentsList;
