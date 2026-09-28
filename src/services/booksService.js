@@ -158,26 +158,44 @@ export async function getBooks(params = {}) {
   const queryString = query.toString() ? `?${query.toString()}` : '';
 
   try {
-    const res = await request(`/books${queryString}`, { method: 'GET' });
-    if (res) {
-      const rawItems = Array.isArray(res) ? res : (res.items || []);
-      let items = rawItems.map(b => ({
-        id: b.id,
-        title: b.title || b.book || '',
-        author: b.author || '',
-        level: b.level,
-        copies: b.copies_note || b.copies || '',
-        is_active: b.disabled_at === null && b.is_active !== false
-      }));
-
+    const res = await request(`/readings/titles${queryString}`, { method: 'GET' });
+    if (res && res.items) {
+      const titleMap = new Map();
+      inMemoryBooks.forEach(b => titleMap.set(b.title.toLowerCase().trim(), { ...b }));
+      res.items.forEach((item, idx) => {
+        const key = (item.book_title || item.title || '').toLowerCase().trim();
+        if (titleMap.has(key)) {
+          const existing = titleMap.get(key);
+          titleMap.set(key, {
+            ...existing,
+            test_id: item.test_id || existing.test_id || null,
+            test_code: item.test_code || existing.test_code || null,
+            level: item.level || existing.level,
+            total_readings: item.total_readings !== undefined ? item.total_readings : (existing.total_readings || 0),
+            active_readings: item.active_readings !== undefined ? item.active_readings : (existing.active_readings || 0)
+          });
+        } else {
+          titleMap.set(key, {
+            id: item.test_id || `read-book-${idx + 1}`,
+            test_id: item.test_id || null,
+            test_code: item.test_code || null,
+            title: item.book_title || item.title,
+            author: '',
+            level: item.level || '0',
+            copies: 'En biblioteca',
+            is_active: true,
+            total_readings: item.total_readings || 0,
+            active_readings: item.active_readings || 0
+          });
+        }
+      });
+      let items = Array.from(titleMap.values());
       if (!params.include_disabled) {
         items = items.filter(b => b.is_active);
       }
-
       if (params.level) {
         items = items.filter(b => b.level === params.level);
       }
-
       if (params.filter) {
         const term = params.filter.trim().toLowerCase();
         items = items.filter(b => 
@@ -185,9 +203,7 @@ export async function getBooks(params = {}) {
           (b.author && b.author.toLowerCase().includes(term))
         );
       }
-
       items.sort((a, b) => compareBookLevels(a.level, b.level));
-
       return {
         items,
         total: items.length,
@@ -196,7 +212,7 @@ export async function getBooks(params = {}) {
       };
     }
   } catch (err) {
-    // Si el backend aún no tiene el endpoint /books levantado, usar fallback
+    // Si falla o no hay conexión, usar datos en memoria
   }
 
   // Filtrado y ordenación sobre datos de respaldo
@@ -230,7 +246,7 @@ export async function getBooks(params = {}) {
 }
 
 /**
- * Da de alta un libro en el catálogo (POST /api/v1/books)
+ * Da de alta un libro en el catálogo
  */
 export async function createBook(bookData) {
   if (!bookData.title || !bookData.title.trim()) {
@@ -245,55 +261,29 @@ export async function createBook(bookData) {
     throw err;
   }
 
-  try {
-    const payload = {
-      title: bookData.title.trim(),
-      book: bookData.title.trim(),
-      level: bookData.level,
-      copies_note: (bookData.copies || '').trim(),
-      author: (bookData.author || '').trim()
-    };
-    const res = await request('/books', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    return {
-      id: res.id,
-      title: res.title || res.book,
-      author: res.author || '',
-      level: res.level,
-      copies: res.copies_note || '',
-      is_active: res.disabled_at === null
-    };
-  } catch (error) {
-    if (error.status === 409) {
-      const err = new Error('Ese título de libro ya existe en el catálogo.');
-      err.status = 409;
-      throw err;
-    }
-    // Fallback local
-    const exists = inMemoryBooks.some(b => b.title.trim().toLowerCase() === bookData.title.trim().toLowerCase());
-    if (exists) {
-      const err = new Error('Ese título de libro ya existe en el catálogo.');
-      err.status = 409;
-      throw err;
-    }
-
-    const newBook = {
-      id: nextBookId++,
-      title: bookData.title.trim(),
-      author: (bookData.author || '').trim(),
-      level: bookData.level,
-      copies: (bookData.copies || '').trim(),
-      is_active: bookData.is_active !== undefined ? bookData.is_active : true
-    };
-    inMemoryBooks.push(newBook);
-    return newBook;
+  const exists = inMemoryBooks.some(b => b.title.trim().toLowerCase() === bookData.title.trim().toLowerCase());
+  if (exists) {
+    const err = new Error('Ese título de libro ya existe en el catálogo.');
+    err.status = 409;
+    throw err;
   }
+
+  const newBook = {
+    id: nextBookId++,
+    title: bookData.title.trim(),
+    author: (bookData.author || '').trim(),
+    level: bookData.level,
+    copies: (bookData.copies || '').trim(),
+    is_active: bookData.is_active !== undefined ? bookData.is_active : true,
+    total_readings: 0,
+    active_readings: 0
+  };
+  inMemoryBooks.push(newBook);
+  return newBook;
 }
 
 /**
- * Actualiza un libro existente (PUT /api/v1/books/:id)
+ * Actualiza un libro existente
  */
 export async function updateBook(id, bookData) {
   if (!bookData.title || !bookData.title.trim()) {
@@ -308,72 +298,40 @@ export async function updateBook(id, bookData) {
     throw err;
   }
 
-  try {
-    const payload = {
-      title: bookData.title.trim(),
-      book: bookData.title.trim(),
-      level: bookData.level,
-      copies_note: (bookData.copies || '').trim(),
-      author: (bookData.author || '').trim()
-    };
-    const res = await request(`/books/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(payload)
-    });
-    return {
-      id: res.id,
-      title: res.title || res.book,
-      author: res.author || '',
-      level: res.level,
-      copies: res.copies_note || '',
-      is_active: res.disabled_at === null
-    };
-  } catch (error) {
-    if (error.status === 409) {
-      const err = new Error('Ese título de libro ya existe en el catálogo.');
-      err.status = 409;
-      throw err;
-    }
-    // Fallback local
-    const index = inMemoryBooks.findIndex(b => b.id === Number(id));
-    if (index === -1) {
-      const notFound = new Error('Libro no encontrado.');
-      notFound.status = 404;
-      throw notFound;
-    }
-
-    const duplicate = inMemoryBooks.some(b => 
-      b.id !== Number(id) && 
-      b.title.trim().toLowerCase() === bookData.title.trim().toLowerCase()
-    );
-    if (duplicate) {
-      const err = new Error('Ese título de libro ya existe en el catálogo.');
-      err.status = 409;
-      throw err;
-    }
-
-    inMemoryBooks[index] = {
-      ...inMemoryBooks[index],
-      ...bookData,
-      id: Number(id)
-    };
-    return inMemoryBooks[index];
+  const index = inMemoryBooks.findIndex(b => String(b.id) === String(id));
+  if (index === -1) {
+    const notFound = new Error('Libro no encontrado.');
+    notFound.status = 404;
+    throw notFound;
   }
+
+  const duplicate = inMemoryBooks.some(b => 
+    String(b.id) !== String(id) && 
+    b.title.trim().toLowerCase() === bookData.title.trim().toLowerCase()
+  );
+  if (duplicate) {
+    const err = new Error('Ese título de libro ya existe en el catálogo.');
+    err.status = 409;
+    throw err;
+  }
+
+  inMemoryBooks[index] = {
+    ...inMemoryBooks[index],
+    ...bookData,
+    id: inMemoryBooks[index].id
+  };
+  return inMemoryBooks[index];
 }
 
 /**
- * Da de baja lógica un libro del catálogo (DELETE /api/v1/books/:id)
+ * Da de baja lógica un libro del catálogo
  */
 export async function deleteBook(id) {
-  try {
-    return await request(`/books/${id}`, { method: 'DELETE' });
-  } catch (error) {
-    const index = inMemoryBooks.findIndex(b => b.id === Number(id));
-    if (index !== -1) {
-      inMemoryBooks[index].is_active = false;
-    }
-    return null;
+  const index = inMemoryBooks.findIndex(b => String(b.id) === String(id));
+  if (index !== -1) {
+    inMemoryBooks[index].is_active = false;
   }
+  return { success: true };
 }
 
 /**
@@ -388,8 +346,24 @@ export async function getReadings(params = {}) {
 
   try {
     const res = await request(`/readings${queryString}`, { method: 'GET' });
-    if (res && res.items) return res;
-    if (Array.isArray(res)) return { items: res, total: res.length };
+    let rawList = null;
+    if (res && Array.isArray(res.items)) rawList = res.items;
+    else if (Array.isArray(res)) rawList = res;
+
+    if (rawList !== null) {
+      const items = rawList.map(item => ({
+        ...item,
+        status: (item.status === 'en curso' || item.status === 'en_curso' || !item.end_date) ? 'en_curso' : 'finalizada',
+        book_title: item.book_title || item.title || item.book || '',
+        title: item.book_title || item.title || item.book || '',
+        book_level: item.book_level || item.level || '0',
+        level: item.level || item.book_level || '0'
+      }));
+      return {
+        items,
+        total: res.total !== undefined ? res.total : items.length
+      };
+    }
   } catch (err) {
     if (err.status !== 0) {
       console.warn('Error al consultar lecturas del backend:', err);
@@ -422,7 +396,10 @@ export async function assignBook(readingData) {
     throw err;
   }
 
-  if (!readingData.book_id) {
+  const book = inMemoryBooks.find(b => String(b.id) === String(readingData.book_id));
+  const bookTitle = (readingData.book_title || readingData.title || (book ? book.title : '')).trim();
+
+  if (!readingData.book_id && !bookTitle) {
     const err = new Error('Debes seleccionar un libro del catálogo.');
     err.status = 400;
     throw err;
@@ -442,30 +419,49 @@ export async function assignBook(readingData) {
   }
 
   const payload = {
-    book_id: String(readingData.book_id),
+    book_title: bookTitle,
+    title: bookTitle,
+    book: bookTitle,
+    level: readingData.level || readingData.book_level || (book ? book.level : '0'),
     start_date: readingData.start_date,
-    end_date: readingData.end_date || null
+    end_date: readingData.end_date || null,
+    copies_note: readingData.copies_note || (book ? book.copies : null),
+    sessions_note: readingData.sessions_note || null
   };
+  if (readingData.test_id || (book && book.test_id)) {
+    payload.test_id = readingData.test_id || (book && book.test_id);
+  }
+  if (readingData.test_code || (book && book.test_code)) {
+    payload.test_code = readingData.test_code || (book && book.test_code);
+  }
 
   try {
-    return await request(`/students/${readingData.student_id}/books`, {
+    const res = await request(`/students/${readingData.student_id}/books`, {
       method: 'POST',
       body: JSON.stringify(payload)
     });
+    if (res) {
+      return {
+        ...res,
+        status: (res.status === 'en curso' || res.status === 'en_curso' || !res.end_date) ? 'en_curso' : 'finalizada',
+        book_title: res.book_title || res.title || res.book || payload.book_title,
+        book_level: res.book_level || res.level || payload.level,
+        level: res.level || res.book_level || payload.level
+      };
+    }
   } catch (error) {
     if (error.status === 422 || error.status === 409 || error.status === 400 || error.status === 403 || error.status === 404) {
       throw error;
     }
     // Fallback local solo en modo offline / pruebas unitarias sin backend (status 0)
     if (error.status === 0) {
-      const book = inMemoryBooks.find(b => String(b.id) === String(readingData.book_id));
       const newReading = {
         id: nextReadingId++,
-        student_id: Number(readingData.student_id),
+        student_id: readingData.student_id,
         student_name: readingData.student_name || 'Alumno',
-        book_id: Number(readingData.book_id),
-        book_title: book ? book.title : 'Libro',
-        book_level: book ? book.level : '0',
+        book_id: readingData.book_id || nextReadingId,
+        book_title: bookTitle || 'Libro',
+        book_level: payload.level,
         start_date: readingData.start_date,
         end_date: readingData.end_date || null,
         status: readingData.end_date ? 'finalizada' : 'en_curso'
@@ -488,10 +484,14 @@ export async function closeReading(readingId, { end_date }) {
   }
 
   try {
-    return await request(`/readings/${readingId}`, {
+    const res = await request(`/readings/${readingId}`, {
       method: 'PATCH',
       body: JSON.stringify({ end_date })
     });
+    return {
+      ...res,
+      status: (res.status === 'en curso' || res.status === 'en_curso' || !res.end_date) ? 'en_curso' : 'finalizada'
+    };
   } catch (error) {
     if (error.status === 422 || error.status === 404 || error.status === 403) {
       throw error;
@@ -528,10 +528,14 @@ export async function closeReading(readingId, { end_date }) {
  */
 export async function reopenReading(readingId) {
   try {
-    return await request(`/readings/${readingId}`, {
+    const res = await request(`/readings/${readingId}`, {
       method: 'PATCH',
       body: JSON.stringify({ end_date: null })
     });
+    return {
+      ...res,
+      status: 'en_curso'
+    };
   } catch (error) {
     if (error.status === 404 || error.status === 403) {
       throw error;
@@ -550,3 +554,4 @@ export async function reopenReading(readingId) {
     throw error;
   }
 }
+

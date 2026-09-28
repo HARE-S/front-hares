@@ -47,6 +47,57 @@
       <span>{{ toastMessage }}</span>
     </div>
 
+    <!-- KPI Summary Grid (2 en 1: Biblioteca y Seguimiento) -->
+    <div class="kpi-summary-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap icon-primary">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+          </svg>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ activeReadingsCount }}</span>
+          <span class="kpi-label">Lecturas en Curso</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap icon-success">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ completedReadingsCount }}</span>
+          <span class="kpi-label">Lecturas Finalizadas</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap icon-info">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+          </svg>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ readingsTotal }}</span>
+          <span class="kpi-label">Total Lecturas</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap icon-neutral">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
+          </svg>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ booksTotal }}</span>
+          <span class="kpi-label">Títulos de Fondo</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Segmented Navigation Tabs -->
     <div class="view-tabs">
       <button 
@@ -179,18 +230,34 @@
 
               <!-- Disponibilidad -->
               <td class="td-status text-center">
-                <span 
-                  v-if="book.is_active" 
-                  class="status-pill status-pill--active"
-                >
-                  Activo
-                </span>
-                <span 
-                  v-else 
-                  class="status-pill status-pill--inactive"
-                >
-                  Baja lógica
-                </span>
+                <div class="status-stack">
+                  <span 
+                    v-if="book.is_active" 
+                    class="status-pill status-pill--active"
+                  >
+                    Activo
+                  </span>
+                  <span 
+                    v-else 
+                    class="status-pill status-pill--inactive"
+                  >
+                    Baja lógica
+                  </span>
+                  <span 
+                    v-if="book.active_readings > 0" 
+                    class="reading-pill-active" 
+                    title="Alumnos leyendo actualmente este libro"
+                  >
+                    {{ book.active_readings }} en curso
+                  </span>
+                  <span 
+                    v-else-if="book.total_readings > 0" 
+                    class="reading-pill-history" 
+                    title="Total de lecturas registradas"
+                  >
+                    {{ book.total_readings }} leídos
+                  </span>
+                </div>
               </td>
 
               <!-- Acciones -->
@@ -204,6 +271,16 @@
                     @click="openAssignModal(book.id)"
                   >
                     Asignar
+                  </button>
+
+                  <button 
+                    v-if="book.total_readings > 0 || book.active_readings > 0"
+                    type="button" 
+                    class="btn-action-text text-secondary"
+                    title="Ver lecturas de este libro en el aula"
+                    @click="viewReadingsForBook(book.title)"
+                  >
+                    Ver Lecturas
                   </button>
 
                   <button 
@@ -285,6 +362,30 @@
               placeholder="Filtrar por alumno o libro..." 
               class="form-control pl-icon"
             />
+            <button 
+              v-if="readingSearch" 
+              type="button" 
+              class="btn-clear-inline" 
+              title="Borrar filtro" 
+              @click="readingSearch = ''"
+            >
+              &times;
+            </button>
+          </div>
+
+          <!-- Filtro por Nivel Pedagógico -->
+          <div class="filter-item">
+            <label for="filter-reading-level" class="sr-only">Nivel pedagógico</label>
+            <select 
+              id="filter-reading-level"
+              v-model="selectedReadingLevel" 
+              class="form-control select-compact"
+            >
+              <option value="">Todos los niveles</option>
+              <option v-for="lvl in BOOK_LEVELS" :key="lvl" :value="lvl">
+                Nivel {{ lvl }}
+              </option>
+            </select>
           </div>
         </div>
 
@@ -327,8 +428,13 @@
               <!-- Libro y Nivel -->
               <td class="td-book">
                 <div class="book-cell-inline">
-                  <span class="book-title-inline">{{ reading.book_title }}</span>
-                  <BookLevelBadge :level="reading.book_level || '0'" />
+                  <span class="book-title-inline font-bold">{{ reading.book_title || reading.title }}</span>
+                  <BookLevelBadge :level="reading.book_level || reading.level || '0'" />
+                </div>
+                <div v-if="reading.copies_note || reading.sessions_note" class="reading-notes-inline text-muted text-xs">
+                  <span v-if="reading.copies_note">{{ reading.copies_note }}</span>
+                  <span v-if="reading.copies_note && reading.sessions_note"> · </span>
+                  <span v-if="reading.sessions_note">{{ reading.sessions_note }}</span>
                 </div>
               </td>
 
@@ -514,6 +620,7 @@ const selectedBookIdForAssign = ref(null);
 const allReadings = ref([]);
 const readingsTotal = ref(0);
 const readingsStatusFilter = ref(''); // '' (todas) | 'en_curso' | 'finalizada'
+const selectedReadingLevel = ref('');
 const readingSearch = ref('');
 const closingReading = ref(null);
 const closeEndDate = ref(new Date().toISOString().split('T')[0]);
@@ -580,11 +687,13 @@ const completedReadingsCount = computed(() => {
 const filteredReadings = computed(() => {
   return allReadings.value.filter(item => {
     const matchesStatus = !readingsStatusFilter.value || item.status === readingsStatusFilter.value;
+    const matchesLevel = !selectedReadingLevel.value || item.book_level === selectedReadingLevel.value || item.level === selectedReadingLevel.value;
     const term = readingSearch.value.trim().toLowerCase();
     const matchesSearch = !term || 
-      item.student_name.toLowerCase().includes(term) || 
-      item.book_title.toLowerCase().includes(term);
-    return matchesStatus && matchesSearch;
+      (item.student_name && item.student_name.toLowerCase().includes(term)) || 
+      (item.book_title && item.book_title.toLowerCase().includes(term)) ||
+      (item.title && item.title.toLowerCase().includes(term));
+    return matchesStatus && matchesLevel && matchesSearch;
   });
 });
 
@@ -627,9 +736,17 @@ function openAssignModal(bookId = null) {
   isAssignModalOpen.value = true;
 }
 
+function viewReadingsForBook(title) {
+  readingSearch.value = title;
+  readingsStatusFilter.value = '';
+  selectedReadingLevel.value = '';
+  activeTab.value = 'readings';
+}
+
 function handleReadingAssigned(newReading) {
   showToast(`Lectura de "${newReading.book_title}" asignada a ${newReading.student_name}.`);
   loadReadingsList();
+  loadBooksList();
   activeTab.value = 'readings';
 }
 
@@ -655,6 +772,7 @@ async function submitCloseReading() {
     showToast(`Lectura de "${closingReading.value.book_title}" marcada como terminada.`);
     closingReading.value = null;
     loadReadingsList();
+    loadBooksList();
   } catch (err) {
     closeErrorMessage.value = err.message || 'Error al cerrar la lectura.';
   }
@@ -665,6 +783,7 @@ async function handleReopenReading(reading) {
     await reopenReading(reading.id);
     showToast(`Lectura de "${reading.book_title}" reabierta en curso.`);
     loadReadingsList();
+    loadBooksList();
   } catch (err) {
     alert(err.message || 'Error al reabrir la lectura.');
   }
@@ -679,6 +798,84 @@ async function handleReopenReading(reading) {
   max-width: 80rem;
   margin: 0 auto;
   width: 100%;
+}
+
+/* KPI Summary Grid (2 en 1) */
+.kpi-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background-color: var(--color-surface, #ffffff);
+  border: 1px solid rgba(189, 201, 192, 0.4);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.kpi-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.kpi-icon-wrap.icon-primary {
+  background-color: rgba(142, 247, 199, 0.25);
+  color: var(--color-primary, #006c49);
+}
+
+.kpi-icon-wrap.icon-success {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+}
+
+.kpi-icon-wrap.icon-info {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #1d4ed8;
+}
+
+.kpi-icon-wrap.icon-neutral {
+  background-color: rgba(100, 116, 139, 0.15);
+  color: #475569;
+}
+
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-on-surface, #191c1b);
+}
+
+.kpi-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-on-surface-variant, #3f4943);
+}
+
+.reading-notes-inline {
+  font-size: 0.75rem;
+  color: var(--color-on-surface-variant, #6b7280);
+  margin-top: 0.25rem;
 }
 
 /* Header */
@@ -1133,5 +1330,62 @@ async function handleReopenReading(reading) {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+/* 2 en 1 Integrated status & reading pill styles */
+.status-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.reading-pill-active {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  background-color: rgba(0, 108, 73, 0.12);
+  color: var(--color-secondary, #006c49);
+  border: 1px solid rgba(0, 108, 73, 0.25);
+  white-space: nowrap;
+}
+
+.reading-pill-history {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  background-color: var(--color-surface-container-high, #e2e9e2);
+  color: var(--color-on-surface-variant, #3f4943);
+  white-space: nowrap;
+}
+
+.btn-clear-inline {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--color-on-surface-variant, #3f4943);
+  cursor: pointer;
+  padding: 0.15rem 0.35rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-clear-inline:hover {
+  background-color: var(--color-surface-container-high, #e2e9e2);
+  color: var(--color-on-surface, #191c1a);
 }
 </style>
