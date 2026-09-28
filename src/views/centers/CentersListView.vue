@@ -1,8 +1,18 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getCenters, getCenterSections, getSectionStudents } from '@/services/directoryService';
-import { ChevronDown, FileSpreadsheet } from 'lucide-vue-next';
+import { matchesQuery } from '@/utils/search';
+import {
+  ChevronDown,
+  FileSpreadsheet,
+  Search,
+  X,
+  RotateCcw,
+  ArrowUpDown,
+  Building2,
+  Users
+} from 'lucide-vue-next';
 
 const router = useRouter();
 const route = useRoute();
@@ -14,9 +24,12 @@ const loadingSections = ref(false);
 const loadingStudents = ref(false);
 const error = ref(null);
 
-const selectedCenter = ref(null);
-const selectedSection = ref(null);
-const selectedYear = ref(null);
+const searchQuery = ref('');
+const selectedCenter = ref('');
+const selectedSection = ref('');
+const selectedYear = ref('');
+const sortBy = ref('name');
+const sortOrder = ref('asc');
 
 async function loadCenters() {
   loadingCenters.value = true;
@@ -57,6 +70,18 @@ async function loadCenters() {
   }
 }
 
+// Al cambiar de centro, resetear sección si no pertenece al nuevo centro
+watch(selectedCenter, (newCenter) => {
+  if (newCenter) {
+    const validSections = sectionsMap.value[newCenter] || [];
+    if (!validSections.some(s => s.id === selectedSection.value)) {
+      selectedSection.value = '';
+    }
+  } else {
+    selectedSection.value = '';
+  }
+});
+
 const sections = computed(() => {
   if (!selectedCenter.value) return [];
   return sectionsMap.value[selectedCenter.value] || [];
@@ -73,6 +98,45 @@ const years = computed(() => {
   return Array.from(uniqueYears).sort().reverse();
 });
 
+const hasActiveFilters = computed(() => {
+  return Boolean(
+    (selectedCenter.value && selectedCenter.value !== '') ||
+    (selectedSection.value && selectedSection.value !== '') ||
+    (selectedYear.value && selectedYear.value !== '') ||
+    searchQuery.value.trim()
+  );
+});
+
+function clearSearch() {
+  searchQuery.value = '';
+}
+
+function resetFilters() {
+  selectedCenter.value = '';
+  selectedSection.value = '';
+  selectedYear.value = '';
+  searchQuery.value = '';
+  sortBy.value = 'name';
+  sortOrder.value = 'asc';
+}
+
+function toggleSort(field) {
+  if (sortBy.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortBy.value = field;
+    sortOrder.value = 'asc';
+  }
+}
+
+function getInitials(name) {
+  if (!name) return 'AL';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
 
 const filteredStudents = computed(() => {
   let result = allStudents.value;
@@ -89,7 +153,33 @@ const filteredStudents = computed(() => {
     result = result.filter(s => s.academic_year === selectedYear.value);
   }
 
-  return result.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const q = searchQuery.value.trim();
+  if (q) {
+    result = result.filter(s => {
+      if (matchesQuery(s.name, q)) return true;
+      if (s.external_id && matchesQuery(s.external_id, q)) return true;
+      if (s.center_name && matchesQuery(s.center_name, q)) return true;
+      if (s.section_name && matchesQuery(s.section_name, q)) return true;
+      return false;
+    });
+  }
+
+  return result.slice().sort((a, b) => {
+    let valA = '';
+    let valB = '';
+    if (sortBy.value === 'center') {
+      valA = a.center_name || '';
+      valB = b.center_name || '';
+    } else if (sortBy.value === 'section') {
+      valA = a.section_name || '';
+      valB = b.section_name || '';
+    } else {
+      valA = a.name || '';
+      valB = b.name || '';
+    }
+    const cmp = valA.localeCompare(valB, 'es', { sensitivity: 'base' });
+    return sortOrder.value === 'asc' ? cmp : -cmp;
+  });
 });
 
 function viewStudent(studentId) {
@@ -98,8 +188,8 @@ function viewStudent(studentId) {
     router.push({
       name: 'student-detail',
       params: {
-        centerId: student.center_id,
-        sectionId: student.section_id,
+        centerId: student.center_id || 'c-1',
+        sectionId: student.section_id || 's-1',
         studentId: studentId
       }
     });
@@ -115,7 +205,7 @@ onMounted(loadCenters);
       <div class="header-container">
         <div class="header-content">
           <h1>Alumnado</h1>
-          <p class="header-subtitle">Consulta el alumnado de cada centro y sección</p>
+          <p class="header-subtitle">Consulta y busca el alumnado de cada centro y sección</p>
           <p class="source-note">Los datos proceden de Alexia y son de solo lectura.</p>
         </div>
         <div class="header-actions">
@@ -140,14 +230,55 @@ onMounted(loadCenters);
       </div>
     </div>
 
-    <!-- Filtros -->
+    <!-- Filtros y Buscador -->
     <div class="filters-card">
       <div class="filters-title">
-        <span class="filters-label">Filtros</span>
+        <div class="filters-title-left">
+          <span class="filters-label">Búsqueda y Filtros</span>
+          <span v-if="allStudents.length > 0" class="filters-sub-count">
+            ({{ allStudents.length }} alumnos en total)
+          </span>
+        </div>
+        <button
+          v-if="hasActiveFilters"
+          type="button"
+          class="btn-reset-filters"
+          title="Restablecer todos los filtros"
+          @click="resetFilters"
+        >
+          <RotateCcw :size="13" />
+          <span>Limpiar filtros</span>
+        </button>
       </div>
 
       <div class="filters-grid">
-        <!-- Centro -->
+        <!-- Buscador por Nombre, Apellidos o ID -->
+        <div class="filter-item filter-search">
+          <label for="student-search-input" class="filter-label">Buscar alumno</label>
+          <div class="search-input-wrapper">
+            <Search :size="18" class="search-input-icon" />
+            <input
+              id="student-search-input"
+              v-model="searchQuery"
+              type="text"
+              class="filter-input-search"
+              placeholder="Buscar por nombre, apellidos, ID..."
+              aria-label="Buscar alumno por nombre, apellidos o identificador"
+            />
+            <button
+              v-if="searchQuery"
+              type="button"
+              class="btn-clear-search-inline"
+              aria-label="Borrar búsqueda"
+              title="Borrar texto"
+              @click="clearSearch"
+            >
+              <X :size="15" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Selector de Centro -->
         <div class="filter-item">
           <label for="center-select" class="filter-label">Centro</label>
           <div class="select-wrapper">
@@ -157,7 +288,7 @@ onMounted(loadCenters);
               class="filter-select"
               :disabled="loadingCenters"
             >
-              <option value="">-- Seleccionar centro --</option>
+              <option value="">-- Todos los centros --</option>
               <option v-for="center in centers" :key="center.id" :value="center.id">
                 {{ center.name }}
               </option>
@@ -166,7 +297,7 @@ onMounted(loadCenters);
           </div>
         </div>
 
-        <!-- Sección -->
+        <!-- Selector de Sección -->
         <div class="filter-item">
           <label for="section-select" class="filter-label">Sección</label>
           <div class="select-wrapper">
@@ -174,9 +305,9 @@ onMounted(loadCenters);
               id="section-select"
               v-model="selectedSection"
               class="filter-select"
-              :disabled="loadingSections"
+              :disabled="loadingSections || !selectedCenter"
             >
-              <option value="">-- Seleccionar sección --</option>
+              <option value="">{{ selectedCenter ? '-- Todas las secciones --' : '-- Selecciona centro primero --' }}</option>
               <option v-for="section in sections" :key="section.id" :value="section.id">
                 {{ section.name }}
               </option>
@@ -185,7 +316,7 @@ onMounted(loadCenters);
           </div>
         </div>
 
-        <!-- Año Académico -->
+        <!-- Selector de Año Académico -->
         <div class="filter-item">
           <label for="year-select" class="filter-label">Año Académico</label>
           <div class="select-wrapper">
@@ -217,35 +348,93 @@ onMounted(loadCenters);
       <p>Cargando datos...</p>
     </div>
 
-    <!-- Estado vacío -->
-    <div v-else-if="selectedSection && filteredStudents.length === 0" class="empty-state">
-      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path>
-      </svg>
-      <p>No hay alumnos que coincidan con los filtros seleccionados.</p>
+    <!-- Estado vacío cuando no hay resultados para los filtros -->
+    <div v-else-if="hasActiveFilters && filteredStudents.length === 0" class="empty-state">
+      <Search class="empty-icon" :size="48" />
+      <p class="empty-title">No hay alumnos que coincidan con los filtros seleccionados.</p>
+      <p class="empty-hint">Prueba con otro término de búsqueda o limpia los filtros para ver el listado completo.</p>
+      <button
+        v-if="hasActiveFilters"
+        type="button"
+        class="btn-clear-search-empty"
+        @click="resetFilters"
+      >
+        <RotateCcw :size="14" />
+        <span>Restablecer filtros</span>
+      </button>
     </div>
 
     <!-- Tabla de estudiantes -->
     <div v-else-if="filteredStudents.length > 0" class="students-table-card">
       <div class="table-header">
-        <h3>{{ filteredStudents.length }} alumno{{ filteredStudents.length !== 1 ? 's' : '' }}</h3>
+        <div class="table-header-left">
+          <h3>{{ filteredStudents.length }} alumno{{ filteredStudents.length !== 1 ? 's' : '' }}</h3>
+          <span v-if="hasActiveFilters && allStudents.length > 0" class="filter-count-hint">
+            (filtrado de {{ allStudents.length }} en total)
+          </span>
+        </div>
+        <div v-if="searchQuery.trim()" class="search-term-badge">
+          <span>Buscando: <strong>"{{ searchQuery.trim() }}"</strong></span>
+        </div>
       </div>
 
       <div class="table-wrapper">
         <table class="students-table">
           <thead>
             <tr>
-              <th class="col-name">Nombre</th>
+              <th class="col-name" @click="toggleSort('name')">
+                <div class="th-content">
+                  <span>Alumno</span>
+                  <ArrowUpDown :size="13" class="sort-icon" />
+                </div>
+              </th>
+              <th class="col-center" @click="toggleSort('center')">
+                <div class="th-content">
+                  <span>Centro</span>
+                  <ArrowUpDown :size="13" class="sort-icon" />
+                </div>
+              </th>
+              <th class="col-section" @click="toggleSort('section')">
+                <div class="th-content">
+                  <span>Sección / Grupo</span>
+                  <ArrowUpDown :size="13" class="sort-icon" />
+                </div>
+              </th>
+              <th class="col-year">Año Académico</th>
               <th class="col-action">Acción</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="student in filteredStudents" :key="student.id" class="student-row">
               <td class="col-name">
-                <span class="student-name">{{ student.name }}</span>
+                <div class="student-profile-cell">
+                  <div class="student-avatar-chip">
+                    {{ getInitials(student.name) }}
+                  </div>
+                  <div class="student-info-meta">
+                    <span class="student-name">{{ student.name }}</span>
+                    <span v-if="student.external_id" class="student-external-id">
+                      ID: {{ student.external_id }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td class="col-center">
+                <span class="center-badge">{{ student.center_name || '—' }}</span>
+              </td>
+              <td class="col-section">
+                <span class="section-pill">{{ student.section_name || '—' }}</span>
+              </td>
+              <td class="col-year">
+                <span class="year-badge">{{ student.academic_year || '2024-25' }}</span>
               </td>
               <td class="col-action">
-                <button class="btn-view-student" @click="viewStudent(student.id)">
+                <button
+                  type="button"
+                  class="btn-view-student"
+                  title="Ver ficha del alumno"
+                  @click="viewStudent(student.id)"
+                >
                   Ver ficha
                 </button>
               </td>
@@ -255,7 +444,7 @@ onMounted(loadCenters);
       </div>
     </div>
 
-    <!-- Instrucción inicial -->
+    <!-- Instrucción inicial cuando no hay filtros y no hay alumnos cargados -->
     <div v-else class="initial-state">
       <svg class="initial-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -316,6 +505,13 @@ onMounted(loadCenters);
   color: var(--on-surface-variant);
 }
 
+.source-note {
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -342,18 +538,56 @@ onMounted(loadCenters);
   color: var(--primary);
 }
 
+/* Summary Bar */
+.centers-summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.center-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-full, 9999px);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--on-surface);
+}
+
+.badge-count {
+  background-color: var(--surface-container-high);
+  color: var(--on-surface-variant);
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 /* Filtros */
 .filters-card {
   background-color: var(--surface-container-lowest);
   border: 1px solid var(--outline-variant);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
 }
 
 .filters-title {
   background-color: var(--surface-container-low);
-  padding: 1rem 1.5rem;
+  padding: 0.85rem 1.5rem;
   border-bottom: 1px solid var(--outline-variant);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filters-title-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .filters-label {
@@ -364,22 +598,105 @@ onMounted(loadCenters);
   letter-spacing: 0.05em;
 }
 
+.filters-sub-count {
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+}
+
+.btn-reset-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background-color: var(--surface-container-high);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-reset-filters:hover {
+  background-color: var(--surface-container-highest);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
   padding: 1.5rem;
 }
 
 .filter-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.45rem;
+}
+
+.filter-search {
+  grid-column: 1 / -1;
 }
 
 .filter-label {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 600;
+  color: var(--on-surface);
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--on-surface-variant);
+  pointer-events: none;
+}
+
+.filter-input-search {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.6rem;
+  padding-right: 2.5rem;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  color: var(--on-surface);
+  font-size: 0.92rem;
+  transition: all 0.2s ease;
+}
+
+.filter-input-search:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 108, 73, 0.12);
+}
+
+.btn-clear-search-inline {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-clear-search-inline:hover {
+  background-color: var(--surface-container-high);
   color: var(--on-surface);
 }
 
@@ -436,6 +753,25 @@ onMounted(loadCenters);
   border-radius: var(--radius-lg);
   font-size: 0.9rem;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-retry {
+  margin-left: 1rem;
+  padding: 0.35rem 0.75rem;
+  background-color: white;
+  color: var(--error, #ba1a1a);
+  border: 1px solid var(--error, #ba1a1a);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.btn-retry:hover {
+  background-color: var(--error-container, #ffdad6);
 }
 
 /* Loading State */
@@ -470,8 +806,8 @@ onMounted(loadCenters);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 3rem 1.5rem;
+  gap: 0.75rem;
+  padding: 3.5rem 1.5rem;
   background-color: var(--surface-container-lowest);
   border: 1px dashed var(--outline-variant);
   border-radius: var(--radius-lg);
@@ -481,37 +817,92 @@ onMounted(loadCenters);
 
 .empty-icon,
 .initial-icon {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   color: var(--on-surface-variant);
-  opacity: 0.5;
+  opacity: 0.45;
+  margin-bottom: 0.25rem;
 }
 
-.empty-state p,
-.initial-state p {
+.empty-title {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--on-surface);
 }
 
-/* Table */
+.empty-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+}
+
+.btn-clear-search-empty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--surface-container-high);
+  color: var(--on-surface);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-clear-search-empty:hover {
+  background-color: var(--surface-container-highest);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Students Table */
 .students-table-card {
   background-color: var(--surface-container-lowest);
   border: 1px solid var(--outline-variant);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
 }
 
 .table-header {
   background-color: var(--surface-container-low);
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--outline-variant);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.table-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .table-header h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--on-surface);
+}
+
+.filter-count-hint {
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+.search-term-badge {
+  font-size: 0.82rem;
+  background-color: var(--surface-container-high);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  color: var(--on-surface-variant);
 }
 
 .table-wrapper {
@@ -526,20 +917,37 @@ onMounted(loadCenters);
 
 .students-table th {
   background-color: var(--surface-container-low);
-  padding: 1rem 1.25rem;
+  padding: 0.95rem 1.25rem;
   text-align: left;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--on-surface-variant);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   border-bottom: 1px solid var(--outline-variant);
 }
 
+.th-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.th-content:hover {
+  color: var(--primary);
+}
+
+.sort-icon {
+  opacity: 0.6;
+}
+
 .students-table td {
-  padding: 1.125rem 1.25rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--outline-variant);
   color: var(--on-surface);
+  vertical-align: middle;
 }
 
 .student-row:hover td {
@@ -551,37 +959,99 @@ onMounted(loadCenters);
 }
 
 .col-name {
-  width: 50%;
+  width: 32%;
+}
+
+.col-center {
+  width: 24%;
+}
+
+.col-section {
+  width: 20%;
 }
 
 .col-year {
-  width: 25%;
+  width: 12%;
 }
 
 .col-action {
-  width: 25%;
-  text-align: center;
+  width: 12%;
+  text-align: right;
+}
+
+.student-profile-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.student-avatar-chip {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full, 9999px);
+  background-color: var(--primary-container, #d1e8d5);
+  color: var(--on-primary-container, #002114);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.student-info-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
 .student-name {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--on-surface);
+  line-height: 1.2;
+}
+
+.student-external-id {
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+  font-family: monospace;
+}
+
+.center-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  background-color: var(--surface-container);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+}
+
+.section-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  background-color: var(--secondary-container, #e8def8);
+  color: var(--on-secondary-container, #1d192b);
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 .year-badge {
   display: inline-block;
-  padding: 0.3rem 0.6rem;
-  background-color: var(--secondary-fixed);
-  color: var(--on-primary-fixed-variant);
+  padding: 0.25rem 0.55rem;
+  background-color: var(--surface-container-high);
+  color: var(--on-surface-variant);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   border-radius: var(--radius-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .btn-view-student {
-  padding: 0.5rem 1rem;
+  padding: 0.45rem 0.9rem;
   background-color: var(--primary);
   color: var(--on-primary);
   border: 1px solid var(--primary);
@@ -590,6 +1060,7 @@ onMounted(loadCenters);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .btn-view-student:hover {
@@ -603,7 +1074,13 @@ onMounted(loadCenters);
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+  .filters-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 680px) {
   .students-view {
     gap: 1.5rem;
   }
@@ -622,77 +1099,20 @@ onMounted(loadCenters);
     padding: 1rem;
   }
 
-  .col-name {
-    width: 60%;
-  }
-
-  .col-year {
-    width: 20%;
-  }
-
-  .col-action {
-    width: 20%;
-  }
-
   .students-table th,
   .students-table td {
-    padding: 0.75rem 0.9rem;
+    padding: 0.75rem 0.85rem;
     font-size: 0.85rem;
   }
 
+  .col-center,
+  .col-year {
+    display: none;
+  }
+
   .btn-view-student {
-    padding: 0.4rem 0.8rem;
+    padding: 0.4rem 0.75rem;
     font-size: 0.75rem;
   }
-}
-
-.source-note {
-  font-size: 0.8rem;
-  color: var(--on-surface-variant);
-  margin-top: 0.25rem;
-  font-style: italic;
-}
-
-.centers-summary-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.center-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: var(--surface-container-low);
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-full, 9999px);
-  padding: 0.25rem 0.75rem;
-  font-size: 0.8rem;
-  color: var(--on-surface);
-}
-
-.badge-count {
-  background-color: var(--surface-container-high);
-  color: var(--on-surface-variant);
-  padding: 0.1rem 0.45rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.btn-retry {
-  margin-left: 1rem;
-  padding: 0.35rem 0.75rem;
-  background-color: white;
-  color: var(--error, #ba1a1a);
-  border: 1px solid var(--error, #ba1a1a);
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-
-.btn-retry:hover {
-  background-color: var(--error-container, #ffdad6);
 }
 </style>

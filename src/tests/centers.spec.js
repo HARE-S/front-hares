@@ -203,4 +203,108 @@ describe('FE-25 — Navegación por centros, secciones y alumnado', () => {
       expect(wrapper.findAll('button').some((b) => b.text().includes('Reintentar'))).toBe(true);
     });
   });
+
+  describe('Buscador de alumnos y filtros avanzados en CentersListView', () => {
+    const mockCenters = [
+      { id: 'c-1', name: 'Centro Peñascal Bilbao', sections_count: 2 },
+      { id: 'c-2', name: 'Centro Peñascal Tolosa', sections_count: 1 }
+    ];
+    const mockSectionsC1 = [
+      { id: 'sec-1', name: '1º ESO A', academic_year: '2024-25', center_id: 'c-1' },
+      { id: 'sec-2', name: '2º ESO B', academic_year: '2024-25', center_id: 'c-1' }
+    ];
+    const mockSectionsC2 = [
+      { id: 'sec-3', name: '3º Primaria', academic_year: '2023-24', center_id: 'c-2' }
+    ];
+    const mockStudentsSec1 = [
+      { id: 'stu-1', name: 'María Gómez Pérez', external_id: 'ALX-101' },
+      { id: 'stu-2', name: 'Iker Ruiz Ortiz', external_id: 'ALX-102' }
+    ];
+    const mockStudentsSec2 = [
+      { id: 'stu-3', name: 'Jon Álvarez Castillo', external_id: 'ALX-103' }
+    ];
+    const mockStudentsSec3 = [
+      { id: 'stu-4', name: 'Ainhoa García', external_id: 'ALX-104' }
+    ];
+
+    beforeEach(() => {
+      getCenters.mockResolvedValue(mockCenters);
+      getCenterSections.mockImplementation((centerId) => {
+        if (centerId === 'c-1') return Promise.resolve(mockSectionsC1);
+        if (centerId === 'c-2') return Promise.resolve(mockSectionsC2);
+        return Promise.resolve([]);
+      });
+      getSectionStudents.mockImplementation((sectionId) => {
+        if (sectionId === 'sec-1') return Promise.resolve(mockStudentsSec1);
+        if (sectionId === 'sec-2') return Promise.resolve(mockStudentsSec2);
+        if (sectionId === 'sec-3') return Promise.resolve(mockStudentsSec3);
+        return Promise.resolve([]);
+      });
+    });
+
+    it('permite buscar alumno por fragmento de nombre o apellido sin importar mayúsculas ni tildes', async () => {
+      const wrapper = await mountAt(CentersListView, '/centers');
+      await flushPromises();
+
+      // Inicialmente se muestran los 4 estudiantes
+      expect(wrapper.text()).toContain('María Gómez Pérez');
+      expect(wrapper.text()).toContain('Jon Álvarez Castillo');
+      expect(wrapper.text()).toContain('Ainhoa García');
+
+      // Buscar por "alvarez" (sin tilde, minúsculas)
+      const searchInput = wrapper.find('#student-search-input');
+      expect(searchInput.exists()).toBe(true);
+      await searchInput.setValue('alvarez');
+      await flushPromises();
+
+      expect(wrapper.text()).toContain('Jon Álvarez Castillo');
+      expect(wrapper.text()).not.toContain('María Gómez Pérez');
+      expect(wrapper.text()).not.toContain('Ainhoa García');
+    });
+
+    it('permite buscar alumno por su identificador externo / Alexia ID', async () => {
+      const wrapper = await mountAt(CentersListView, '/centers');
+      await flushPromises();
+
+      const searchInput = wrapper.find('#student-search-input');
+      await searchInput.setValue('ALX-104');
+      await flushPromises();
+
+      expect(wrapper.text()).toContain('Ainhoa García');
+      expect(wrapper.text()).not.toContain('María Gómez Pérez');
+    });
+
+    it('permite limpiar los filtros con el botón "Limpiar filtros"', async () => {
+      const wrapper = await mountAt(CentersListView, '/centers');
+      await flushPromises();
+
+      const searchInput = wrapper.find('#student-search-input');
+      await searchInput.setValue('Maria');
+      await flushPromises();
+
+      expect(wrapper.text()).not.toContain('Jon Álvarez Castillo');
+
+      // El botón Limpiar filtros aparece
+      const resetBtn = wrapper.find('.btn-reset-filters');
+      expect(resetBtn.exists()).toBe(true);
+      await resetBtn.trigger('click');
+      await flushPromises();
+
+      // Se restablecen todos los alumnos
+      expect(wrapper.text()).toContain('Jon Álvarez Castillo');
+      expect(wrapper.text()).toContain('María Gómez Pérez');
+    });
+
+    it('muestra el estado vacío adecuado cuando no hay coincidencias con la búsqueda', async () => {
+      const wrapper = await mountAt(CentersListView, '/centers');
+      await flushPromises();
+
+      const searchInput = wrapper.find('#student-search-input');
+      await searchInput.setValue('NombreInexistenteXYZ');
+      await flushPromises();
+
+      expect(wrapper.text()).toContain('No hay alumnos que coincidan con los filtros seleccionados');
+      expect(wrapper.find('.btn-clear-search-empty').exists()).toBe(true);
+    });
+  });
 });
