@@ -52,3 +52,7 @@ front-hares/
 - [Vite](https://vitejs.dev/)
 - [Vitest](https://vitest.dev/) + [@vue/test-utils](https://test-utils.vuejs.org/)
 - [Lucide Vue Next](https://lucide.dev/) (Iconografía)
+
+----
+
+.
