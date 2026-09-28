@@ -205,4 +205,15 @@ describe('Componente TestForm.vue (Formulario de Pruebas — FE-14 y FE-15)', ()
     expect(codeInput.attributes('disabled')).toBeDefined();
     expect(wrapper.text()).toContain('El código no puede modificarse porque hay resultados asociados');
   });
+
+  it('autogenera el código de prueba automáticamente al seleccionar curso, letra y tipo sin requerir escribir el código', async () => {
+    const wrapper = mount(TestForm);
+
+    await wrapper.find('#test-course').setValue(2);
+    await wrapper.find('#test-letter').setValue('B');
+    await wrapper.find('#test-type').setValue('F');
+
+    expect(wrapper.find('#test-code').element.value).toBe('2BF');
+    expect(wrapper.text()).toContain('Generado automáticamente');
+  });
 });

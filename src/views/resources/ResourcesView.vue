@@ -54,16 +54,16 @@ defineExpose({
 
 <template>
   <div class="resources-view">
-    <!-- Barra superior de pestañas unificadas de Recursos -->
+    <!-- Barra superior de Recursos: selector limpio y esbelto -->
     <div class="resources-nav-bar">
-      <div class="resources-nav-pill">
+      <nav class="resources-nav-pill" aria-label="Secciones de Recursos">
         <button
           type="button"
           class="resources-tab-btn"
           :class="{ active: currentSubTab === 'tests' }"
           @click="setSubTab('tests')"
         >
-          <Layers :size="17" />
+          <Layers :size="15" />
           <span>Pruebas de Lectura</span>
         </button>
 
@@ -73,14 +73,14 @@ defineExpose({
           :class="{ active: currentSubTab === 'books' }"
           @click="setSubTab('books')"
         >
-          <BookOpen :size="17" />
+          <BookOpen :size="15" />
           <span>Biblioteca de Libros</span>
         </button>
-      </div>
+      </nav>
     </div>
 
     <!-- Contenido Activo -->
-    <div class="resources-content">
+    <main class="resources-content">
       <TestsCatalogView
         v-if="currentSubTab === 'tests'"
         ref="testsCatalogRef"
@@ -93,7 +93,7 @@ defineExpose({
         :user-role="userRole"
         :course="course"
       />
-    </div>
+    </main>
   </div>
 </template>
 
@@ -101,7 +101,7 @@ defineExpose({
 .resources-view {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.75rem;
   width: 100%;
 }
 
@@ -109,42 +109,43 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding-bottom: 0.25rem;
+  padding-bottom: 0.15rem;
 }
 
 .resources-nav-pill {
   display: inline-flex;
-  background-color: var(--surface-container-high, #e7e8e8);
-  padding: 0.3rem;
-  border-radius: var(--radius-lg, 12px);
-  gap: 0.35rem;
-  border: 1px solid var(--outline-variant, rgba(0, 0, 0, 0.08));
+  background-color: var(--surface-container-high, #f1f5f9);
+  padding: 0.2rem;
+  border-radius: var(--radius-md, 8px);
+  gap: 0.2rem;
+  border: 1px solid var(--outline-variant, #e2e8f0);
 }
 
 .resources-tab-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 1.15rem;
-  border-radius: var(--radius-md, 8px);
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
   border: none;
   background: transparent;
-  color: var(--on-surface-variant, #49454f);
-  font-size: 0.9rem;
+  color: var(--on-surface-variant, #64748b);
+  font-size: 0.825rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 }
 
 .resources-tab-btn:hover:not(.active) {
-  background-color: rgba(0, 0, 0, 0.04);
-  color: var(--on-surface, #1d1b20);
+  background-color: rgba(0, 0, 0, 0.03);
+  color: var(--on-surface, #0f172a);
 }
 
 .resources-tab-btn.active {
-  background-color: var(--surface-container-lowest, #ffffff);
+  background-color: #ffffff;
   color: var(--primary, #006699);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .resources-content {

@@ -162,11 +162,11 @@ onUnmounted(() => {
 
 .stitch-content-canvas {
   flex: 1;
-  padding: 2rem 1.75rem;
+  padding: 1rem 1.5rem;
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.25s ease-in-out;
 }
 
 .content-container {
@@ -185,9 +185,9 @@ onUnmounted(() => {
 .stitch-footer {
   border-top: 1px solid var(--outline-variant);
   background-color: var(--surface-container-lowest);
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1.5rem;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--on-surface-variant);
 }
 
@@ -195,18 +195,17 @@ onUnmounted(() => {
   margin: 0;
 }
 
-/* Barra Superior Global (TopBar) */
+/* Barra Superior Global (TopBar: ultra-ligera, delgada y minimalista) */
 .stitch-topbar {
-  background-color: var(--surface-container-lowest, #ffffff);
-  border-bottom: 1px solid var(--outline-variant, #e2e8f0);
-  padding: 0 1.75rem;
-  height: 56px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 0 1.5rem;
+  height: 44px;
   display: flex;
   align-items: center;
   position: sticky;
   top: 0;
   z-index: 30;
-  backdrop-filter: blur(8px);
 }
 
 .topbar-inner {
@@ -221,38 +220,36 @@ onUnmounted(() => {
 .topbar-left {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .topbar-brand-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.75rem;
-  background-color: var(--surface-container, #f1f5f9);
-  border-radius: 9999px;
+  gap: 0.4rem;
+  padding: 0.15rem 0.4rem;
+  background-color: transparent;
+  border: none;
   font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--on-surface-variant, #475569);
-  border: 1px solid var(--outline-variant, #e2e8f0);
+  font-weight: 500;
+  color: #64748b;
 }
 
 .chip-pulse-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background-color: var(--primary, #059669);
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+  background-color: #10b981;
 }
 
 .chip-text {
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .course-selector-container {
@@ -262,30 +259,29 @@ onUnmounted(() => {
 .course-selector-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.85rem;
-  background: var(--surface-container-lowest, #ffffff);
-  border: 1px solid var(--outline-variant, #cbd5e1);
-  border-radius: 9999px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--on-surface, #1e293b);
+  gap: 0.4rem;
+  padding: 0.2rem 0.65rem;
+  height: 28px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #334155;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
 }
 
 .course-selector-btn:hover {
-  border-color: var(--primary, #059669);
+  border-color: #10b981;
   background-color: #f0fdf4;
   color: #065f46;
 }
 
 .course-selector-btn--open {
-  border-color: var(--primary, #059669);
+  border-color: #10b981;
   background-color: #ecfdf5;
   color: #065f46;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
 }
 
 .course-btn-icon-wrap {
