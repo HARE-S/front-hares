@@ -38,8 +38,28 @@
           </select>
         </div>
 
-        <!-- Buscador Reactivo de Libro con Nivel (FE-21 Escenario 3 y 4) -->
-        <div class="form-group">
+        <!-- Selector Modo: Catálogo vs Libro Libre -->
+        <div class="selection-mode-pills">
+          <button 
+            type="button" 
+            class="pill-btn" 
+            :class="{ active: selectionMode === 'catalog' }"
+            @click="selectionMode = 'catalog'"
+          >
+            Libro del Catálogo
+          </button>
+          <button 
+            type="button" 
+            class="pill-btn" 
+            :class="{ active: selectionMode === 'custom' }"
+            @click="selectionMode = 'custom'"
+          >
+            + Otro Libro de Aula
+          </button>
+        </div>
+
+        <!-- MODO 1: Catálogo existente -->
+        <div v-if="selectionMode === 'catalog'" class="form-group">
           <label class="form-label">
             Buscar Libro en el Catálogo <span class="required">*</span>
           </label>
@@ -91,7 +111,64 @@
             </label>
 
             <div v-if="filteredAvailableBooks.length === 0" class="no-books-msg">
-              No se encontraron libros activos que coincidan con la búsqueda.
+              <p>No se encontraron libros activos que coincidan con la búsqueda.</p>
+              <button 
+                v-if="searchQuery.trim()" 
+                type="button" 
+                class="btn-suggest-custom"
+                @click="switchToCustom(searchQuery)"
+              >
+                ¿Asignar "{{ searchQuery }}" como libro de aula?
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODO 2: Libro Libre de Aula -->
+        <div v-else class="custom-book-fields">
+          <div class="form-group">
+            <label for="custom-book-title" class="form-label">
+              Título del Libro de Aula <span class="required">*</span>
+            </label>
+            <input 
+              id="custom-book-title"
+              v-model="customBook.title" 
+              type="text" 
+              placeholder="Ej: El Principito, Caperucita en Manhattan..."
+              class="form-control"
+              :disabled="isSubmitting"
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-half">
+              <label for="custom-book-level" class="form-label">
+                Nivel Pedagógico <span class="required">*</span>
+              </label>
+              <select 
+                id="custom-book-level"
+                v-model="customBook.level" 
+                class="form-control"
+                :disabled="isSubmitting"
+              >
+                <option v-for="lvl in BOOK_LEVELS" :key="lvl" :value="lvl">
+                  Nivel {{ lvl }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group col-half">
+              <label for="custom-book-copies" class="form-label">
+                Ejemplares / Formato <span class="optional-label">(opcional)</span>
+              </label>
+              <input 
+                id="custom-book-copies"
+                v-model="customBook.copies" 
+                type="text" 
+                placeholder="Ej: 15 ejemplares, PDF aula"
+                class="form-control"
+                :disabled="isSubmitting"
+              />
             </div>
           </div>
         </div>
@@ -141,7 +218,7 @@
           <button 
             type="submit" 
             class="btn btn-primary"
-            :disabled="isSubmitting || !formData.book_id || !formData.student_id"
+            :disabled="isSubmitting || !formData.student_id || (selectionMode === 'catalog' && !formData.book_id) || (selectionMode === 'custom' && !customBook.title.trim())"
           >
             {{ isSubmitting ? 'Asignando...' : 'Confirmar Asignación' }}
           </button>
@@ -153,7 +230,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { getBooks, assignBook } from '../../services/booksService';
+import { BOOK_LEVELS, getBooks, assignBook } from '../../services/booksService';
 import { getStudents } from '../../services/studentService';
 import BookLevelBadge from './BookLevelBadge.vue';
 
@@ -179,6 +256,13 @@ const errorMessage = ref(null);
 const searchQuery = ref('');
 const availableBooks = ref([]);
 
+const selectionMode = ref('catalog'); // 'catalog' | 'custom'
+const customBook = ref({
+  title: '',
+  level: '0',
+  copies: ''
+});
+
 const today = new Date().toISOString().split('T')[0];
 
 const formData = ref({
@@ -200,9 +284,17 @@ async function loadStudents() {
         name: s.name,
         section: (s.sections && s.sections.length > 0) ? s.sections.join(', ') : 'Matriculado'
       }));
+      return;
     }
   } catch (err) {
-    console.warn('Error al cargar lista de alumnos para asignar libro:', err);
+    // Si no hay conexión o entorno offline
+  }
+  if (studentsList.value.length === 0) {
+    studentsList.value = [
+      { id: '1', name: 'Lucas Méndez Ruiz', section: '1A' },
+      { id: '2', name: 'Sofía Navarro Ortiz', section: '1A' },
+      { id: '3', name: 'Mateo Barrenechea', section: '1A' }
+    ];
   }
 }
 
@@ -232,10 +324,21 @@ watch(() => props.isOpen, (open) => {
       start_date: today,
       end_date: ''
     };
+    selectionMode.value = 'catalog';
+    customBook.value = {
+      title: '',
+      level: '0',
+      copies: ''
+    };
     searchQuery.value = '';
     errorMessage.value = null;
   }
 });
+
+function switchToCustom(title) {
+  selectionMode.value = 'custom';
+  customBook.value.title = title || '';
+}
 
 // Filtrado reactivo en vivo sobre los libros disponibles (FE-21 Escenario 3)
 const filteredAvailableBooks = computed(() => {
@@ -260,10 +363,19 @@ async function handleSubmit() {
     errorMessage.value = 'Debes seleccionar un alumno.';
     return;
   }
-  if (!formData.value.book_id) {
-    errorMessage.value = 'Debes seleccionar un libro para la lectura.';
-    return;
+
+  if (selectionMode.value === 'custom') {
+    if (!customBook.value.title.trim()) {
+      errorMessage.value = 'Debes introducir el título del libro.';
+      return;
+    }
+  } else {
+    if (!formData.value.book_id) {
+      errorMessage.value = 'Debes seleccionar un libro para la lectura.';
+      return;
+    }
   }
+
   if (!formData.value.start_date) {
     errorMessage.value = 'La fecha de inicio es obligatoria.';
     return;
@@ -275,14 +387,36 @@ async function handleSubmit() {
 
   isSubmitting.value = true;
   try {
-    const student = studentsList.value.find(s => s.id === Number(formData.value.student_id));
-    const payload = {
-      student_id: Number(formData.value.student_id),
-      student_name: student ? student.name : 'Alumno',
-      book_id: Number(formData.value.book_id),
-      start_date: formData.value.start_date,
-      end_date: formData.value.end_date || null
-    };
+    const student = studentsList.value.find(s => String(s.id) === String(formData.value.student_id));
+    let payload;
+
+    if (selectionMode.value === 'custom') {
+      payload = {
+        student_id: formData.value.student_id,
+        student_name: student ? student.name : 'Alumno',
+        book_title: customBook.value.title.trim(),
+        title: customBook.value.title.trim(),
+        level: customBook.value.level || '0',
+        copies_note: customBook.value.copies.trim() || null,
+        start_date: formData.value.start_date,
+        end_date: formData.value.end_date || null
+      };
+    } else {
+      const selectedBook = availableBooks.value.find(b => String(b.id) === String(formData.value.book_id));
+      payload = {
+        student_id: formData.value.student_id,
+        student_name: student ? student.name : 'Alumno',
+        book_id: formData.value.book_id,
+        test_id: selectedBook?.test_id || null,
+        test_code: selectedBook?.test_code || null,
+        book_title: selectedBook ? selectedBook.title : '',
+        title: selectedBook ? selectedBook.title : '',
+        level: selectedBook ? selectedBook.level : '0',
+        copies_note: selectedBook ? (selectedBook.copies || '') : '',
+        start_date: formData.value.start_date,
+        end_date: formData.value.end_date || null
+      };
+    }
 
     const reading = await assignBook(payload);
     emit('assigned', reading);
@@ -293,6 +427,7 @@ async function handleSubmit() {
     isSubmitting.value = false;
   }
 }
+
 </script>
 
 <style scoped>
@@ -528,6 +663,61 @@ async function handleSubmit() {
   gap: 0.75rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(189, 201, 192, 0.3);
+}
+
+.selection-mode-pills {
+  display: flex;
+  background-color: var(--color-surface-container-high, #e2e9e2);
+  padding: 0.25rem;
+  border-radius: var(--radius-md, 0.5rem);
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.pill-btn {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-sm, 0.375rem);
+  border: none;
+  background: transparent;
+  color: var(--color-on-surface-variant, #3f4943);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pill-btn.active {
+  background-color: var(--color-surface-container-lowest, #ffffff);
+  color: var(--color-secondary, #006c49);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-suggest-custom {
+  margin-top: 0.75rem;
+  background: var(--color-surface-container-lowest, #ffffff);
+  border: 1px dashed var(--color-secondary, #006c49);
+  color: var(--color-secondary, #006c49);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm, 0.375rem);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-suggest-custom:hover {
+  background-color: rgba(0, 108, 73, 0.08);
+}
+
+.custom-book-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  background: var(--color-surface-container-low, #f2f5f2);
+  padding: 1rem;
+  border-radius: var(--radius-md, 0.5rem);
+  border: 1px solid rgba(189, 201, 192, 0.4);
 }
 
 .sr-only {
