@@ -53,5 +53,8 @@ front-hares/
 - [Vitest](https://vitest.dev/) + [@vue/test-utils](https://test-utils.vuejs.org/)
 - [Lucide Vue Next](https://lucide.dev/) (Iconografía)
 
-## Contibucion
--https://github.com/alvarezmarlen
+## Contribución
+
+**Autores principales:**
+- Marlén Álvarez ([@alvarezmarlen](https://github.com/alvarezmarlen))
+- Santiago Patiño Torres ([@SANTPT](https://github.com/SANTPT))
