@@ -193,10 +193,10 @@ async function loadCatalogTests() {
   try {
     const res = await getTests({ limit: 50 });
     if (res?.items?.length > 0) {
-      // Normalizar IDs: usar 'code' como ID principal para consistencia
+      // Conservar el UUID original de la prueba para comunicación con el backend
       tests.value = res.items.map(t => ({
         ...t,
-        id: t.code || t.id  // Usar code como id si existe
+        id: t.id
       }));
       if (!selectedTestId.value) {
         selectedTestId.value = tests.value[0].id || tests.value[0].code;
