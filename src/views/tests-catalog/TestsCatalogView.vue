@@ -78,13 +78,6 @@ defineExpose({
           </h1>
           <span class="center-badge">Fondo Peñascal</span>
         </div>
-        <p class="page-subtitle">
-          {{ viewMode === 'form'
-            ? (testToEdit
-              ? 'Modifica los metadatos de la prueba. Si ya tiene histórico de resultados, el código permanecerá bloqueado.'
-              : 'Registra un nuevo texto de control estandarizado especificando palabras, curso y tipología textual.')
-            : 'Textos de control estandarizados para las evaluaciones periódicas de velocidad y comprensión lectora.' }}
-        </p>
       </div>
 
       <!-- Acciones de cabecera -->
@@ -95,7 +88,7 @@ defineExpose({
           class="btn btn-secondary back-btn"
           @click="handleCancelEdit"
         >
-          <ArrowLeft :size="18" />
+          <ArrowLeft :size="15" />
           <span>Volver al Catálogo</span>
         </button>
 
@@ -106,7 +99,7 @@ defineExpose({
           data-testid="create-test-btn"
           @click="openCreate"
         >
-          <PlusCircle :size="18" />
+          <PlusCircle :size="15" />
           <span>Nueva Prueba</span>
         </button>
       </div>
@@ -167,7 +160,7 @@ defineExpose({
 @media (min-width: 768px) {
   .view-header {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
   }
 }
@@ -175,56 +168,57 @@ defineExpose({
 .title-badge-row {
   display: flex;
   align-items: center;
-  gap: var(--space-3, 0.75rem);
+  gap: 0.65rem;
   flex-wrap: wrap;
 }
 
 .page-title {
   margin: 0;
-  font-size: var(--text-2xl, 1.5rem);
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--green-950, #062b1b);
-  letter-spacing: -0.02em;
+  color: var(--on-surface, #0f172a);
+  letter-spacing: -0.015em;
 }
 
 .center-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.65rem;
+  padding: 0.15rem 0.55rem;
   background-color: var(--green-50, #f0fdf4);
   color: var(--green-800, #166534);
   border: 1px solid var(--green-200, #bbf7d0);
   border-radius: 9999px;
-  font-size: var(--text-xs, 0.75rem);
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
 .page-subtitle {
-  margin: var(--space-2, 0.5rem) 0 0 0;
-  font-size: var(--text-sm, 0.875rem);
-  color: var(--gray-600, #4b5563);
+  margin: 0.15rem 0 0 0;
+  font-size: 0.8125rem;
+  color: var(--on-surface-variant, #64748b);
   max-width: 700px;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* Actions */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-3, 0.75rem);
+  gap: 0.6rem;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  min-height: 44px;
-  padding: 0 1.25rem;
-  font-size: var(--text-sm, 0.875rem);
+  gap: 0.4rem;
+  min-height: 32px;
+  height: 32px;
+  padding: 0 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  border-radius: var(--radius-md, 0.375rem);
+  border-radius: var(--radius-md, 6px);
   cursor: pointer;
   transition: all 0.15s ease-in-out;
   border: 1px solid transparent;

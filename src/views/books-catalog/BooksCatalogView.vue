@@ -7,31 +7,28 @@
           <h1 class="page-title">Biblioteca y Seguimiento de Lecturas</h1>
           <span class="badge-catalog">Fondo Peñascal</span>
         </div>
-        <p class="page-subtitle">
-          Gestión del catálogo de títulos del centro y registro de lecturas individuales del alumnado
-        </p>
       </div>
 
       <!-- Quick Actions -->
       <div class="header-actions">
         <button 
           type="button" 
-          class="btn btn-secondary"
+          class="btn btn-secondary btn-compact"
           @click="openAssignModal(null)"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="text-secondary">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" class="text-secondary">
             <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
           </svg>
-          <span>Asignar Libro a Alumno</span>
+          <span>Asignar Libro</span>
         </button>
 
         <button 
           v-if="userRole !== 'tutor'"
           type="button" 
-          class="btn btn-primary"
+          class="btn btn-primary btn-compact"
           @click="openCreateBookModal"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
           </svg>
           <span>Nuevo Libro</span>
@@ -41,60 +38,42 @@
 
     <!-- Notification Toast -->
     <div v-if="toastMessage" class="alert alert-success toast-banner" role="status">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
       </svg>
       <span>{{ toastMessage }}</span>
     </div>
 
-    <!-- KPI Summary Grid (2 en 1: Biblioteca y Seguimiento) -->
+    <!-- KPI Summary Grid (Barra métrica continua ultra-ligera) -->
     <div class="kpi-summary-grid">
       <div class="kpi-card">
-        <div class="kpi-icon-wrap icon-primary">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
-          </svg>
-        </div>
-        <div class="kpi-info">
-          <span class="kpi-value">{{ activeReadingsCount }}</span>
-          <span class="kpi-label">Lecturas en Curso</span>
-        </div>
+        <span class="kpi-dot dot-primary"></span>
+        <span class="kpi-value">{{ activeReadingsCount }}</span>
+        <span class="kpi-label">en curso</span>
       </div>
 
-      <div class="kpi-card">
-        <div class="kpi-icon-wrap icon-success">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-          </svg>
-        </div>
-        <div class="kpi-info">
-          <span class="kpi-value">{{ completedReadingsCount }}</span>
-          <span class="kpi-label">Lecturas Finalizadas</span>
-        </div>
-      </div>
+      <div class="kpi-divider"></div>
 
       <div class="kpi-card">
-        <div class="kpi-icon-wrap icon-info">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-          </svg>
-        </div>
-        <div class="kpi-info">
-          <span class="kpi-value">{{ readingsTotal }}</span>
-          <span class="kpi-label">Total Lecturas</span>
-        </div>
+        <span class="kpi-dot dot-success"></span>
+        <span class="kpi-value">{{ completedReadingsCount }}</span>
+        <span class="kpi-label">finalizadas</span>
       </div>
 
+      <div class="kpi-divider"></div>
+
       <div class="kpi-card">
-        <div class="kpi-icon-wrap icon-neutral">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
-          </svg>
-        </div>
-        <div class="kpi-info">
-          <span class="kpi-value">{{ booksTotal }}</span>
-          <span class="kpi-label">Títulos de Fondo</span>
-        </div>
+        <span class="kpi-dot dot-info"></span>
+        <span class="kpi-value">{{ readingsTotal }}</span>
+        <span class="kpi-label">total lecturas</span>
+      </div>
+
+      <div class="kpi-divider"></div>
+
+      <div class="kpi-card">
+        <span class="kpi-dot dot-neutral"></span>
+        <span class="kpi-value">{{ booksTotal }}</span>
+        <span class="kpi-label">títulos en fondo</span>
       </div>
     </div>
 
@@ -794,82 +773,76 @@ async function handleReopenReading(reading) {
 .books-view {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   max-width: 80rem;
   margin: 0 auto;
   width: 100%;
 }
 
-/* KPI Summary Grid (2 en 1) */
+/* KPI Summary Grid (Barra métrica continua ultra-ligera) */
 .kpi-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background-color: #f8fafc;
+  border: 1px solid var(--outline-variant, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  flex-wrap: wrap;
 }
 
 .kpi-card {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background-color: var(--color-surface, #ffffff);
-  border: 1px solid rgba(189, 201, 192, 0.4);
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  gap: 0.35rem;
+  padding: 0.15rem 0.45rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
 }
 
-.kpi-icon-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 0.5rem;
+.kpi-divider {
+  width: 1px;
+  height: 14px;
+  background-color: #cbd5e1;
+}
+
+.kpi-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
-.kpi-icon-wrap.icon-primary {
-  background-color: rgba(142, 247, 199, 0.25);
-  color: var(--color-primary, #006c49);
-}
-
-.kpi-icon-wrap.icon-success {
-  background-color: rgba(34, 197, 94, 0.15);
-  color: #15803d;
-}
-
-.kpi-icon-wrap.icon-info {
-  background-color: rgba(59, 130, 246, 0.15);
-  color: #1d4ed8;
-}
-
-.kpi-icon-wrap.icon-neutral {
-  background-color: rgba(100, 116, 139, 0.15);
-  color: #475569;
-}
-
-.kpi-info {
-  display: flex;
-  flex-direction: column;
-}
+.dot-primary { background-color: var(--color-primary, #006c49); }
+.dot-success { background-color: #16a34a; }
+.dot-info { background-color: #2563eb; }
+.dot-neutral { background-color: #64748b; }
 
 .kpi-value {
-  font-size: 1.5rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1.2;
-  color: var(--color-on-surface, #191c1b);
+  line-height: 1;
+  color: var(--color-on-surface, #0f172a);
 }
 
 .kpi-label {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  color: var(--color-on-surface-variant, #3f4943);
+  color: var(--color-on-surface-variant, #64748b);
+}
+
+.btn-compact {
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 0.75rem !important;
+  font-size: 0.78rem !important;
+  border-radius: 6px !important;
 }
 
 .reading-notes-inline {
@@ -882,9 +855,9 @@ async function handleReopenReading(reading) {
 .view-header {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(189, 201, 192, 0.25);
+  gap: 0.75rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--outline-variant, #e2e8f0);
 }
 
 @media (min-width: 768px) {
@@ -898,58 +871,58 @@ async function handleReopenReading(reading) {
 .title-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
   flex-wrap: wrap;
 }
 
 .page-title {
   font-family: var(--font-family-display, 'Plus Jakarta Sans', sans-serif);
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-on-surface, #191c1b);
-  letter-spacing: -0.02em;
+  color: var(--color-on-surface, #0f172a);
+  letter-spacing: -0.015em;
   margin: 0;
 }
 
 .badge-catalog {
   background-color: var(--color-primary-fixed, #8ef7c7);
   color: var(--color-on-primary-fixed-variant, #005136);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 0.2rem 0.65rem;
+  padding: 0.15rem 0.55rem;
   border-radius: 9999px;
 }
 
 .page-subtitle {
-  font-size: 0.9375rem;
-  color: var(--color-on-surface-variant, #3f4943);
-  margin: 0.25rem 0 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-on-surface-variant, #64748b);
+  margin: 0.15rem 0 0 0;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
 }
 
 /* Tabs */
 .view-tabs {
   display: flex;
-  gap: 0.5rem;
-  border-bottom: 1px solid rgba(189, 201, 192, 0.3);
+  gap: 0.35rem;
+  border-bottom: 1px solid var(--outline-variant, #e2e8f0);
 }
 
 .tab-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1.15rem;
+  gap: 0.45rem;
+  padding: 0.5rem 0.85rem;
   border: none;
   background: none;
-  font-size: 0.9375rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--color-on-surface-variant, #3f4943);
+  color: var(--color-on-surface-variant, #64748b);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.15s ease;
@@ -979,13 +952,13 @@ async function handleReopenReading(reading) {
 
 /* Toolbar */
 .panel-toolbar {
-  padding: 0.875rem 1.25rem;
+  padding: 0.6rem 0.85rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
   background-color: var(--color-surface-container-lowest, #ffffff);
-  border: 1px solid var(--color-outline-variant, #bdc9c0);
-  border-radius: var(--radius-lg, 0.5rem);
+  border: 1px solid var(--outline-variant, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
 }
 
 @media (min-width: 900px) {
@@ -999,7 +972,7 @@ async function handleReopenReading(reading) {
 .toolbar-left {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
   flex-wrap: wrap;
 }
 
@@ -1011,16 +984,16 @@ async function handleReopenReading(reading) {
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
 /* Uniform form controls */
 .form-control {
-  height: 2.375rem;
-  padding: 0.45rem 0.75rem;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: var(--color-on-surface, #191c1b);
+  height: 2.15rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.825rem;
+  line-height: 1.4;
+  color: var(--color-on-surface, #0f172a);
   background-color: var(--color-surface-container-lowest, #ffffff);
   border: 1px solid #cbd5e1;
   border-radius: var(--radius-md, 0.375rem);
@@ -1032,7 +1005,7 @@ async function handleReopenReading(reading) {
 .form-control:focus {
   outline: none;
   border-color: var(--color-secondary, #006c49);
-  box-shadow: 0 0 0 3px rgba(0, 108, 73, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 108, 73, 0.12);
 }
 
 .search-input-wrapper {
